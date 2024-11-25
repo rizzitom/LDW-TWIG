@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Votre Panier{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Votre Panier</h1>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            {% if panier is empty %}
+                <p class="text-center">Votre panier est vide.</p>
+            {% else %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Produit</th>
+                            <th scope="col">Quantité</th>
+                            <th scope="col">Prix Unitaire</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in panier %}
+                            <tr>
+                                <td>{{ item.nom }}</td>
+                                <td>{{ item.quantite }}</td>
+                                <td>{{ item.prix }} €</td>
+                                <td>{{ item.quantite * item.prix }} €</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <a href="#" class="btn btn-primary">Passer à la caisse</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+<h2>Ajouter un Produit</h2>
+<form method="post">
+    <div class="form-group">
+        <label for="inputDesignation">Désignation</label>
+        <input type="text" id="inputDesignation" name="inputDesignation" required>
+    </div>
+    <div class="form-group">
+        <label for="inputDescription">Description</label>
+        <textarea id="inputDescription" name="inputDescription" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="inputPrix">Prix</label>
+        <input type="number" id="inputPrix" name="inputPrix" required step="0.01">
+    </div>
+    <div class="form-group">
+        <label for="selectType">Type</label>
+        <select id="selectType" name="selectType">
+            {% for type in types %}
+                <option value="{{ type.id }}">{{ type.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" name="btAjouterProduit">Ajouter</button>
+</form>
+
+<h2>Liste des Produits</h2>

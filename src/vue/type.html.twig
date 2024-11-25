@@ -1,0 +1,26 @@
+<h2>Liste des Types</h2>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for type in types %}
+                <tr>
+                    <td>{{ type.nom }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>Ajouter un Type</h2>
+<form method="post">
+    <div class="form-group">
+        <label for="inputNomType">Nom du Type</label>
+        <input type="text" id="inputNomType" name="inputNomType" required>
+    </div>
+    <button type="submit" name="btAjouterType">Ajouter</button>
+</form>

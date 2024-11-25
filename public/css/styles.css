@@ -1,0 +1,196 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+}
+
+body {
+  background-color: #cad3e7;
+}
+
+.bg-custom {
+  background-color: #003366 !important;
+}
+
+
+/* NavBar */
+
+.navbar-dark .navbar-brand {
+  color: rgb(255, 255, 255);
+  font-weight: bold;
+}
+
+.navbar-nav {
+  font-size: 0.9rem;
+  margin-left: 6rem;
+}
+
+.navbar-brand img {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin-left: 25px;
+}
+
+.nav-link {
+  font-size: 18px;
+  color: #e1e6eb;
+}
+
+.nav-item {
+  display: flex;
+  margin-right: 20px;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: #ececec;
+}
+
+.form-control {
+  height: auto;
+  width: 25rem;
+  margin-right: 0.5rem;
+  background-color: #f1f2f3;
+}
+
+.custom-cart-icon {
+  width: 58px;
+}
+
+.btn-outline-success {
+  color: white;
+  background-color: rgb(41, 112, 194);
+  border-color: rgb(41, 112, 194);
+  font-weight: bold;
+  margin-right: 2rem;
+}
+
+.btn-outline-success:hover {
+  color: rgb(231, 230, 230);
+  background-color: transparent;
+  border-color: black;
+}
+
+.imagelogo {
+  height: 60px;
+}
+
+/* Mega Menu */
+
+.dropdown-menu.mega-menu {
+  width: 300%; 
+  padding: 35px;
+  background-color: #ffffff;
+  display: none; 
+  justify-content: space-between; 
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  border: 1px solid #e1e6eb;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item.dropdown:hover .mega-menu {
+  display: flex; 
+}
+
+.mega-menu .column {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.mega-menu .column:last-child {
+  margin-right: 0; 
+}
+
+.mega-menu h6 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #0056b3;
+}
+
+.mega-menu ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.mega-menu ul li {
+  margin-bottom: 8px;
+}
+
+.mega-menu ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+
+.mega-menu ul li a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.fa-icone {
+  padding-right: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+
+/* Footer */
+
+.text-white a {
+  color: #ffffff;
+}
+
+.text-white a:hover {
+  color: #adb5bd;
+}
+
+/* Fin NavBar */
+
+/* Card dans le index (présentation des catégories de produits) */
+
+.card {
+  transition: transform 0.2s;
+  padding: 1px;
+  border: none;
+  background-color: #fff;
+}
+
+.card-img-top {
+  max-width: 100%;
+  max-height: 65%;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding-top: 10px;
+}
+
+.card-text {
+  font-size: 1rem;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-link:hover .card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* image commercial acceuil */
+
+.imagecommercial {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
