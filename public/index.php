@@ -16,8 +16,9 @@ require_once '../config/connexion.php';
 require_once '../src/modele/_classes.php';
 include '../config/routes.php';
 
-$loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../src/vue');
-$twig = new \Twig\Environment($loader, ['cache' => false, ]);
+$loader = new \Twig\Loader\FilesystemLoader('../src/vue');
+$twig = new \Twig\Environment($loader, []);
+$twig->addGlobal('session', $_SESSION);
 $db = connect($config); 
 $contenu = getPage($db);
 $contenu($twig, $db);

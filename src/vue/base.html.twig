@@ -9,42 +9,100 @@
     <script src="https://kit.fontawesome.com/969792f3e4.js" crossorigin="anonymous"></script>
     {% block head %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<body class="bg-custom text-white p-3">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">NetTech</a>
+            <a class="navbar-brand" href="index">
+                <img src="/public/images/nettechfondtransp.png" alt="NetTech Logo" style="height: 60px;">
+            </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    {% if session.login is defined %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?page=deconnexion">Se déconnecter</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">{{ session.login }}</a>
-                        </li>
-                        {% if session.role == 1 %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Administration
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="#">Produit</a></li>
-                                    <li><div class="dropdown-divider"></div></li>
-                                    <li><a class="dropdown-item" href="#">Type</a></li>
-                                    <li><div class="dropdown-divider"></div></li>
-                                    <li><a class="dropdown-item" href="#">Utilisateur</a></li>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-regular fa-gem fa-lg"></i> Tous nos produits
+                        </a>
+                        <div class="dropdown-menu mega-menu" aria-labelledby="navbarDropdown">
+                            <div class="column">
+                                <div class="fa-icone">
+                                    <i class="fa-solid fa-computer fa-xl" style="color: #000000;"></i>
+                                    <h6>Informatique</h6>
+                                </div>
+                                <ul>
+                                    <li><a href="#">Ordinateurs</a></li>
+                                    <li><a href="#">Périphériques</a></li>
+                                    <li><a href="#">Réseau</a></li>
                                 </ul>
-                            </li>
-                        {% endif %}
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?page=connexion">Se connecter</a>
-                        </li>
-                    {% endif %}
+                            </div>
+                            <div class="column">
+                                <div class="fa-icone">
+                                    <i class="fa-solid fa-camera fa-xl"></i>
+                                    <h6>Image & Son</h6>
+                                </div>
+                                <ul>
+                                    <li><a href="#">TV</a></li>
+                                    <li><a href="#">Son</a></li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <div class="fa-icone">
+                                    <i class="fa-solid fa-mobile fa-xl"></i>
+                                    <h6>Téléphonie & Auto</h6>
+                                </div>
+                                <ul>
+                                    <li><a href="#">Smartphones</a></li>
+                                    <li><a href="#">GPS</a></li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <div class="fa-icone">
+                                    <i class="fa-solid fa-heart fa-xl" style="color: #ff0000;"></i>
+                                    <h6>Seconde Vie</h6>
+                                </div>
+                                <ul>
+                                    <li><a href="#">Reconditionné</a></li>
+                                    <li><a href="#">Recyclé</a></li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <div class="fa-icone">
+                                    <i class="fa-solid fa-droplet fa-xl" style="color: #000000;"></i>
+                                    <h6>Consommables</h6>
+                                </div>
+                                <ul>
+                                    <li><a href="#">Cartouches d'encre</a></li>
+                                    <li><a href="#">Toners</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
                 </ul>
+                <form class="d-flex me-auto">
+                    <input class="form-control" type="search" placeholder="Rechercher un produit..." aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Rechercher</button>
+                </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="?page=#">
+                        <i class="fa-solid fa-shop fa-lg" style="color: #ffffff;"></i>
+                        <span>Nos Boutiques</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?page=connexion">
+                        <i class="fa-solid fa-user fa-lg" style="color: #ffffff;"></i>
+                        <span>Comptes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?page=panier">
+                        <i class="fa-solid fa-cart-shopping fa-beat fa-lg" style="color: #ffffff;"></i>
+                        <span>Panier</span>
+                    </a>
+                </li>
             </div>
         </div>
     </nav>
@@ -52,5 +110,6 @@
     {% block body %}{% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/public/js/script.js"></script>
 </body>
 </html>

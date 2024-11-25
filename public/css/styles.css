@@ -3,6 +3,50 @@
   font-weight: 600;
 }
 
+.bg-custom {
+    background-color: #212529;
+}
+
+.text-white {
+    color: #fff;
+}
+
+.logo-navbar {
+    height: 60px;
+}
+
+.mega-menu .fa-icone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-informatique {
+    color: #000;
+}
+
+.icon-camera {
+    color: #000;
+}
+
+.icon-telephonie {
+    color: #000;
+}
+
+.icon-heart {
+    color: #ff0000;
+}
+
+.icon-consommables {
+    color: #000;
+}
+
+.icon-shop,
+.icon-user,
+.icon-cart {
+    color: #fff;
+}
+
 body {
   background-color: #cad3e7;
 }
