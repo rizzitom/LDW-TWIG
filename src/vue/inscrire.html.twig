@@ -131,17 +131,17 @@
                             {% if form.valide == true %}
                                 <h1>Inscription réussie</h1>
                                 <h1>Voici votre identifiant : {{ form.email }}</h1>
-                                {% if form.role == 1 %}
+                               <!-- {% if form.role == 1 %}
                                     <h1>Vous êtes administrateur du site</h1>
                                 {% else %}
                                     <h1>Vous êtes un client du site</h1>
                                 {% endif %}
-                            {% else %}
+                            {% else %} -->
                                 <h1>Echec de l'inscription</h1>
                                 <h1>Erreur : {{ form.message }}</h1>
                                 <h1><a href="index.php?page=inscrire">Retourner sur la page d'inscription</a></h1>
                             {% endif %}
-                        {% endif %}
+                        {% endif %} 
 
 
                         </div>
@@ -193,10 +193,7 @@
                             </div>
                         </div>
 
-                        <select class="form-control" name="role">
-                        <option value="1">Administrateur</option>
-                        <option value="2">Client</option>
-                        </select>
+                        <input type="hidden" name="role" value="2">
 
                         <button type="submit" name="btInscrire" class="btn btn-primary btn-block">S'inscrire</button>
                     </div>

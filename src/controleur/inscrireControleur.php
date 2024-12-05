@@ -5,10 +5,7 @@ function inscrireControleur($twig, $db) {
     $form = array();
     
     $validationMessages = [];
-    $formValide = true;
-
-    var_dump($_POST);
-    
+    $formValide = true;    
 
     if (isset($_POST['btInscrire'])) {
         

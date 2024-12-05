@@ -3,61 +3,56 @@
   font-weight: 600;
 }
 
+li {
+  text-decoration: none;
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  list-style: none;
+}
+
 .bg-custom {
-    background-color: #212529;
+  background-color: #003366 !important;  /* Couleur de fond plus marquée */
 }
 
 .text-white {
-    color: #fff;
+  color: #fff;
 }
 
 .logo-navbar {
-    height: 60px;
+  height: 60px;
 }
 
 .mega-menu .fa-icone {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.icon-informatique {
-    color: #000;
-}
-
-.icon-camera {
-    color: #000;
-}
-
-.icon-telephonie {
-    color: #000;
+.icon-informatique,
+.icon-camera,
+.icon-telephonie,
+.icon-consommables {
+  color: #000; /* Tous ces icônes ont un fond noir */
 }
 
 .icon-heart {
-    color: #ff0000;
-}
-
-.icon-consommables {
-    color: #000;
+  color: #ff0000;  /* Rouge pour l'icône cœur */
 }
 
 .icon-shop,
 .icon-user,
 .icon-cart {
-    color: #fff;
+  color: #fff; /* Icônes en blanc */
 }
 
 body {
-  background-color: #cad3e7;
+  background-color: #cad3e7; /* Bleu clair pour le fond général */
 }
-
-.bg-custom {
-  background-color: #003366 !important;
-}
-
 
 /* NavBar */
-
 .navbar-dark .navbar-brand {
   color: rgb(255, 255, 255);
   font-weight: bold;
@@ -102,7 +97,7 @@ body {
 
 .btn-outline-success {
   color: white;
-  background-color: rgb(41, 112, 194);
+  background-color: rgb(41, 112, 194); /* Bleu pour le bouton */
   border-color: rgb(41, 112, 194);
   font-weight: bold;
   margin-right: 2rem;
@@ -119,13 +114,12 @@ body {
 }
 
 /* Mega Menu */
-
 .dropdown-menu.mega-menu {
-  width: 300%; 
+  width: 300%;
   padding: 35px;
   background-color: #ffffff;
-  display: none; 
-  justify-content: space-between; 
+  display: none;
+  justify-content: space-between;
   position: absolute;
   top: 100%;
   left: 0;
@@ -135,7 +129,7 @@ body {
 }
 
 .nav-item.dropdown:hover .mega-menu {
-  display: flex; 
+  display: flex;
 }
 
 .mega-menu .column {
@@ -144,14 +138,14 @@ body {
 }
 
 .mega-menu .column:last-child {
-  margin-right: 0; 
+  margin-right: 0;
 }
 
 .mega-menu h6 {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
-  color: #0056b3;
+  color: #0056b3; 
 }
 
 .mega-menu ul {
@@ -180,9 +174,7 @@ body {
   margin-bottom: 10px;
 }
 
-
 /* Footer */
-
 .text-white a {
   color: #ffffff;
 }
@@ -190,10 +182,6 @@ body {
 .text-white a:hover {
   color: #adb5bd;
 }
-
-/* Fin NavBar */
-
-/* Card dans le index (présentation des catégories de produits) */
 
 .card {
   transition: transform 0.2s;
@@ -231,8 +219,7 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* image commercial acceuil */
-
+/* Image commerciale accueil */
 .imagecommercial {
   display: flex;
   justify-content: center;
