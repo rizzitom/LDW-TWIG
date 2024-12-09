@@ -24,6 +24,7 @@ function connexionControleur($twig, $db){
             $form['message'] = 'Login ou mot de passe incorrect';
         }
     }
+    var_dump($form);
     echo $twig->render('connexion.html.twig', array('form'=>$form));
 }
 
