@@ -130,21 +130,18 @@
                             {% if form.valide is defined %}
                             {% if form.valide == true %}
                                 <h1>Inscription réussie</h1>
-                                <h1>Voici votre identifiant : {{ form.email }}</h1>
-                               <!-- {% if form.role == 1 %}
-                                    <h1>Vous êtes administrateur du site</h1>
+                                {% if form.role == 1 %}
+                                    <h2>Vous êtes administrateur du site</h2>
                                 {% else %}
-                                    <h1>Vous êtes un client du site</h1>
+                                    <h2>Bienvenue {{ form.prenom }}</h2>
                                 {% endif %}
-                            {% else %} -->
-                                <h1>Echec de l'inscription</h1>
-                                <h1>Erreur : {{ form.message }}</h1>
-                                <h1><a href="index.php?page=inscrire">Retourner sur la page d'inscription</a></h1>
+                            {% else %}
+                                <h2>Echec de l'inscription</h2>
+                                <h2>Erreur : {{ form.message }}</h2>
                             {% endif %}
                         {% endif %} 
 
-
-                        </div>
+                        <div>
                             <div class="form-group">
                             <label for="inputNom">Nom</label>
                             <div class="input-group">
@@ -197,7 +194,7 @@
 
                         <button type="submit" name="btInscrire" class="btn btn-primary btn-block">S'inscrire</button>
                     </div>
-                    <a href="?page=connexion" class="d-block text-center mt-3 text-white">Déjà inscrit ? Connectez-vous</a>
+                    <a href="?page=connexion" class="d-block text-center p-3 text-white">Déjà inscrit ? Connectez-vous</a>
                 </div>
             </div>
         </div>

@@ -14,8 +14,7 @@ function connexionControleur($twig, $db){
             }
             
             else{
-                $_SESSION['login'] = $inputEmail;
-                $_SESSION['role'] = $unUtilisateur['idRole']; header("Location:index.php");
+                header("Location:index.php");
                 exit;
             }
         }
@@ -24,7 +23,6 @@ function connexionControleur($twig, $db){
             $form['message'] = 'Login ou mot de passe incorrect';
         }
     }
-    var_dump($form);
     echo $twig->render('connexion.html.twig', array('form'=>$form));
 }
 

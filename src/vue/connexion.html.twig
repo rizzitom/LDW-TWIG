@@ -114,18 +114,23 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h1 class="text-center my-5 fw-bold">Identifiez-vous</h1>
+            {% if form.message is defined %}
+            <div class="alert alert-danger text-center" role="alert">
+             {{ form.message }}
+             </div>
+            {% endif %}
             <div class="card bg-secondary text-white">
                 <div class="card-body">
                     <h2 class="card-title text-center">Déjà client ?</h2>
                     <form action="?page=connexion" method="post">
                         <div class="form-group">
-                            <label for="login">Votre email :</label>
-                            <input type="email" id="login" name="login" class="form-control w-100" required>
+                            <label for="inputEmail">Votre email :</label>
+                            <input type="email" id="inputEmail" name="inputEmail" class="form-control w-100" required>
                         </div>
                         <div class="form-group">
-                            <label for="password">Votre mot de passe :</label>
+                            <label for="inputPassword">Votre mot de passe :</label>
                             <div class="input-group">
-                                <input type="password" id="password" name="password" class="form-control" required>
+                                <input type="password" id="inputPassword" name="inputPassword" class="form-control" required>
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-light" type="button" onclick="togglePassword()">👁</button>
                                 </div>
