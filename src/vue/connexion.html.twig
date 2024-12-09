@@ -130,7 +130,7 @@
                         <div class="form-group">
                             <label for="inputPassword">Votre mot de passe :</label>
                             <div class="input-group">
-                                <input type="password" id="inputPassword" name="inputPassword" class="form-control" required>
+                                <input type="password" id="inputPassword" name="inputPassword" class="form-control" minlength="8" required>
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-light" type="button" onclick="togglePassword()">👁</button>
                                 </div>
@@ -140,7 +140,7 @@
                             <input type="checkbox" class="form-check-input" id="rememberMe">
                             <label class="form-check-label" for="rememberMe">Rester connecté</label>
                         </div>
-                        <button type="submit" name="btConnexion" class="btn btn-primary btn-block">Connexion</button>
+                        <button type="submit" name="btConnecter" class="btn btn-primary btn-block">Connexion</button>
                     </form>
                     <a href="#" class="d-block text-center mt-3 text-white">Vous avez oublié votre mot de passe ?</a>
                 </div>
@@ -152,6 +152,19 @@
         </div>
     </div>
 </div>
+
+<script>
+
+function togglePassword() {
+    const passwordInput = document.getElementById('inputPassword');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+    } else {
+        passwordInput.type = 'password';
+    }
+}
+
+</script>
 
 
 <script src="/public/js/script.js"></script>
