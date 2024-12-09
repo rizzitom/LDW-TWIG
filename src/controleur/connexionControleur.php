@@ -1,5 +1,4 @@
 <?php
-require_once '../src/modele/class_utilisateur.php';
 
 function connexionControleur($twig, $db){
     $form = array();
@@ -17,10 +16,9 @@ function connexionControleur($twig, $db){
           }
           else{
             session_start();
-            $_SESSION['email'] = $unUtilisateur['email']; 
-            $_SESSION['role'] = $unUtilisateur['role'];
+            $_SESSION['login'] = $inputEmail; 
+            $_SESSION['role'] = $unUtilisateur['idRole'];
             header("Location:index.php");
-            exit;
           }
         }
         else{

@@ -2,7 +2,7 @@
 function getPage($db) {
     $lesPages['accueil'] = "accueilControleur";
     $lesPages['connexion'] = "connexionControleur";
-    $lesPages['déconnexion'] = "deconnexionControleur";
+    $lesPages['deconnexion'] = "deconnexionControleur";
     $lesPages['inscrire'] = "inscrireControleur";
     $lesPages['panier'] = "panierControleur";
     $lesPages['produit'] = "produitControleur";
