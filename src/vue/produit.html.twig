@@ -1,32 +1,56 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}NetTech - Produits{% endblock %}
+{% block title %}Gestion des Produits{% endblock %}
 
 {% block body %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Ajouter un Produit</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label for="inputDesignation" class="form-label">Désignation</label>
+            <input type="text" id="inputDesignation" name="inputDesignation" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="inputDescription" class="form-label">Description</label>
+            <textarea id="inputDescription" name="inputDescription" class="form-control" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="inputPrix" class="form-label">Prix</label>
+            <input type="number" id="inputPrix" name="inputPrix" class="form-control" required step="0.01">
+        </div>
+        <div class="mb-3">
+            <label for="selectType" class="form-label">Type</label>
+            <select id="selectType" name="selectType" class="form-select" required>
+                {% for type in types %}
+                    <option value="{{ type.id }}">{{ type.nom }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" name="btAjouterProduit" class="btn btn-primary">Ajouter</button>
+    </form>
 
-<h2>Ajouter un Produit</h2>
-<form method="post">
-    <div class="form-group">
-        <label for="inputDesignation">Désignation</label>
-        <input type="text" id="inputDesignation" name="inputDesignation" required>
+    <h2 class="text-center mt-5 mb-4">Liste des Produits</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th scope="col">Désignation</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Prix</th>
+                    <th scope="col">Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in produits %}
+                    <tr>
+                        <td>{{ produit.designation }}</td>
+                        <td>{{ produit.description }}</td>
+                        <td>{{ produit.prix | number_format(2, ',', ' ') }} €</td>
+                        <td>{{ produit.type.nom }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <div class="form-group">
-        <label for="inputDescription">Description</label>
-        <textarea id="inputDescription" name="inputDescription" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="inputPrix">Prix</label>
-        <input type="number" id="inputPrix" name="inputPrix" required step="0.01">
-    </div>
-    <div class="form-group">
-        <label for="selectType">Type</label>
-        <select id="selectType" name="selectType">
-            {% for type in types %}
-                <option value="{{ type.id }}">{{ type.nom }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <button type="submit" name="btAjouterProduit">Ajouter</button>
-</form>
-
-<h2>Liste des Produits</h2>
+</div>
+{% endblock %}
