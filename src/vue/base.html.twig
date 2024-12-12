@@ -30,11 +30,11 @@
                              Administration
                         </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="/produit">Produit</a>
+                                    <a class="dropdown-item" href="index.php?page=produit">Produit</a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="/type">Type</a>
+                                    <a class="dropdown-item" href="index.php?page=type">Type</a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="/utilisateur">Utilisateur</a>
+                                    <a class="dropdown-item" href="index.php?page=utilisateur">Utilisateur</a>
                                 </div>
                             </li>
                         {% endif %}
@@ -92,29 +92,32 @@
                     <input class="form-control" type="search" placeholder="Rechercher un produit..." aria-label="Search">
                     <button class="btn btn-outline-success" type="submit">Rechercher</button>
                 </form>
+        <ul class="navbar-nav ms-auto">
+            {% if session.login is defined %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user fa-lg" style="color: #ffffff;"></i> {{ session.login }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="index.php?page=mon_compte">Mon Compte</a></li>
+                        <li><a class="dropdown-item" href="index.php?page=deconnexion">Se déconnecter</a></li>
+                    </ul>
+                </li>
+            {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="?page=#">
-                        <i class="fa-solid fa-shop fa-lg" style="color: #ffffff;"></i>
-                        <span>Nos Boutiques</span>
+                    <a class="nav-link" href="index.php?page=connexion">
+                        <i class="fa-solid fa-user fa-lg" style="color: #ffffff;"></i> Se connecter
                     </a>
                 </li>
-                {%if session.login is defined %}
-                <span class="nav-item"><i class="fa-solid fa-user fa-lg" style="color: #ffffff;"><a href="index.php?page=deconnexion">Se déconnecter</a></span></i>
-                {% else %}
-                <span class="nav-item"><i class="fa-solid fa-user fa-lg" style="color: #ffffff;"><a href="index.php?page=connexion">Se connecter</a></span></i>
-                {% endif %}
-                {%if session.login is defined %}
-                <li><a href="#">{{session.login}}</a></li>
-                {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="?page=panier">
-                        <i class="fa-solid fa-cart-shopping fa-beat fa-lg" style="color: #ffffff;"></i>
-                        <span>Panier</span>
-                    </a>
-                </li>
-            </div>
-        </div>
-    </nav>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="?page=panier">
+                    <i class="fa-solid fa-cart-shopping fa-beat fa-lg" style="color: #ffffff;"></i> Panier
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
     {% block body %}{% endblock %}
 
