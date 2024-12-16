@@ -8,6 +8,8 @@ function getPage($db) {
     $lesPages['produit'] = "produitControleur";
     $lesPages['type'] = "typeControleur";
     $lesPages['utilisateur'] = "utilisateurControleur";
+    $lesPages['utilisateurmodif'] = "utilisateurModifControleur";
+
 
 
     if ($db!=null){

@@ -2,6 +2,38 @@
 function utilisateurControleur($twig, $db) {
     $utilisateur = new Utilisateur($db);
     $liste = $utilisateur->select();
+    $utilisateurData = null;
+
+    if (isset($_GET['action']) && $_GET['action'] == 'supprimer' && isset($_GET['id'])) {
+            $id = $_GET['id'];
+            $utilisateur->delete($id);
+            header("Location: index.php?page=utilisateur");
+            exit;
+        }
+    
+    if (isset($_POST['btModifierUtilisateur'])) {
+            $id = $_POST['idUtilisateur'];
+            $email = $_POST['inputEmail'];
+            $nom = $_POST['inputNom'];
+            $prenom = $_POST['inputPrenom'];
+            $role = $_POST['inputRole'];
+    
+            $utilisateur->update($id, $email, $nom, $prenom, $role);
+            header("Location: index.php?page=utilisateur");
+            exit;
+        }
+    
+    if (isset($_GET['action']) && $_GET['action'] == 'dupliquer' && isset($_GET['id'])) {
+            $id = $_GET['id'];
+            $utilisateur->duplicate($id);
+            header("Location: index.php?page=utilisateur");
+            exit;
+        }
+
+        if (isset($_GET['action']) && $_GET['action'] == 'ajouter') {
+            echo $twig->render('ajouterUtilisateur.html.twig');
+            exit;
+        }
 
     if (isset($_POST['btAjouterUtilisateur'])) {
 

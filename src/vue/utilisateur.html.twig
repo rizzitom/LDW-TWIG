@@ -5,6 +5,10 @@
 {% block body %}
 <div class="container mt-4">
     <h2 class="text-center mb-4">Liste des Utilisateurs</h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterUtilisateurModal">
+        Ajouter un utilisateur
+    </button>
+
 
     <!-- Tableau des Utilisateurs -->
     <div class="table-responsive">
@@ -15,51 +19,107 @@
                     <th scope="col">Nom</th>
                     <th scope="col">Prénom</th>
                     <th scope="col">Rôle</th>
+                    <th scope="col">Administration</th>
                 </tr>
             </thead>
             <tbody>
-                {% for u in liste %}
-                    <tr>
-                        <td>{{ u.email }}</td>
-                        <td>{{ u.nom }}</td>
-                        <td>{{ u.prenom }}</td>
-                        <td>{{ u.libellerole }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% for u in liste %}
+        <tr>
+            <td>{{ u.email }}</td>
+            <td>{{ u.nom }}</td>
+            <td>{{ u.prenom }}</td>
+            <td>{{ u.libellerole }}</td>
+            <td>
+                <a href="index.php?page=utilisateur&action=supprimer&id={{ u.idUtilisateur }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</a>
+                <a href="index.php?page=utilisateur&action=dupliquer&id={{ u.idUtilisateur }}" class="btn btn-warning btn-sm">Dupliquer</a>
+                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifier{{ u.idUtilisateur }}">Modifier</button>
+            </td>
+        </tr>
+
+    <div class="modal fade" id="ajouterUtilisateurModal" tabindex="-1" aria-labelledby="ajouterUtilisateurModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ajouterUtilisateurModalLabel">Ajouter un Utilisateur</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label">Email</label>
+                            <input type="email" name="inputEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputNom" class="form-label">Nom</label>
+                            <input type="text" name="inputNom" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPrenom" class="form-label">Prénom</label>
+                            <input type="text" name="inputPrenom" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputRole" class="form-label">Rôle</label>
+                            <select name="inputRole" class="form-select" required>
+                                <option value="1">Administrateur</option>
+                                <option value="2">Client</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Mot de passe</label>
+                            <input type="password" name="inputPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" name="inputPasswordConfirm" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="btAjouterUtilisateur" class="btn btn-primary">Ajouter</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <h2 class="mt-5">Ajouter un Utilisateur</h2>
-    <form method="post">
-        <div class="mb-3">
-            <label for="inputEmail" class="form-label">Email</label>
-            <input type="email" id="inputEmail" name="inputEmail" class="form-control" value="{{ form.inputEmail ?? '' }}" required>
+        <div class="modal fade" id="modalModifier{{ u.idUtilisateur }}" tabindex="-1" aria-labelledby="modalModifierLabel{{ u.idUtilisateur }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalModifierLabel{{ u.idUtilisateur }}">Modifier Utilisateur</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="idUtilisateur" value="{{ u.idUtilisateur }}">
+                            <div class="mb-3">
+                                <label for="inputEmail" class="form-label">Email</label>
+                                <input type="email" name="inputEmail" class="form-control" value="{{ u.email }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputNom" class="form-label">Nom</label>
+                                <input type="text" name="inputNom" class="form-control" value="{{ u.nom }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputPrenom" class="form-label">Prénom</label>
+                                <input type="text" name="inputPrenom" class="form-control" value="{{ u.prenom }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputRole" class="form-label">Rôle</label>
+                                <select name="inputRole" class="form-select">
+                                    <option value="1" {% if u.idRole == 1 %}selected{% endif %}>Administrateur</option>
+                                    <option value="2" {% if u.idRole == 2 %}selected{% endif %}>Client</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" name="btModifierUtilisateur" class="btn btn-primary">Enregistrer</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="inputNom" class="form-label">Nom</label>
-            <input type="text" id="inputNom" name="inputNom" class="form-control" value="{{ form.inputNom ?? '' }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="inputPrenom" class="form-label">Prénom</label>
-            <input type="text" id="inputPrenom" name="inputPrenom" class="form-control" value="{{ form.inputPrenom ?? '' }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="inputRole" class="form-label">Rôle</label>
-            <select id="inputRole" name="inputRole" class="form-select" required>
-                <option value="1" {% if form.inputRole == 1 %}selected{% endif %}>Administrateur</option>
-                <option value="2" {% if form.inputRole == 2 %}selected{% endif %}>Utilisateur</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="inputPassword" class="form-label">Mot de passe</label>
-            <input type="password" id="inputPassword" name="inputPassword" class="form-control" required>
-        </div>
-        <div class="mb-3">
-            <label for="inputPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
-            <input type="password" id="inputPasswordConfirm" name="inputPasswordConfirm" class="form-control" required>
-        </div>
-        <button type="submit" name="btAjouterUtilisateur" class="btn btn-primary">Ajouter</button>
-    </form>
-    </div>
+    {% endfor %}
+</tbody>
 {% endblock %}
