@@ -23,17 +23,16 @@ function utilisateurControleur($twig, $db) {
             exit;
         }
     
-    if (isset($_GET['action']) && $_GET['action'] == 'dupliquer' && isset($_GET['id'])) {
+        if (isset($_GET['action']) && $_GET['action'] == 'dupliquer' && isset($_GET['id'])) {
             $id = $_GET['id'];
-            $utilisateur->duplicate($id);
+            if ($utilisateur->duplicate($id)) {
+                $_SESSION['message'] = "Utilisateur dupliqué avec succès !";
+            } else {
+                $_SESSION['message'] = "Erreur lors de la duplication de l'utilisateur.";
+            }
             header("Location: index.php?page=utilisateur");
             exit;
-        }
-
-        if (isset($_GET['action']) && $_GET['action'] == 'ajouter') {
-            echo $twig->render('ajouterUtilisateur.html.twig');
-            exit;
-        }
+        }    
 
     if (isset($_POST['btAjouterUtilisateur'])) {
 

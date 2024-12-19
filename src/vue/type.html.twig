@@ -6,30 +6,81 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">Liste des Types</h2>
 
+    <!-- Bouton Ajouter un Type -->
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#ajouterTypeModal">Ajouter un Type</button>
+
     <div class="table-responsive">
         <table class="table table-striped table-bordered table-hover">
             <thead class="table-primary">
                 <tr>
                     <th scope="col">Type</th>
+                    <th scope="col">Administration</th>
                 </tr>
             </thead>
             <tbody>
                 {% for type in types %}
                     <tr>
                         <td>{{ type.nom }}</td>
+                        <td>
+                            <!-- Supprimer -->
+                            <a href="index.php?page=type&action=supprimer&id={{ type.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce type ?')">Supprimer</a>
+                            
+                            <!-- Modifier -->
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifier{{ type.id }}">Modifier</button>
+                            
+                            <!-- Modal Modifier -->
+                            <div class="modal fade" id="modalModifier{{ type.id }}" tabindex="-1" aria-labelledby="modalModifierLabel{{ type.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <form method="post">
+                                        <div class="modal-content bg-dark text-light">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="modalModifierLabel{{ type.id }}">Modifier le Type</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="inputNomType{{ type.id }}" class="form-label">Nom du Type</label>
+                                                    <input type="text" id="inputNomType{{ type.id }}" name="inputNomType" class="form-control" value="{{ type.nom }}" required>
+                                                    <input type="hidden" name="typeId" value="{{ type.id }}">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" name="btModifierType" class="btn btn-primary">Modifier</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <h2 class="mt-5">Ajouter un Type</h2>
-    <form method="post">
-        <div class="mb-3">
-            <label for="inputNomType" class="form-label">Nom du Type</label>
-            <input type="text" id="inputNomType" name="inputNomType" class="form-control" required>
+    <div class="modal fade" id="ajouterTypeModal" tabindex="-1" aria-labelledby="ajouterTypeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ajouterTypeModalLabel">Ajouter un Type</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputNomType" class="form-label">Nom du Type</label>
+                            <input type="text" id="inputNomType" name="inputNomType" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" name="btAjouterType" class="btn btn-primary">Ajouter</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </form>
         </div>
-        <button type="submit" name="btAjouterType" class="btn btn-primary">Ajouter</button>
-    </form>
+    </div>
+
 </div>
 {% endblock %}
