@@ -68,7 +68,7 @@
                         <td>{{ produit.prix | number_format(2, ',', ' ') }} €</td>
                         <td>{{ produit.type_nom }}</td>
                         <td>
-                            <a href="index.php?page=produit&action=modifier&id={{ produit.id }}" class="btn btn-warning btn-sm">Modifier</a>
+                            <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifierProduit">Modifier</a>                            
                             <a href="index.php?page=produit&action=dupliquer&id={{ produit.id }}" class="btn btn-info btn-sm">Dupliquer</a>
                             <a href="index.php?page=produit&action=supprimer&id={{ produit.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">Supprimer</a>
                         </td>
@@ -78,5 +78,65 @@
         </table>
     </div>
 </div>
+
+<div class="modal fade" id="modalModifierProduit" tabindex="-1" aria-labelledby="modalModifierProduitLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalModifierProduitLabel">Modifier un Produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <input type="hidden" id="idProduit" name="idProduit" value="{{ produitAModifier.id }}">
+                    <div class="mb-3">
+                        <label for="inputDesignation" class="form-label">Désignation</label>
+                        <input type="text" id="inputDesignation" name="inputDesignation" class="form-control" value="{{ produitAModifier.designation }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputDescription" class="form-label">Description</label>
+                        <textarea id="inputDescription" name="inputDescription" class="form-control" required>{{ produitAModifier.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPrix" class="form-label">Prix</label>
+                        <input type="number" id="inputPrix" name="inputPrix" class="form-control" value="{{ produitAModifier.prix }}" required step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="selectType" class="form-label">Type</label>
+                        <select id="selectType" name="selectType" class="form-select" required>
+                            {% for type in types %}
+                                <option value="{{ type.id }}" {% if produitAModifier and produitAModifier.idType == type.id %}selected{% endif %}>{{ type.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" name="btModifierProduit" class="btn btn-primary">Modifier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.btn-warning').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const row = this.closest('tr');
+        const id = this.getAttribute('data-id');
+        const designation = row.querySelector('.designation').innerText;
+        const description = row.querySelector('.description').innerText;
+        const prix = row.querySelector('.prix').innerText.replace('€', '').trim();
+        const type = this.getAttribute('data-type-id');
+
+        document.querySelector('#idProduit').value = id;
+        document.querySelector('#inputDesignation').value = designation;
+        document.querySelector('#inputDescription').value = description;
+        document.querySelector('#inputPrix').value = prix;
+        document.querySelector('#selectType').value = type;
+
+        const modal = new bootstrap.Modal(document.querySelector('#modalModifierProduit'));
+        modal.show();
+    });
+});
+</script>
 
 {% endblock %}
