@@ -1,5 +1,5 @@
 <?php
-// http://localhost:8000/public/index.php
+// http://localhost:/public/index.php
 
 // public/index.php
 

@@ -14,7 +14,7 @@ a {
 }
 
 .bg-custom {
-  background-color: #003366 !important;  /* Couleur de fond plus marquée */
+  background-color: #3f3f3f !important;  /* Couleur de fond plus marquée */
 }
 
 .text-white {
@@ -237,6 +237,6 @@ body {
 /* Image commerciale accueil */
 .imagecommercial {
   display: flex;
-  justify-content: center;
-  padding-top: 2rem;
+  justify-content: right;
+  padding-top: 4rem;
 }
