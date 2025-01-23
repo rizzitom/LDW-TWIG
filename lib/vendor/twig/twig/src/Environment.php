@@ -103,7 +103,7 @@ class Environment
             'debug' => false,
             'charset' => 'UTF-8',
             'strict_variables' => false,
-            'autoescape' => 'html',
+            'autoescape' => '',
             'cache' => false,
             'auto_reload' => null,
             'optimizations' => -1,

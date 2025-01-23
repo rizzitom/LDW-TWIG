@@ -70,6 +70,6 @@ function utilisateurControleur($twig, $db) {
         }
     }
 
-    echo $twig->render('utilisateur.html.twig', array('form' => $_POST, 'liste' => $liste));
+    echo $twig->render('utilisateur.twig', array('form' => $_POST, 'liste' => $liste));
 }
 ?>

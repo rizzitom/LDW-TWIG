@@ -78,6 +78,6 @@ function inscrireControleur($twig, $db) {
         $form['messages'] = $validationMessages;
     }
 
-        echo $twig->render('inscrire.html.twig', array('form' => $form));
+        echo $twig->render('inscrire.twig', array('form' => $form));
     }
 ?>

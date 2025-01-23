@@ -5,6 +5,6 @@ function panierControleur($twig) {
         ['nom' => 'Produit 2', 'prix' => 49.99, 'quantite' => 2],
     ];
     
-    echo $twig->render('panier.html.twig', ['panier' => $panier]);
+    echo $twig->render('panier.twig', ['panier' => $panier]);
 }
 ?>

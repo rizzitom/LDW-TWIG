@@ -1,6 +1,6 @@
 <?php
 function accueilControleur($twig) {
-    echo $twig->render('index.html.twig', ['name' => 'NetTech']);
+    echo $twig->render('index.twig', ['name' => 'NetTech']);
 }
 
 function contactControleur(){

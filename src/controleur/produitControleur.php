@@ -51,7 +51,7 @@ function produitControleur($twig, $db) {
                 exit;
             }
     
-            echo $twig->render('produit.html.twig', [
+            echo $twig->render('produit.twig', [
                 'types' => $types,
                 'produits' => $produits,
                 'produitAModifier' => $produitAModifier
@@ -80,6 +80,6 @@ function produitControleur($twig, $db) {
         exit;
     }
 
-    echo $twig->render('produit.html.twig', array('types' => $types, 'produits' => $produits));
+    echo $twig->render('produit.twig', array('types' => $types, 'produits' => $produits));
 }
 ?>

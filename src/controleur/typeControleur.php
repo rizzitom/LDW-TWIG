@@ -28,7 +28,7 @@ function typeControleur($twig, $db) {
         exit;
     }
 
-    echo $twig->render('type.html.twig', array('types' => $types));
+    echo $twig->render('type.twig', array('types' => $types));
 }
 
 ?>
