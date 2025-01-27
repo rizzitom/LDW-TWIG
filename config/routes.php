@@ -1,6 +1,7 @@
 <?php
 function getPage($db) {
     $lesPages['accueil'] = "accueilControleur";
+    $lesPages['services'] = "servicesControleur";
     $lesPages['connexion'] = "connexionControleur";
     $lesPages['deconnexion'] = "deconnexionControleur";
     $lesPages['inscrire'] = "inscrireControleur";
@@ -9,6 +10,7 @@ function getPage($db) {
     $lesPages['type'] = "typeControleur";
     $lesPages['utilisateur'] = "utilisateurControleur";
     $lesPages['utilisateurmodif'] = "utilisateurModifControleur";
+    $lesPages['maintenance'] = "maintenanceControleur";
 
 
 

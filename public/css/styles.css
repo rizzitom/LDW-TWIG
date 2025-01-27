@@ -53,7 +53,7 @@ a {
 }
 
 .bg-custom {
-  background-color: #3f3f3f !important; 
+  background-color: #2c2828 !important; 
 }
 
 .text-white {
@@ -249,7 +249,7 @@ a {
 .card {
   padding: 1px;
   border: none;
-  background-color: #fff;
+  background-color: #363636;
 }
 
 .card-img-top {
@@ -299,4 +299,12 @@ a {
 .card-body {
   background-color: #2d2c2e;
   border: none;
+}
+
+
+
+.services-card {
+  background-color: #c2c0c0;
+  border-radius: 5%;
+  padding: 40px;
 }

@@ -14,6 +14,7 @@
             <thead class="table-primary">
                 <tr>
                     <th scope="col">Email</th>
+                    <th scope="col">Nom d'utilisateur</th>
                     <th scope="col">Nom</th>
                     <th scope="col">Prénom</th>
                     <th scope="col">Rôle</th>
@@ -24,6 +25,7 @@
     {% for u in liste %}
         <tr>
             <td>{{ u.email }}</td>
+            <td>{{ u.username }}</td>
             <td>{{ u.nom }}</td>
             <td>{{ u.prenom }}</td>
             <td>{{ u.libellerole }}</td>
@@ -94,6 +96,10 @@
                             <div class="mb-3">
                                 <label for="inputEmail" class="form-label">Email</label>
                                 <input type="email" name="inputEmail" class="form-control" value="{{ u.email }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputEmail" class="form-label">Nom d'utilisateur</label>
+                                <input type="email" name="inputEmail" class="form-control" value="{{ u.username }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="inputNom" class="form-label">Nom</label>

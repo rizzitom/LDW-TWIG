@@ -30,10 +30,11 @@ function inscrireControleur($twig, $db) {
     if (isset($_POST['btInscrire'])) {
         
         $inputEmail = $_POST['inputEmail'];
+        $inputUsername = $_POST['inputUsername'];
         $inputPassword = trim($_POST['inputPassword'] ?? '');
         $inputPassword2 = trim($_POST['inputPassword2'] ?? '');
         $nom = $_POST['inputNom'];
-        $prenom = $_POST['inputprenom'];
+        $prenom = $_POST['inputPrenom'];
         $role = ($_POST['role']); 
         
 
@@ -61,7 +62,7 @@ function inscrireControleur($twig, $db) {
         if ($formValide) {
             try {
                 $utilisateur = new Utilisateur($db);
-                $utilisateur->insert($inputEmail, password_hash($inputPassword, PASSWORD_DEFAULT), $role, $nom, $prenom);
+                $utilisateur->insert($inputEmail, $inputUsername, password_hash($inputPassword, PASSWORD_DEFAULT), $role, $nom, $prenom);
                 $validationMessages[] = "Inscription réussie.";
             }
             catch(Eception $e){
@@ -72,6 +73,7 @@ function inscrireControleur($twig, $db) {
 
         $form['valide'] = $formValide;
         $form['email'] = $inputEmail;
+        $form['username'] = $inputUsername;
         $form['role'] = $role;
         $form['nom'] = $nom;
         $form['prenom'] = $prenom;

@@ -14,11 +14,12 @@ function utilisateurControleur($twig, $db) {
     if (isset($_POST['btModifierUtilisateur'])) {
             $id = $_POST['idUtilisateur'];
             $email = $_POST['inputEmail'];
+            $username = $_POST['inputUsername'];
             $nom = $_POST['inputNom'];
             $prenom = $_POST['inputPrenom'];
             $role = $_POST['inputRole'];
     
-            $utilisateur->update($id, $email, $nom, $prenom, $role);
+            $utilisateur->update($id, $email, $username, $nom, $prenom, $role);
             header("Location: index.php?page=utilisateur");
             exit;
         }
@@ -37,6 +38,7 @@ function utilisateurControleur($twig, $db) {
     if (isset($_POST['btAjouterUtilisateur'])) {
 
         $email = $_POST['inputEmail'];
+        $username = $_POST['inputUsername'];
         $nom = $_POST['inputNom'];
         $prenom = $_POST['inputPrenom'];
         $role = $_POST['inputRole'];  
@@ -55,9 +57,10 @@ function utilisateurControleur($twig, $db) {
             } else {
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-                $stmt = $db->prepare("INSERT INTO utilisateur (email, mdp, nom, prenom, idRole) VALUES (:email, :mdp, :nom, :prenom, :idRole)");
+                $stmt = $db->prepare("INSERT INTO utilisateur (email, username mdp, nom, prenom, idRole) VALUES (:email, :username, :mdp, :nom, :prenom, :idRole)");
                 $stmt->execute([
                     'email' => $email,
+                    'username' => $username,
                     'mdp' => $hashedPassword,  
                     'nom' => $nom,
                     'prenom' => $prenom,

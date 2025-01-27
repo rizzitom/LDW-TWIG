@@ -13,13 +13,13 @@ class Utilisateur {
 
     public function __construct($db) {
         $this->db = $db;
-        $this->insert = $this->db->prepare("insert into utilisateur(email, mdp, nom, prenom, idRole) values (:email, :mdp, :nom, :prenom, :role)");
+        $this->insert = $this->db->prepare("insert into utilisateur(email, username, mdp, nom, prenom, idRole) values (:email, :username, :mdp, :nom, :prenom, :role)");
         $this->connect = $this->db->prepare("select email, idRole, mdp from utilisateur where email=:email");
         $this->select = $db->prepare("select u.id, email, idRole, nom, prenom, r.libelle as libellerole from utilisateur u, role r where u.idRole = r.id order by nom");
         $this->delete = $this->db->prepare("DELETE FROM utilisateur WHERE id = :id");
         $this->duplicate = $this->db->prepare("SELECT * FROM utilisateur WHERE id = :id");
         $this->update = $this->db->prepare("UPDATE utilisateur 
-                                            SET email = :email, nom = :nom, prenom = :prenom, idRole = :role 
+                                            SET email = :email, username = :username, nom = :nom, prenom = :prenom, idRole = :role 
                                             WHERE id = :id");
 
     }
@@ -32,10 +32,10 @@ class Utilisateur {
         return $this->select->fetchAll();
        }
 
-    public function insert($email, $mdp, $role, $nom, $prenom) {
+    public function insert($email, $username, $mdp, $role, $nom, $prenom) {
         $r = true;
         $hashedPassword = password_hash($mdp, PASSWORD_BCRYPT); 
-        $this->insert->execute(array(':email'=>$email, ':mdp'=>$mdp, ':role'=>$role,':nom'=>$nom, ':prenom'=>$prenom));
+        $this->insert->execute(array(':email'=>$email, ':username'=>$username, ':mdp'=>$mdp, ':role'=>$role,':nom'=>$nom, ':prenom'=>$prenom));
         if ($this->insert->errorCode()!=0){print_r($this->insert->errorInfo());
          $r=false;
         }
@@ -59,10 +59,11 @@ class Utilisateur {
             return $this->connect->fetch();
            }
 
-           public function update($id, $email, $nom, $prenom, $role) {
+           public function update($id, $email, $username, $nom, $prenom, $role) {
             $this->update->execute(array(
                 ':id' => $id,
                 ':email' => $email,
+                ':username' => $username,
                 ':nom' => $nom,
                 ':prenom' => $prenom,
                 ':role' => $role

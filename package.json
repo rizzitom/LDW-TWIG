@@ -3,7 +3,7 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3"
   },
-  "name": "nettech--site-e-commerce",
+  "name": "lddw-site-e-commerce",
   "version": "1.0.0",
   "main": "index.js",
   "directories": {
