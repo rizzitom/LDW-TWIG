@@ -2,11 +2,11 @@
 include '../config/parametres.php';
 
 
-function verifierMdp($mdp) {
+function verifierpassword($password) {
     $nb1 = $nb2 = $nb3 = $nb4 = 0;
 
-    for ($i = 0; $i < strlen($mdp); $i++) {
-        $c = $mdp[$i];
+    for ($i = 0; $i < strlen($password); $i++) {
+        $c = $password[$i];
 
         if (ctype_upper($c)) {
             $nb1++;
@@ -19,7 +19,7 @@ function verifierMdp($mdp) {
         }
     }
 
-    return strlen($mdp) >= 12 && $nb1 >= 1 && $nb2 >= 3 && $nb3 >= 4 && $nb4 >= 1;
+    return strlen($password) >= 12 && $nb1 >= 1 && $nb2 >= 3 && $nb3 >= 4 && $nb4 >= 1;
 }
 
 function inscrireControleur($twig, $db) {
@@ -49,7 +49,7 @@ function inscrireControleur($twig, $db) {
         if (empty($inputPassword)) {
             $validationMessages[] = "Le mot de passe est requis.";
             $formValide = false;
-        } elseif (!verifierMdp($inputPassword)) {
+        } elseif (!verifierpassword($inputPassword)) {
             $validationMessages[] = "Le mot de passe doit contenir au moins 6 caractères.";
             $formValide = false;
         }
@@ -61,13 +61,13 @@ function inscrireControleur($twig, $db) {
 
         if ($formValide) {
             try {
-                $utilisateur = new Utilisateur($db);
-                $utilisateur->insert($inputEmail, $inputUsername, password_hash($inputPassword, PASSWORD_DEFAULT), $role, $nom, $prenom);
+                $utilisateurs = new utilisateurs($db);
+                $utilisateurs->insert($inputEmail, $inputUsername, password_hash($inputPassword, PASSWORD_DEFAULT), $role, $nom, $prenom);
                 $validationMessages[] = "Inscription réussie.";
             }
             catch(Eception $e){
                 $form['valide'] = false;
-                $form['message'] = 'Problème d\'insertion dans la table utilisateur ';
+                $form['message'] = 'Problème d\'insertion dans la table utilisateurs ';
             }
         }
 

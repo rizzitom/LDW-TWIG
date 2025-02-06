@@ -30,19 +30,19 @@
             <td>{{ u.prenom }}</td>
             <td>{{ u.libellerole }}</td>
             <td>
-                <a href="index.php?page=utilisateur&action=supprimer&id={{ u.idUtilisateur }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</a>
-                <a href="index.php?page=utilisateur&action=dupliquer&id={{ u.idUtilisateur }}" class="btn btn-warning btn-sm">Dupliquer</a>
-                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifier{{ u.idUtilisateur }}">Modifier</button>
+                <a href="index.php?page=utilisateurs&action=supprimer&id={{ u.idUtilisateurs }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">Supprimer</a>
+                <a href="index.php?page=utilisateurs&action=dupliquer&id={{ u.idUtilisateurs }}" class="btn btn-warning btn-sm">Dupliquer</a>
+                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifier{{ u.idUtilisateurs }}">Modifier</button>
             </td>
         </tr>
 
-    <div class="modal fade" id="ajouterUtilisateurModal" tabindex="-1" aria-labelledby="ajouterUtilisateurModalLabel" aria-hidden="true">
+    <div class="modal fade" id="ajouterutilisateursModal" tabindex="-1" aria-labelledby="ajouterutilisateursModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form method="post">
                 <div class="modal-content bg-dark text-light">
                     <div class="modal-header">
                     <i class="fa-solid fa-users"></i>
-                        <h5 class="modal-title" id="ajouterUtilisateurModalLabel">Ajouter un Utilisateur</h5>
+                        <h5 class="modal-title" id="ajouterutilisateursModalLabel">Ajouter un Utilisateur</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" name="btAjouterUtilisateur" class="btn btn-primary">Ajouter</button>
+                        <button type="submit" name="btAjouterutilisateurs" class="btn btn-primary">Ajouter</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                     </div>
                 </div>
@@ -83,16 +83,16 @@
         </div>
     </div>
 
-        <div class="modal fade" id="modalModifier{{ u.idUtilisateur }}" tabindex="-1" aria-labelledby="modalModifierLabel{{ u.idUtilisateur }}" aria-hidden="true">
+        <div class="modal fade" id="modalModifier{{ u.idUtilisateurs }}" tabindex="-1" aria-labelledby="modalModifierLabel{{ u.idUtilisateurs }}" aria-hidden="true">
             <div class="modal-dialog">
                 <form method="post">
                     <div class="modal-content bg-dark text-light">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="modalModifierLabel{{ u.idUtilisateur }}">Modifier Utilisateur</h5>
+                            <h5 class="modal-title" id="modalModifierLabel{{ u.idUtilisateurs }}">Modifier Utilisateur</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <input type="hidden" name="idUtilisateur" value="{{ u.idUtilisateur }}">
+                            <input type="hidden" name="idUtilisateurs" value="{{ u.idUtilisateurs }}">
                             <div class="mb-3">
                                 <label for="inputEmail" class="form-label">Email</label>
                                 <input type="email" name="inputEmail" class="form-control" value="{{ u.email }}" required>
@@ -118,7 +118,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" name="btModifierUtilisateur" class="btn btn-primary">Enregistrer</button>
+                            <button type="submit" name="btModifierUtilisateurs" class="btn btn-primary">Enregistrer</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                         </div>
                     </div>

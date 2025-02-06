@@ -20,10 +20,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="inputDesignation" class="form-label">Désignation</label>
-                            <input type="text" id="inputDesignation" name="inputDesignation" class="form-control" required>
+                            <label for="inputNom" class="form-label">Nom</label>
+                            <input type="text" id="inputNom" name="inputNom" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label for="inputDescription" class="form-label">Description</label>
@@ -34,12 +34,28 @@
                             <input type="number" id="inputPrix" name="inputPrix" class="form-control" required step="0.01">
                         </div>
                         <div class="mb-3">
-                            <label for="selectType" class="form-label">Type</label>
-                            <select id="selectType" name="selectType" class="form-select" required>
-                                {% for type in types %}
-                                    <option value="{{ type.id }}">{{ type.nom }}</option>
-                                {% endfor %}
-                            </select>
+                            <label for="inputStock" class="form-label">Stock</label>
+                            <input type="number" id="inputStock" name="inputStock" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputCategorie" class="form-label">Catégorie</label>
+                            <input type="text" id="inputCategorie" name="inputCategorie" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputMarque" class="form-label">Marque</label>
+                            <input type="text" id="inputMarque" name="inputMarque" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputModele" class="form-label">Modèle</label>
+                            <input type="text" id="inputModele" name="inputModele" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputImage" class="form-label">Image du Produit</label>
+                            <input type="file" id="inputImage" name="inputImage" class="form-control">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" id="inputEstActif" name="inputEstActif" class="form-check-input" checked>
+                            <label class="form-check-label" for="inputEstActif">Actif</label>
                         </div>
                         <button type="submit" name="btAjouterProduit" class="btn btn-primary">Ajouter</button>
                     </form>
@@ -53,22 +69,38 @@
         <table class="table table-striped table-bordered table-hover">
             <thead class="table-primary">
                 <tr>
-                    <th scope="col">Désignation</th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Prix</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Actions</th>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Catégorie</th>
+                    <th>Marque</th>
+                    <th>Modèle</th>
+                    <th>Image</th>
+                    <th>Actif</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for produit in produits %}
                     <tr>
-                        <td>{{ produit.designation }}</td>
+                        <td>{{ produit.nom }}</td>
                         <td>{{ produit.description }}</td>
                         <td>{{ produit.prix | number_format(2, ',', ' ') }} €</td>
-                        <td>{{ produit.type_nom }}</td>
+                        <td>{{ produit.stock }}</td>
+                        <td>{{ produit.categorie }}</td>
+                        <td>{{ produit.marque }}</td>
+                        <td>{{ produit.modele }}</td>
                         <td>
-                            <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalModifierProduit">Modifier</a>                            
+                            {% if produit.image_url %}
+                            <img src="{{ public/(produit.image_url) }}" alt="Image produit">
+                            {% else %}
+                                <span>Pas d'image</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ produit.est_actif ? 'Oui' : 'Non' }}</td>
+                        <td>
+                            <a href="index.php?page=produit&action=modifier&id={{ produit.id }}" class="btn btn-warning btn-sm">Modifier</a>
                             <a href="index.php?page=produit&action=dupliquer&id={{ produit.id }}" class="btn btn-info btn-sm">Dupliquer</a>
                             <a href="index.php?page=produit&action=supprimer&id={{ produit.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">Supprimer</a>
                         </td>
@@ -78,65 +110,4 @@
         </table>
     </div>
 </div>
-
-<div class="modal fade" id="modalModifierProduit" tabindex="-1" aria-labelledby="modalModifierProduitLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark text-light">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalModifierProduitLabel">Modifier un Produit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post">
-                    <input type="hidden" id="idProduit" name="idProduit" value="{{ produitAModifier.id }}">
-                    <div class="mb-3">
-                        <label for="inputDesignation" class="form-label">Désignation</label>
-                        <input type="text" id="inputDesignation" name="inputDesignation" class="form-control" value="{{ produitAModifier.designation }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="inputDescription" class="form-label">Description</label>
-                        <textarea id="inputDescription" name="inputDescription" class="form-control" required>{{ produitAModifier.description }}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="inputPrix" class="form-label">Prix</label>
-                        <input type="number" id="inputPrix" name="inputPrix" class="form-control" value="{{ produitAModifier.prix }}" required step="0.01">
-                    </div>
-                    <div class="mb-3">
-                        <label for="selectType" class="form-label">Type</label>
-                        <select id="selectType" name="selectType" class="form-select" required>
-                            {% for type in types %}
-                                <option value="{{ type.id }}" {% if produitAModifier and produitAModifier.idType == type.id %}selected{% endif %}>{{ type.nom }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" name="btModifierProduit" class="btn btn-primary">Modifier</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.querySelectorAll('.btn-warning').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const row = this.closest('tr');
-        const id = this.getAttribute('data-id');
-        const designation = row.querySelector('.designation').innerText;
-        const description = row.querySelector('.description').innerText;
-        const prix = row.querySelector('.prix').innerText.replace('€', '').trim();
-        const type = this.getAttribute('data-type-id');
-
-        document.querySelector('#idProduit').value = id;
-        document.querySelector('#inputDesignation').value = designation;
-        document.querySelector('#inputDescription').value = description;
-        document.querySelector('#inputPrix').value = prix;
-        document.querySelector('#selectType').value = type;
-
-        const modal = new bootstrap.Modal(document.querySelector('#modalModifierProduit'));
-        modal.show();
-    });
-});
-</script>
-
 {% endblock %}

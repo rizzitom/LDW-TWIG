@@ -1,46 +1,71 @@
 {% extends 'base.twig' %}
 
-{% block title %}LDW - Nos Services{% endblock %}
+{% block title %}Nos Services{% endblock %}
+
+{% block styles %}
+
+{% endblock %}
 
 {% block body %}
-<div class="imagecommercial d-flex align-items-center">
-    <div>
-        <h1 class="titre mr-4">Vous souhaitez une prestation pour ? </h1>
+<div class="container services-container">
+    <div class="row justify-content-center">
+
+        <div class="col-md-4 card-wrapper">
+            <div class="card-background"></div>
+            <div class="service-card">
+                <img src="/public/images/services/Dev.png" alt="développement-web">
+                <h2>💻 Développement Web – Sites Performants et Sur-Mesure</h2>
+                <p>Boostez votre activité avec un site rapide, moderne et optimisé. Vitrine, e-commerce ou plateforme, on crée du sur-mesure qui convertit.</p>
+                <p class="card-price"><strong id="prix-dev">18€</strong>/h <small id="label-dev">(HT)</small></p>
+                <a href="#" class="btn btn-custom">Réaliser un devis</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 card-wrapper">
+            <div class="card-background"></div>
+            <div class="service-card">
+                <img src="/public/images/services/Montage.png" alt="montage">
+                <h2>🚀 PC sur Mesure – Assemblage et Optimisation</h2>
+                <p>Un PC taillé pour vos besoins ! Gaming, graphisme ou pro, nous assemblons des machines ultra-performantes, évolutives et optimisées.</p>
+                <p class="card-price"><strong id="prix-montage">20€</strong>/h <small id="label-montage">(HT)</small></p>
+                <a href="#" class="btn btn-custom">Réaliser un devis</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 card-wrapper">
+            <div class="card-background"></div>
+            <div class="service-card">
+                <img src="/public/images/services/dépannage.png" alt="depannage">
+                <h2>🛠️ Dépannage Informatique – Rapide et Efficace</h2>
+                <p>PC lent, virus, panne ? Réparation, optimisation et récupération de données à domicile ou à distance. On redonne vie à votre ordinateur !</p>
+                <p class="card-price"><strong id="prix-depannage">20€</strong>/h <small id="label-depannage">(HT)</small></p>
+                <a href="#" class="btn btn-custom">Réaliser un devis</a>
+            </div>
+        </div>
     </div>
 
-<div class="container pt-3">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="services-card">
-                <img src="/public/images/services/developpement.png" class="card-img-top" alt="Développement Informatique">
-                    <h2 class="card-title text-white">Développement Informatique</h2><br>
-                    <p class="card-text text-white">Création de logiciels sur mesure pour répondre à vos besoins spécifiques, développement web, applications mobiles et solutions cloud.</p><br>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <img src="/public/images/services/Montage.png" class="card-img-top" alt="Montage PC">
-                <div class="card-body">
-                    <h2 class="card-title text-white">Montage de PC</h2><br>
-                    <p class="card-text text-white">Assemblage de votre PC sur mesure selon vos besoins : gaming, bureautique, station de travail.</p><br><br>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <img src="/public/images/services/dépannage.png" class="card-img-top" alt="Dépannage Informatique">
-                <div class="card-body">
-                    <h2 class="card-title text-white">Dépannage Informatique</h2><br>
-                    <p class="card-text text-white">Réparation rapide et efficace de vos équipements informatiques : PC, ordinateurs portables, réseaux et plus encore.</p><br><br>
-                </div>
-            </div>
-        </div>
+    <div class="toggle-container">
+        <label>Tarifs en HT</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggle-prix">
+            <span class="slider"></span>
+        </label>
+        <label>Tarifs en TTC</label>
     </div>
 </div>
 
-<footer class="footer mt-auto py-3 bg-dark">
-    <div class="container">
-        <li class="text-center"><a class="text-white" href="?page=mentions-légales">Mentions Légales</a></li>
-    </div>
-</footer>
+<script>
+    document.getElementById('toggle-prix').addEventListener('change', function () {
+        let isTTC = this.checked;
+        
+        document.getElementById('prix-dev').textContent = isTTC ? '21€' : '18€';
+        document.getElementById('prix-montage').textContent = isTTC ? '24€' : '20€';
+        document.getElementById('prix-depannage').textContent = isTTC ? '24€' : '20€';
+        
+        document.getElementById('label-dev').textContent = isTTC ? '(TTC)' : '(HT)';
+        document.getElementById('label-montage').textContent = isTTC ? '(TTC)' : '(HT)';
+        document.getElementById('label-depannage').textContent = isTTC ? '(TTC)' : '(HT)';
+    });
+</script>
+
 {% endblock %}

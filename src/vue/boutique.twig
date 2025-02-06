@@ -1,0 +1,23 @@
+<h1>Boutique</h1>
+<div>
+    <h2>Catégories</h2>
+    <ul>
+        {% for categorie in categories %}
+            <li>
+                <a href="/index.php?route=boutique&categorie={{ categorie.id }}">{{ categorie.nom }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div>
+    <h2>Produits</h2>
+    <ul>
+        {% for produit in produits %}
+            <li>
+                <a href="/index.php?route=produitDetail&id={{ produit.id }}">{{ produit.nom }}</a>
+                - {{ produit.prix }} €
+            </li>
+        {% endfor %}
+    </ul>
+</div>

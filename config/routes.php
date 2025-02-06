@@ -8,8 +8,9 @@ function getPage($db) {
     $lesPages['panier'] = "panierControleur";
     $lesPages['produit'] = "produitControleur";
     $lesPages['type'] = "typeControleur";
-    $lesPages['utilisateur'] = "utilisateurControleur";
-    $lesPages['utilisateurmodif'] = "utilisateurModifControleur";
+    $lesPages['utilisateurs'] = "utilisateursControleur";
+    $lesPages['utilisateursmodif'] = "utilisateursModifControleur";
+    $lesPages['boutique'] = "boutiqueControleur";
     $lesPages['maintenance'] = "maintenanceControleur";
 
 
@@ -37,4 +38,5 @@ function getPage($db) {
        
        return $contenu;
 }
+
 ?>

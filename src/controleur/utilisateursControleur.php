@@ -1,41 +1,41 @@
 <?php
-function utilisateurControleur($twig, $db) {
-    $utilisateur = new Utilisateur($db);
-    $liste = $utilisateur->select();
-    $utilisateurData = null;
+function utilisateursControleur($twig, $db) {
+    $utilisateurs = new utilisateurs($db);
+    $liste = $utilisateurs->select();
+    $utilisateursData = null;
 
     if (isset($_GET['action']) && $_GET['action'] == 'supprimer' && isset($_GET['id'])) {
             $id = $_GET['id'];
-            $utilisateur->delete($id);
-            header("Location: index.php?page=utilisateur");
+            $utilisateurs->delete($id);
+            header("Location: index.php?page=utilisateurs");
             exit;
         }
     
-    if (isset($_POST['btModifierUtilisateur'])) {
-            $id = $_POST['idUtilisateur'];
+    if (isset($_POST['btModifierutilisateurs'])) {
+            $id = $_POST['idutilisateurs'];
             $email = $_POST['inputEmail'];
             $username = $_POST['inputUsername'];
             $nom = $_POST['inputNom'];
             $prenom = $_POST['inputPrenom'];
             $role = $_POST['inputRole'];
     
-            $utilisateur->update($id, $email, $username, $nom, $prenom, $role);
-            header("Location: index.php?page=utilisateur");
+            $utilisateurs->update($id, $email, $username, $nom, $prenom, $role);
+            header("Location: index.php?page=utilisateurs");
             exit;
         }
     
         if (isset($_GET['action']) && $_GET['action'] == 'dupliquer' && isset($_GET['id'])) {
             $id = $_GET['id'];
-            if ($utilisateur->duplicate($id)) {
-                $_SESSION['message'] = "Utilisateur dupliqué avec succès !";
+            if ($utilisateurs->duplicate($id)) {
+                $_SESSION['message'] = "utilisateurs dupliqué avec succès !";
             } else {
-                $_SESSION['message'] = "Erreur lors de la duplication de l'utilisateur.";
+                $_SESSION['message'] = "Erreur lors de la duplication de l'utilisateurs.";
             }
-            header("Location: index.php?page=utilisateur");
+            header("Location: index.php?page=utilisateurs");
             exit;
         }    
 
-    if (isset($_POST['btAjouterUtilisateur'])) {
+    if (isset($_POST['btAjouterutilisateurs'])) {
 
         $email = $_POST['inputEmail'];
         $username = $_POST['inputUsername'];
@@ -48,7 +48,7 @@ function utilisateurControleur($twig, $db) {
         if ($password !== $passwordConfirm) {
             echo "<p>Les mots de passe ne correspondent pas.</p>";
         } else {
-            $stmt = $db->prepare("SELECT COUNT(*) FROM utilisateur WHERE email = :email");
+            $stmt = $db->prepare("SELECT COUNT(*) FROM utilisateurs WHERE email = :email");
             $stmt->execute(['email' => $email]);
             $emailExist = $stmt->fetchColumn();
 
@@ -57,22 +57,22 @@ function utilisateurControleur($twig, $db) {
             } else {
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-                $stmt = $db->prepare("INSERT INTO utilisateur (email, username mdp, nom, prenom, idRole) VALUES (:email, :username, :mdp, :nom, :prenom, :idRole)");
+                $stmt = $db->prepare("INSERT INTO utilisateurs (email, username, password, nom, prenom, idRole) VALUES (:email, :username, :password, :nom, :prenom, :idRole)");
                 $stmt->execute([
                     'email' => $email,
                     'username' => $username,
-                    'mdp' => $hashedPassword,  
+                    'password' => $hashedPassword,  
                     'nom' => $nom,
                     'prenom' => $prenom,
                     'idRole' => $role
                 ]);
 
-                header("Location: index.php?page=utilisateur");
+                header("Location: index.php?page=utilisateurs");
                 exit;
             }
         }
     }
 
-    echo $twig->render('utilisateur.twig', array('form' => $_POST, 'liste' => $liste));
+    echo $twig->render('utilisateurs.twig', array('form' => $_POST, 'liste' => $liste));
 }
 ?>

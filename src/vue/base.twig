@@ -8,7 +8,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/969792f3e4.js" crossorigin="anonymous"></script>
     {% block head %}{% endblock %}
 </head>
@@ -32,11 +32,11 @@
                              Administration
                         </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="index.php?page=produit">Produit</a>
+                                    <a class="dropdown-item" href="index.php?page=produit">Gestion des Produits</a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="index.php?page=type">Type</a>
+                                    <a class="dropdown-item" href="index.php?page=type">Gestion des catégories</a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="index.php?page=utilisateur">Utilisateur</a>
+                                    <a class="dropdown-item" href="index.php?page=utilisateurs">Gestion des utilisateurs</a>
                             </li>
                         {% endif %}
                     {% endif %}
@@ -46,7 +46,7 @@
                         <i class="fa-solid fa-code fa-lg" style="color: #ffffff;"></i> Services
                     </a>
                 </li>
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="index.php?page=boutique" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fa-solid fa-shop fa-lg"></i> Boutique
                         </a>
                         <div class="dropdown-menu mega-menu" aria-labelledby="navbarDropdown">

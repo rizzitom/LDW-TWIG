@@ -7,17 +7,17 @@ function connexionControleur($twig, $db){
       $form['valide'] = true;
       $inputEmail = filter_var($_POST['inputEmail'], FILTER_SANITIZE_EMAIL);
       $inputPassword = trim($_POST['inputPassword']);
-      $utilisateur = new Utilisateur($db);
-      $unUtilisateur = $utilisateur->connect($inputEmail);
-      if ($unUtilisateur!=null){
-        if(!password_verify($inputPassword,$unUtilisateur['mdp'])){
+      $utilisateurs = new utilisateurs($db);
+      $unutilisateurs = $utilisateurs->connect($inputEmail);
+      if ($unutilisateurs!=null){
+        if(!password_verify($inputPassword,$unutilisateurs['password'])){
             $form['valide'] = false;
             $form['message'] = 'Login ou mot de passe incorrect';
           }
           else{
             session_start();
             $_SESSION['login'] = $inputEmail; 
-            $_SESSION['role'] = $unUtilisateur['idRole'];
+            $_SESSION['role'] = $unutilisateurs['idRole'];
             header("Location:index.php");
           }
         }

@@ -1,6 +1,6 @@
 <?php
 
-class Utilisateur {
+class utilisateurs {
 
     private $db;
     private $insert;
@@ -13,12 +13,12 @@ class Utilisateur {
 
     public function __construct($db) {
         $this->db = $db;
-        $this->insert = $this->db->prepare("insert into utilisateur(email, username, mdp, nom, prenom, idRole) values (:email, :username, :mdp, :nom, :prenom, :role)");
-        $this->connect = $this->db->prepare("select email, idRole, mdp from utilisateur where email=:email");
-        $this->select = $db->prepare("select u.id, email, idRole, nom, prenom, r.libelle as libellerole from utilisateur u, role r where u.idRole = r.id order by nom");
-        $this->delete = $this->db->prepare("DELETE FROM utilisateur WHERE id = :id");
-        $this->duplicate = $this->db->prepare("SELECT * FROM utilisateur WHERE id = :id");
-        $this->update = $this->db->prepare("UPDATE utilisateur 
+        $this->insert = $this->db->prepare("insert into utilisateurs(email, username, password, nom, prenom, idRole) values (:email, :username, :password, :nom, :prenom, :role)");
+        $this->connect = $this->db->prepare("select email, idRole, password from utilisateurs where email=:email");
+        $this->select = $db->prepare("select u.id, email, idRole, nom, prenom, r.libelle as libellerole from utilisateurs u, role r where u.idRole = r.id order by nom");
+        $this->delete = $this->db->prepare("DELETE FROM utilisateurs WHERE id = :id");
+        $this->duplicate = $this->db->prepare("SELECT * FROM utilisateurs WHERE id = :id");
+        $this->update = $this->db->prepare("UPDATE utilisateurs 
                                             SET email = :email, username = :username, nom = :nom, prenom = :prenom, idRole = :role 
                                             WHERE id = :id");
 
@@ -32,10 +32,10 @@ class Utilisateur {
         return $this->select->fetchAll();
        }
 
-    public function insert($email, $username, $mdp, $role, $nom, $prenom) {
+    public function insert($email, $username, $password, $role, $nom, $prenom) {
         $r = true;
-        $hashedPassword = password_hash($mdp, PASSWORD_BCRYPT); 
-        $this->insert->execute(array(':email'=>$email, ':username'=>$username, ':mdp'=>$mdp, ':role'=>$role,':nom'=>$nom, ':prenom'=>$prenom));
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
+        $this->insert->execute(array(':email'=>$email, ':username'=>$username, ':password'=>$password, ':role'=>$role,':nom'=>$nom, ':prenom'=>$prenom));
         if ($this->insert->errorCode()!=0){print_r($this->insert->errorInfo());
          $r=false;
         }
@@ -52,7 +52,7 @@ class Utilisateur {
         }
 
         public function connect($email){
-            $unUtilisateur = $this->connect->execute(array(':email'=>$email));
+            $unutilisateurs = $this->connect->execute(array(':email'=>$email));
             if ($this->connect->errorCode()!=0){
               print_r($this->connect->errorInfo());
             }
