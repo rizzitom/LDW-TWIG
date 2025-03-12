@@ -30,21 +30,24 @@ class FilesystemLoader implements LoaderInterface
 
     private $rootPath;
 
-    /**
-     * @param string|array $paths    A path or an array of paths where to look for templates
-     * @param string|null  $rootPath The root path common to all relative paths (null for getcwd())
-     */
-    public function __construct($paths = [], string $rootPath = null)
-    {
-        $this->rootPath = (null === $rootPath ? getcwd() : $rootPath).\DIRECTORY_SEPARATOR;
-        if (null !== $rootPath && false !== ($realPath = realpath($rootPath))) {
-            $this->rootPath = $realPath.\DIRECTORY_SEPARATOR;
-        }
-
-        if ($paths) {
-            $this->setPaths($paths);
-        }
+/**
+ * @param string|array|null $paths    A path or an array of paths where to look for templates
+ * @param string|null       $rootPath The root path common to all relative paths (null for getcwd())
+ */
+public function __construct(string|array|null $paths = [], ?string $rootPath = null)
+{
+    $this->rootPath = (null === $rootPath ? getcwd() : $rootPath) . \DIRECTORY_SEPARATOR;
+    
+    if (null !== $rootPath && false !== ($realPath = realpath($rootPath))) {
+        $this->rootPath = $realPath . \DIRECTORY_SEPARATOR;
     }
+
+    // Correction : Vérification si $paths est bien défini avant de l'utiliser
+    if (!empty($paths)) {
+        $this->setPaths($paths);
+    }
+}
+
 
     /**
      * Returns the paths to the templates.

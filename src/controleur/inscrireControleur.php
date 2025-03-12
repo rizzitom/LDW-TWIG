@@ -65,7 +65,7 @@ function inscrireControleur($twig, $db) {
                 $utilisateurs->insert($inputEmail, $inputUsername, password_hash($inputPassword, PASSWORD_DEFAULT), $role, $nom, $prenom);
                 $validationMessages[] = "Inscription réussie.";
             }
-            catch(Eception $e){
+            catch(Exception $e){
                 $form['valide'] = false;
                 $form['message'] = 'Problème d\'insertion dans la table utilisateurs ';
             }
