@@ -1,0 +1,43 @@
+<div class="product-card h-100 animate__animated animate__fadeInUp" style="animation-delay: {{ delay|default(0) }}s">
+    {% if produit.prix_promo is defined and produit.prix_promo > 0 and produit.prix_promo < produit.prix %}
+        <div class="product-badge badge-promo">Promo</div>
+    {% endif %}
+     {% if produit.nouveau is defined and produit.nouveau %}
+          <div class="product-badge badge-new" style="top: {% if produit.prix_promo %}45px{% else %}10px{% endif %}; left: 10px !important; right: auto !important;">Nouveau</div>
+     {% endif %}
+
+    <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none d-block">
+        <div class="product-image" style="background-image: url('{{ produit.image_url|default('/public/images/placeholder.png') }}')"></div>
+    </a>
+
+    <div class="product-card-body">
+        <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none">
+            <h3 class="product-title">{{ produit.nom }}</h3>
+        </a>
+        {# <p class="product-description">...</p> #} {# Optionnel #}
+        <div class="product-footer mt-auto"> {# mt-auto important #}
+            <div class="product-price-container">
+                {% if produit.prix_promo is defined and produit.prix_promo > 0 and produit.prix_promo < produit.prix %}
+                    <span class="product-price-promo">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                    <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                {% else %}
+                    <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                {% endif %}
+            </div>
+            <div class="product-actions">
+                 <a href="index.php?page=produit&slug={{ produit.slug }}" class="product-action" title="Voir le produit">
+                    <i class="fas fa-eye"></i>
+                 </a>
+                {% if produit.stock|default(1) > 0 %} {# Vérifie stock avant d'afficher bouton ajout #}
+                <form action="index.php?page=panier&action=ajouter" method="post" class="d-inline form-add-cart">
+                    <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                    <input type="hidden" name="quantite" value="1">
+                    <button type="submit" class="product-action" title="Ajouter au panier">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

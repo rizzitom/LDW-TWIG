@@ -1,0 +1,461 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Mon profil{% endblock %}
+
+{% block client_actions %}
+<a href="index.php" class="btn btn-outline-purple">
+    <i class="fas fa-store me-1"></i> Continuer mes achats
+</a>
+{% endblock %}
+
+{% block client_content %}
+<style>
+    .profile-picture-container {
+        display: inline-block;
+    }
+    
+    .profile-picture-container:hover .profile-picture-overlay {
+        opacity: 1;
+    }
+    
+    .profile-picture-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 120px;
+        height: 120px;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transition: opacity 0.3s;
+        border-radius: 50%;
+    }
+</style>
+    <div class="row">
+        <!-- Résumé du profil -->
+        <div class="col-lg-4 mb-4">
+            <div class="client-card h-100">
+                <div class="card-header">
+                    <i class="fas fa-user-circle"></i> Aperçu du profil
+                </div>
+                <div class="card-body text-center">
+                <div class="mb-4">
+                    {% if client.profile_picture %}
+                        <div class="profile-picture-container position-relative">
+                            <img src="{{ asset(client.profile_picture) }}" alt="Photo de profil" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;" ondblclick="deleteProfilePicture()">
+                            <div class="profile-picture-overlay rounded-circle">
+                                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                                    <button type="button" class="btn btn-sm btn-light mb-1" data-bs-toggle="modal" data-bs-target="#changePictureModal">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteProfilePicture()">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                            <i class="fas fa-user-circle text-secondary" style="font-size: 5rem;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                    <h5 class="mb-1">{{ client.prenom }} {{ client.nom }}</h5>
+                    <p class="text-muted mb-2">{{ client.email }}</p>
+                    <p class="mb-3">
+                        <span class="badge bg-light text-dark">Client depuis {{ client.date_inscription|date("d/m/Y") }}</span>
+                    </p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#changePictureModal">
+                            <i class="fas fa-camera me-2"></i> {{ client.profile_picture ? 'Modifier ma photo' : 'Ajouter une photo' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques Client -->
+        <div class="col-lg-8 mb-4">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="client-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                    <i class="fas fa-shopping-bag text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Commandes</h6>
+                                    <h4 class="mb-0">{{ stats.commandes|default(0) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="client-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                                    <i class="fas fa-euro-sign text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Total dépensé</h6>
+                                    <h4 class="mb-0">{{ stats.depenses|default(0)|number_format(2, ',', ' ') }} €</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="client-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                                    <i class="fas fa-file-invoice-dollar text-info"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Devis réalisés</h6>
+                                    <h4 class="mb-0">{{ stats.devis|default(0) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="client-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                                    <i class="fas fa-gift text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Points fidélité</h6>
+                                    <h4 class="mb-0">{{ stats.points|default(0) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations personnelles -->
+        <div class="col-lg-6 mb-4">
+            <div class="client-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-id-card"></i> Informations personnelles
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-purple" data-bs-toggle="modal" data-bs-target="#editInfosModal">
+                        <i class="fas fa-edit me-1"></i> Modifier
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Nom :</div>
+                        <div class="col-md-8">{{ client.nom }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Prénom :</div>
+                        <div class="col-md-8">{{ client.prenom }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Email :</div>
+                        <div class="col-md-8">{{ client.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">Téléphone :</div>
+                        <div class="col-md-8">{{ client.telephone|default('Non renseigné') }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 text-muted">Date de naissance :</div>
+                        <div class="col-md-8">{{ client.date_naissance ? client.date_naissance|date("d/m/Y") : 'Non renseignée' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adresse principale -->
+        <div class="col-lg-6 mb-4">
+            <div class="client-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i> Adresse principale
+                    </div>
+                    <a href="index.php?page=adresses" class="btn btn-sm btn-outline-purple">
+                        <i class="fas fa-edit me-1"></i> Gérer
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if adresse_principale %}
+                        <address>
+                            <strong>{{ client.prenom }} {{ client.nom }}</strong><br>
+                            {{ adresse_principale.rue }}<br>
+                            {{ adresse_principale.code_postal }} {{ adresse_principale.ville }}<br>
+                            {{ adresse_principale.pays|default('France') }}<br>
+                            <i class="fas fa-phone-alt text-muted me-1 mt-2"></i> {{ adresse_principale.telephone|default(client.telephone) }}
+                        </address>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-home text-muted fs-2 mb-3"></i>
+                            <p>Vous n'avez pas encore ajouté d'adresse principale.</p>
+                            <a href="index.php?page=adresses" class="btn btn-sm btn-purple">
+                                <i class="fas fa-plus-circle me-1"></i> Ajouter une adresse
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dernières commandes -->
+        <div class="col-lg-12 mb-4">
+            <div class="client-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-shopping-bag"></i> Dernières commandes
+                    </div>
+                    <a href="index.php?page=commandes" class="btn btn-sm btn-outline-purple">
+                        <i class="fas fa-eye me-1"></i> Voir toutes
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-client mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Référence</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if dernieres_commandes|length > 0 %}
+                                    {% for commande in dernieres_commandes %}
+                                        <tr class="clickable-row" data-href="index.php?page=commande&id={{ commande.id }}">
+                                            <td>{{ commande.reference }}</td>
+                                            <td>{{ commande.date_commande|date("d/m/Y") }}</td>
+                                            <td>{{ commande.montant_total|number_format(2, ',', ' ') }} €</td>
+                                            <td>
+                                                {% if commande.statut == 'en_attente' %}
+                                                    <span class="status-badge status-pending">En attente</span>
+                                                {% elseif commande.statut == 'en_cours' %}
+                                                    <span class="status-badge status-processing">En cours</span>
+                                                {% elseif commande.statut == 'expedie' %}
+                                                    <span class="status-badge status-shipped">Expédiée</span>
+                                                {% elseif commande.statut == 'livre' %}
+                                                    <span class="status-badge status-delivered">Livrée</span>
+                                                {% elseif commande.statut == 'annule' %}
+                                                    <span class="status-badge status-cancelled">Annulée</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="index.php?page=commande&id={{ commande.id }}" class="btn btn-sm btn-outline-purple">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+                                            <p>Vous n'avez pas encore passé de commande.</p>
+                                            <a href="index.php?page=boutique" class="btn btn-sm btn-purple">
+                                                <i class="fas fa-shopping-bag me-1"></i> Découvrir nos produits
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newsletter et préférences de communication -->
+        <div class="col-lg-12 mb-4">
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-envelope"></i> Préférences de communication
+                </div>
+                <div class="card-body">
+                    <form action="index.php?page=mon_compte" method="post" class="row">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" {{ client.newsletter ? 'checked' : '' }}>
+                                <label class="form-check-label" for="newsletter">
+                                    Newsletter mensuelle (offres exclusives et nouveautés)
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="promo_email" name="promo_email" {{ client.promo_email ? 'checked' : '' }}>
+                                <label class="form-check-label" for="promo_email">
+                                    Alertes promotionnelles par email
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="order_updates" name="order_updates" {{ client.order_updates ? 'checked' : '' }}>
+                                <label class="form-check-label" for="order_updates">
+                                    Notifications de suivi de commande
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="sms_alerts" name="sms_alerts" {{ client.sms_alerts ? 'checked' : '' }}>
+                                <label class="form-check-label" for="sms_alerts">
+                                    Alertes SMS (livraison et promotions)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button type="submit" name="update_preferences" class="btn btn-purple">
+                                <i class="fas fa-save me-2"></i> Enregistrer mes préférences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modal modification informations -->
+    <div class="modal fade" id="editInfosModal" tabindex="-1" aria-labelledby="editInfosModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=mon_compte" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editInfosModalLabel">Modifier mes informations</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="edit_nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="edit_nom" name="nom" value="{{ client.nom }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_prenom" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="edit_prenom" name="prenom" value="{{ client.prenom }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="edit_email" name="email" value="{{ client.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_telephone" class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" id="edit_telephone" name="telephone" value="{{ client.telephone }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_date_naissance" class="form-label">Date de naissance</label>
+                            <input type="date" class="form-control" id="edit_date_naissance" name="date_naissance" value="{{ client.date_naissance }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="update_infos" class="btn btn-purple">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal changement de photo -->
+    <div class="modal fade" id="changePictureModal" tabindex="-1" aria-labelledby="changePictureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=mon_compte" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePictureModalLabel">{{ client.profile_picture ? 'Modifier' : 'Ajouter' }} ma photo de profil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% if client.profile_picture %}
+                            <div class="text-center mb-3">
+                                <img src="{{ asset(client.profile_picture) }}" alt="Photo de profil actuelle" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                                <p class="text-muted">Photo de profil actuelle</p>
+                            </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="profile_picture" class="form-label">Sélectionner une nouvelle image</label>
+                            <input class="form-control" type="file" id="profile_picture" name="profile_picture" accept="image/*" required>
+                        </div>
+                        <div class="form-text text-muted">
+                            Formats acceptés : JPG, PNG, GIF, WEBP. Taille maximale : 2 Mo.
+                        </div>
+                        <div class="mt-3">
+                            <div id="image-preview-container" class="text-center d-none">
+                                <p class="mb-2">Aperçu:</p>
+                                <img id="image-preview" src="#" alt="Aperçu" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="update_picture" class="btn btn-purple">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Modal suppression photo -->
+    <div class="modal fade" id="deleteProfilePictureModal" tabindex="-1" aria-labelledby="deleteProfilePictureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=mon_compte" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteProfilePictureModalLabel">Supprimer ma photo de profil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer votre photo de profil ?</p>
+                        <p class="text-muted">Cette action est irréversible.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="delete_picture" class="btn btn-danger">Supprimer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_scripts %}
+<script>
+    // Fonction pour prévisualiser l'image sélectionnée
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('profile_picture');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('image-preview');
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.classList.remove('d-none');
+                    }
+                    
+                    reader.readAsDataURL(this.files[0]);
+                } else {
+                    previewContainer.classList.add('d-none');
+                }
+            });
+        }
+    });
+    
+    // Fonction pour supprimer la photo de profil
+    function deleteProfilePicture() {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteProfilePictureModal'));
+        deleteModal.show();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+[2025-04-14 16:18:54] SECURITY EVENT: unknown (::1): Failed login attempt for user: rizzitom306@gmail.com
+[2025-04-14 18:04:15] SECURITY EVENT: unknown (::1): Failed login attempt for user: rizzitom306@gmail.com
+[2025-04-14 19:28:00] SECURITY EVENT: unknown (::1): Failed login attempt for user: admin@ledesignduweb.fr
+[2025-04-14 19:28:13] SECURITY EVENT: unknown (::1): Failed login attempt for user: admin@ledesignduweb.fr
+[2025-04-14 19:28:22] SECURITY EVENT: unknown (::1): Failed login attempt for user: admin@ledesignduweb.fr
+[2025-04-14 19:38:18] SECURITY EVENT: unknown (::1): Failed login attempt for user: admin@ledesignduweb.fr
+[2025-04-14 19:38:19] SECURITY EVENT: unknown (::1): Failed login attempt for user: admin@ledesignduweb.fr
+[2025-04-15 10:24:30] SECURITY EVENT: unknown (::1): Failed login attempt for user: rizzitom306@gmail.com
+[2025-04-15 15:59:38] SECURITY EVENT: unknown (::1): CSRF token validation failed
+[2025-04-15 15:59:38] SECURITY EVENT: unknown (::1): CSRF token validation failed on login
+[2025-04-15 15:59:51] SECURITY EVENT: unknown (::1): CSRF token validation failed
+[2025-04-15 15:59:51] SECURITY EVENT: unknown (::1): CSRF token validation failed on login
+[2025-04-15 16:00:01] SECURITY EVENT: unknown (::1): CSRF token validation failed
+[2025-04-15 16:00:01] SECURITY EVENT: unknown (::1): CSRF token validation failed on login
+[2025-04-15 16:00:27] SECURITY EVENT: unknown (::1): CSRF token validation failed
+[2025-04-15 16:00:27] SECURITY EVENT: unknown (::1): CSRF token validation failed on login
+[2025-04-15 16:00:42] SECURITY EVENT: unknown (::1): Failed login attempt for user: rizzitom306@gmail.com
+[2025-04-21 20:29:51] ADMIN ACCESS DENIED: rizzitom306@gmail.com (176.67.82.140) - Invalid session - Page: admin/dashboard
+[2025-04-28 14:21:48] ADMIN ACCESS DENIED: rizzitom306@gmail.com (78.123.2.9) - Session timeout - Page: admin/dashboard
+[2025-04-28 14:22:13] SECURITY EVENT: unknown (78.123.2.9): Failed login attempt for user: rizzitom306@gmail.com
+[2025-04-29 11:46:49] ADMIN ACCESS DENIED: rizzitom306@gmail.com (78.123.2.9) - Session timeout - Page: admin/dashboard
+[2025-04-30 12:53:00] ADMIN ACCESS DENIED: rizzitom306@gmail.com (::1) - Session timeout - Page: type
+[2025-04-30 12:56:46] ADMIN ACCESS DENIED: unknown (::1) - Session not found - Page: admin/dashboard
+[2025-05-08 11:38:02] ADMIN ACCESS DENIED: rizzitom306@gmail.com (2a02:8429:8181:4201:e1d4:b194:a1f9:eb96) - Session timeout - Page: admin/dashboard
+[2025-05-10 18:27:32] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: rizzitom306@gmail.com
+[2025-05-10 18:28:28] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for non-existent user: lucie.rizzi@gmail.com
+[2025-05-10 18:28:35] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for non-existent user: lucie.rizzi@gmail.com
+[2025-05-10 18:30:31] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:30:35] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:30:40] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:30:48] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:31:13] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:31:23] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:31:37] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: rizzitom306@gmail.com
+[2025-05-10 18:32:03] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:33:25] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucie.rizzi@gmail.com
+[2025-05-10 18:33:35] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucierizzi@gmail.com
+[2025-05-10 18:33:39] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucierizzi@gmail.com
+[2025-05-10 18:33:46] SECURITY EVENT: unknown (2a02:8429:4f15:d001:c89d:4535:62e6:16c0): Failed login attempt for user: lucierizzi@gmail.com
+[2025-05-11 12:00:07] SECURITY EVENT: unknown (185.147.212.13): Failed login attempt for user: rizzitom306@gmail.com
+[2025-06-12 14:47:04] ADMIN ACCESS DENIED: rizzitom306@gmail.com (::1) - Session timeout - Page: admin/dashboard

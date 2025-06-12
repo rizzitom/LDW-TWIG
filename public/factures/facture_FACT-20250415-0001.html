@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Facture FACT-20250415-0001</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 20px;
+                    color: #333;
+                }
+                .invoice-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 40px;
+                }
+                .company-info, .customer-info {
+                    width: 45%;
+                }
+                .invoice-title {
+                    text-align: center;
+                    margin: 20px 0;
+                    font-size: 24px;
+                    color: #6200b3;
+                }
+                .invoice-details {
+                    margin-bottom: 30px;
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    background-color: #f9f9f9;
+                }
+                .invoice-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                }
+                .invoice-table th, .invoice-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: left;
+                }
+                .invoice-table th {
+                    background-color: #f2f2f2;
+                }
+                .invoice-total {
+                    width: 300px;
+                    margin-left: auto;
+                    margin-bottom: 50px;
+                }
+                .invoice-total table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .invoice-total th, .invoice-total td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                }
+                .invoice-footer {
+                    margin-top: 50px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #777;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-header">
+                <div class="company-info">
+                    <h2>LE DESIGN DU WEB</h2>
+                    <p><br>
+                     </p>
+                    <p>Email: contact@ldw.fr<br>
+                    Tél: 01 23 45 67 89</p>
+                    <p>SIRET: 948 362 355 00026<br>
+                    TVA Intracom: FR59948362355</p>
+                </div>
+                <div class="customer-info">
+                    <h3>Facturé à:</h3>
+                    <p>Rizzi Tom<br>
+                    4 Lotissement Les Bastides Du Colombier, Orgon<br />
+13660 Orgon</p>
+                    <p>Email: rizzitom306@gmail.com</p>
+                </div>
+            </div>
+            
+            <h1 class="invoice-title">FACTURE</h1>
+            
+            <div class="invoice-details">
+                <p><strong>Numéro de facture:</strong> FACT-20250415-0001</p>
+                <p><strong>Date d'émission:</strong> 15/04/2025</p>
+                <p><strong>Référence commande:</strong> CMD-20250414-0004</p>
+                <p><strong>Mode de paiement:</strong> paypal</p>
+            </div>
+            
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantité</th>
+                        <th>Prix unitaire HT</th>
+                        <th>Total HT</th>
+                    </tr>
+                </thead>
+                <tbody><tr>
+                <td>Montre Connectée Sport</td>
+                <td>1</td>
+                <td>0,83 €</td>
+                <td>0,83 €</td>
+            </tr></tbody>
+            </table>
+            
+            <div class="invoice-total">
+                <table>
+                    <tr>
+                        <th>Total HT</th>
+                        <td>0,83 €</td>
+                    </tr>
+                    <tr>
+                        <th>TVA (20%)</th>
+                        <td>0,17 €</td>
+                    </tr>
+                    <tr>
+                        <th>Total TTC</th>
+                        <td>1,00 €</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="invoice-footer">
+                <p>Facture générée le 15/04/2025 à 08:33</p>
+                <p>En cas de question concernant cette facture, veuillez contacter notre service client à contact@ldw.fr</p>
+                <p>Merci pour votre confiance!</p>
+                <p>LE DESIGN DU WEB - SIRET: 948 362 355 00026</p>
+            </div>
+        </body>
+        </html>

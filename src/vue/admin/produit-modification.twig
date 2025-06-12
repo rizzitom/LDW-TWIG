@@ -1,0 +1,541 @@
+{% extends "base.twig" %}
+
+{% block title %}Modifier un produit - Le Design Du Web{% endblock %}
+
+{% block head %}
+<style>
+    .admin-container {
+        background-color: #2b2b2c;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-title {
+        margin-bottom: 0;
+    }
+    
+    .form-container {
+        background-color: #1d1d1d;
+        border-radius: 10px;
+        padding: 2rem;
+    }
+    
+    .form-label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-check-input:checked {
+        background-color: #6200b3;
+        border-color: #6200b3;
+    }
+    
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        background-color: #2b2b2c;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 10px;
+        margin-top: 1rem;
+        border: 2px dashed #444;
+    }
+    
+    .image-preview.has-image {
+        border: none;
+    }
+    
+    .dropzone {
+        border: 2px dashed #444;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .dropzone:hover {
+        border-color: #6200b3;
+        background-color: rgba(98, 0, 179, 0.1);
+    }
+    
+    .dropzone-icon {
+        font-size: 2rem;
+        color: #6200b3;
+        margin-bottom: 1rem;
+    }
+    
+    .multi-image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .multi-image-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .multi-image-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 5px;
+        background-color: #2b2b2c;
+    }
+    
+    .multi-image-remove {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    .spec-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+    
+    .spec-row .form-control {
+        flex: 1;
+    }
+    
+    .spec-remove {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    
+    .existing-images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .existing-image-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .existing-image-preview {
+        width: 100%;
+        height: 100%;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 5px;
+        background-color: #2b2b2c;
+    }
+    
+    .existing-image-checkbox {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 10;
+    }
+    
+    .existing-image-label {
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        transition: all 0.2s ease;
+    }
+    
+    .existing-image-label.selected {
+        border-color: #6200b3;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Modifier un produit</h1>
+            <a href="index.php?page=produit" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
+        </div>
+        
+        {% if erreur %}
+        <div class="alert alert-danger mb-4" role="alert">
+            {{ erreur }}
+        </div>
+        {% endif %}
+        
+        <form action="index.php?page=produit&action=modifier&id={{ produit.id }}" method="post" enctype="multipart/form-data">
+            <div class="form-container">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h3 class="mb-3">Informations générales</h3>
+                        
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom du produit*</label>
+                            <input type="text" class="form-control" id="nom" name="nom" value="{{ produit.nom }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug</label>
+                            <input type="text" class="form-control" id="slug" name="slug" value="{{ produit.slug }}">
+                            <small class="text-muted">Laissez vide pour générer automatiquement à partir du nom</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description_courte" class="form-label">Description courte</label>
+                            <input type="text" class="form-control" id="description_courte" name="description_courte" value="{{ produit.description_courte }}" maxlength="255">
+                            <small class="text-muted">255 caractères maximum</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description complète</label>
+                            <textarea class="form-control" id="description" name="description" rows="6">{{ produit.description }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="prix" class="form-label">Prix*</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="prix" name="prix" step="0.01" min="0" value="{{ produit.prix }}" required>
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="prix_promo" class="form-label">Prix promotionnel</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="prix_promo" name="prix_promo" step="0.01" min="0" value="{{ produit.prix_promo }}">
+                                    <span class="input-group-text">€</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="stock" class="form-label">Stock*</label>
+                                <input type="number" class="form-control" id="stock" name="stock" min="0" value="{{ produit.stock }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_categorie" class="form-label">Catégorie*</label>
+                                <select class="form-select" id="id_categorie" name="id_categorie" required>
+                                    {% for categorie in categories %}
+                                    <option value="{{ categorie.id }}" {% if categorie.id == produit.id_categorie %}selected{% endif %}>{{ categorie.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="est_actif" name="est_actif" {% if produit.est_actif %}checked{% endif %}>
+                                    <label class="form-check-label" for="est_actif">Produit actif</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="est_featured" name="est_featured" {% if produit.est_featured %}checked{% endif %}>
+                                    <label class="form-check-label" for="est_featured">Produit en vedette</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <h3 class="mb-3">Image principale</h3>
+                        
+                        {% if produit.image_url %}
+                        <div id="currentMainImage" class="mb-3">
+                            <p>Image actuelle :</p>
+                            <div class="image-preview has-image" style="background-image: url('{{ produit.image_url }}')"></div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="dropzone" id="imageDropzone">
+                            <div class="dropzone-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p>Glissez et déposez votre nouvelle image ici ou cliquez pour sélectionner</p>
+                            <input type="file" name="image" id="imageInput" class="d-none" accept="image/*">
+                        </div>
+                        
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="mb-3">Images supplémentaires</h3>
+                        
+                        {% if produit.images_supplementaires|length > 0 %}
+                        <div class="mb-3">
+                            <p>Images existantes :</p>
+                            <div class="existing-images">
+                                {% for image in produit.images_supplementaires %}
+                                <div class="existing-image-item">
+                                    <label class="existing-image-label" for="image_{{ loop.index0 }}">
+                                        <div class="existing-image-preview" style="background-image: url('{{ image }}')"></div>
+                                        <input type="checkbox" name="images_existantes[]" id="image_{{ loop.index0 }}" value="{{ loop.index0 }}" class="existing-image-checkbox" checked>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">Décochez pour supprimer</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="dropzone" id="multiImageDropzone">
+                            <div class="dropzone-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <p>Glissez et déposez de nouvelles images ici ou cliquez pour sélectionner (plusieurs images possibles)</p>
+                            <input type="file" name="nouvelles_images[]" id="multiImageInput" class="d-none" accept="image/*" multiple>
+                        </div>
+                        
+                        <div id="multiImagePreview" class="multi-image-preview"></div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="mb-3">Caractéristiques techniques</h3>
+                        
+                        <div id="caracteristiques">
+                            {% if produit.caracteristiques|length > 0 %}
+                                {% for nom, valeur in produit.caracteristiques %}
+                                <div class="spec-row">
+                                    <input type="text" class="form-control" name="carac_nom[]" value="{{ nom }}" placeholder="Nom de la caractéristique">
+                                    <input type="text" class="form-control" name="carac_valeur[]" value="{{ valeur }}" placeholder="Valeur">
+                                    <button type="button" class="spec-remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="spec-row">
+                                    <input type="text" class="form-control" name="carac_nom[]" placeholder="Nom de la caractéristique">
+                                    <input type="text" class="form-control" name="carac_valeur[]" placeholder="Valeur">
+                                    <button type="button" class="spec-remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="button" id="addSpecButton" class="btn btn-outline-light mt-2">
+                            <i class="fas fa-plus me-2"></i> Ajouter une caractéristique
+                        </button>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image principale
+        const imageDropzone = document.getElementById('imageDropzone');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        imageDropzone.addEventListener('click', function() {
+            imageInput.click();
+        });
+        
+        imageDropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('border-primary');
+        });
+        
+        imageDropzone.addEventListener('dragleave', function() {
+            this.classList.remove('border-primary');
+        });
+        
+        imageDropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-primary');
+            
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                updateImagePreview();
+            }
+        });
+        
+        imageInput.addEventListener('change', updateImagePreview);
+        
+        function updateImagePreview() {
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.style.backgroundImage = `url('${e.target.result}')`;
+                    imagePreview.classList.add('has-image');
+                    
+                    // Hide current main image if any
+                    const currentMainImage = document.getElementById('currentMainImage');
+                    if (currentMainImage) {
+                        currentMainImage.style.display = 'none';
+                    }
+                }
+                
+                reader.readAsDataURL(imageInput.files[0]);
+            }
+        }
+        
+        // Images supplémentaires
+        const multiImageDropzone = document.getElementById('multiImageDropzone');
+        const multiImageInput = document.getElementById('multiImageInput');
+        const multiImagePreview = document.getElementById('multiImagePreview');
+        
+        multiImageDropzone.addEventListener('click', function() {
+            multiImageInput.click();
+        });
+        
+        multiImageDropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('border-primary');
+        });
+        
+        multiImageDropzone.addEventListener('dragleave', function() {
+            this.classList.remove('border-primary');
+        });
+        
+        multiImageDropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('border-primary');
+            
+            if (e.dataTransfer.files.length) {
+                multiImageInput.files = e.dataTransfer.files;
+                updateMultiImagePreview();
+            }
+        });
+        
+        multiImageInput.addEventListener('change', updateMultiImagePreview);
+        
+        function updateMultiImagePreview() {
+            multiImagePreview.innerHTML = '';
+            
+            if (multiImageInput.files && multiImageInput.files.length > 0) {
+                Array.from(multiImageInput.files).forEach(file => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'multi-image-item';
+                        
+                        const img = document.createElement('div');
+                        img.className = 'multi-image-preview-img';
+                        img.style.backgroundImage = `url('${e.target.result}')`;
+                        
+                        div.appendChild(img);
+                        multiImagePreview.appendChild(div);
+                    }
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+        
+        // Gestion des images existantes
+        const existingImageCheckboxes = document.querySelectorAll('.existing-image-checkbox');
+        existingImageCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const label = this.closest('.existing-image-label');
+                if (this.checked) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            });
+            
+            // Initialiser l'état
+            if (checkbox.checked) {
+                checkbox.closest('.existing-image-label').classList.add('selected');
+            }
+        });
+        
+        // Caractéristiques techniques
+        const caracteristiques = document.getElementById('caracteristiques');
+        const addSpecButton = document.getElementById('addSpecButton');
+        
+        // Ajouter une nouvelle ligne de caractéristique
+        addSpecButton.addEventListener('click', function() {
+            const specRow = document.createElement('div');
+            specRow.className = 'spec-row';
+            
+            specRow.innerHTML = `
+                <input type="text" class="form-control" name="carac_nom[]" placeholder="Nom de la caractéristique">
+                <input type="text" class="form-control" name="carac_valeur[]" placeholder="Valeur">
+                <button type="button" class="spec-remove">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            caracteristiques.appendChild(specRow);
+            
+            // Ajouter l'événement de suppression sur le nouveau bouton
+            specRow.querySelector('.spec-remove').addEventListener('click', function() {
+                specRow.remove();
+            });
+        });
+        
+        // Ajouter l'événement de suppression sur les boutons existants
+        document.querySelectorAll('.spec-remove').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.spec-row').remove();
+            });
+        });
+    });
+</script>
+{% endblock %}

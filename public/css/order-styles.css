@@ -1,0 +1,346 @@
+/* Styles pour les pages de commandes et factures */
+
+/* Status badges avec couleurs distinctives */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #e6a700;
+}
+
+.status-processing {
+    background-color: rgba(13, 110, 253, 0.15);
+    color: #0a58ca;
+}
+
+.status-shipped {
+    background-color: rgba(13, 202, 240, 0.15);
+    color: #098faa;
+}
+
+.status-delivered {
+    background-color: rgba(25, 135, 84, 0.15);
+    color: #146c43;
+}
+
+.status-cancelled {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #b02a37;
+}
+
+.status-refunded {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #495057;
+}
+
+.status-paid {
+    background-color: rgba(25, 135, 84, 0.15);
+    color: #146c43;
+}
+
+/* Suivi de commande */
+.order-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin: 2rem 0;
+    padding: 0 1rem;
+}
+
+.order-progress::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 50px;
+    right: 50px;
+    height: 2px;
+    background-color: var(--bordure-couleur);
+    z-index: 1;
+}
+
+.order-progress.completed::before {
+    background-color: var(--success-color);
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    min-width: 80px;
+}
+
+.progress-step-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--fond-tertiaire);
+    border: 2px solid var(--bordure-couleur);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--texte-mute);
+    transition: all 0.3s ease;
+}
+
+.progress-step-text {
+    font-size: 0.85rem;
+    color: var(--texte-mute);
+    max-width: 100px;
+    transition: color 0.3s ease;
+}
+
+/* Étape active */
+.progress-step.active .progress-step-icon {
+    background-color: rgba(var(--violet-principal-rgb), 0.1);
+    border-color: var(--violet-principal);
+    color: var(--violet-principal);
+    box-shadow: 0 0 0 5px rgba(var(--violet-principal-rgb), 0.1);
+    transform: scale(1.1);
+}
+
+.progress-step.active .progress-step-text {
+    color: var(--texte-couleur);
+    font-weight: 600;
+}
+
+/* Étape complétée */
+.progress-step.completed .progress-step-icon {
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.progress-step.completed .progress-step-text {
+    color: var(--success-color);
+}
+
+/* Style de cartes pour les espaces client */
+.client-card {
+    background-color: var(--fond-secondaire);
+    border-radius: 0.75rem;
+    border: 1px solid var(--bordure-couleur);
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.client-card .card-header {
+    background-color: var(--fond-secondaire);
+    border-bottom: 1px solid var(--bordure-couleur);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.client-card .card-header i {
+    margin-right: 0.5rem;
+    color: var(--violet-accent);
+}
+
+.client-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Hover effect sur les cartes (optionnel) */
+.client-card.hover-effect:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Table style for orders */
+.table-client {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.table-client thead th {
+    background-color: rgba(var(--violet-principal-rgb), 0.05);
+    font-weight: 600;
+    text-transform: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--bordure-couleur);
+}
+
+.table-client tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bordure-couleur);
+}
+
+.table-client tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Hover effect sur les lignes du tableau */
+.table-client tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-client tbody tr:hover {
+    background-color: rgba(var(--violet-principal-rgb), 0.03);
+}
+
+/* Invoice styles */
+.invoice-container {
+    background-color: var(--fond-secondaire);
+    border-radius: 1rem;
+    border: 1px solid var(--bordure-couleur);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.invoice-title {
+    font-size: 1.75rem;
+    color: var(--violet-principal);
+    margin-bottom: 1rem;
+}
+
+.invoice-details {
+    background-color: var(--fond-tertiaire);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.invoice-details p:last-child {
+    margin-bottom: 0;
+}
+
+.invoice-total {
+    background-color: var(--fond-tertiaire);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.invoice-total table {
+    width: 100%;
+}
+
+.invoice-total table th {
+    font-weight: 600;
+    padding: 0.5rem 0;
+}
+
+.invoice-total table td {
+    text-align: right;
+    padding: 0.5rem 0;
+}
+
+/* Styles pour le statut de la commande */
+.order-status-card {
+    border-left: 4px solid var(--bordure-couleur);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: var(--fond-tertiaire);
+    margin-bottom: 1.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.order-status-pending {
+    border-left-color: #ffc107;
+}
+
+.order-status-processing {
+    border-left-color: #0d6efd;
+}
+
+.order-status-shipped {
+    border-left-color: #0dcaf0;
+}
+
+.order-status-delivered {
+    border-left-color: #198754;
+}
+
+.order-status-cancelled {
+    border-left-color: #dc3545;
+}
+
+.order-status-paid {
+    border-left-color: #198754;
+}
+
+/* Historique des commandes */
+.history-timeline {
+    position: relative;
+    padding-left: 28px;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 8px;
+    width: 2px;
+    background-color: var(--bordure-couleur);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: -28px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--violet-principal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+}
+
+.timeline-content {
+    background-color: var(--fond-tertiaire);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.timeline-date {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--texte-mute);
+    margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-text {
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+}

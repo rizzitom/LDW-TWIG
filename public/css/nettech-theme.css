@@ -1,0 +1,265 @@
+:root {
+  /* Primary color palette */
+  --primary: #8A2BE2; /* Vibrant purple */
+  --primary-hover: #7823C9;
+  --primary-dark: #5D19A8;
+  --primary-light: #E4D3F6;
+  --primary-transparent: rgba(138, 43, 226, 0.15);
+  
+  /* Secondary color palette */
+  --secondary: #5D19A8; /* Deeper purple */
+  --secondary-hover: #4A1486;
+  --accent: #BB86FC; /* Light purple accent */
+  --accent-hover: #A96EFC;
+  
+  /* Status colors */
+  --success: #00DCA5;
+  --warning: #FFBE0B;
+  --danger: #FF445A;
+  --info: #3ABFF8;
+  
+  /* Neutral colors - black and white palette */
+  --dark: #121212;
+  --dark-800: #1E1E1E;
+  --dark-700: #252538;
+  --dark-600: #31314A;
+  --dark-500: #3D3D5C;
+  --light: #FFFFFF;
+  --light-300: #f8f9fa;
+  --light-500: #e9ecef;
+  --light-700: #dee2e6;
+  
+  /* Dark theme colors (default) */
+  --bg-color: var(--dark);
+  --bg-color-secondary: var(--dark-800);
+  --bg-color-tertiary: var(--dark-700);
+  --text-color: var(--light);
+  --text-color-secondary: var(--light-300);
+  --text-color-tertiary: var(--light-500);
+  --border-color: rgba(255, 255, 255, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 10px rgba(138, 43, 226, 0.5);
+  --shadow-purple: 0 5px 15px rgba(138, 43, 226, 0.3);
+  --header-bg: var(--dark-800);
+  --footer-bg: var(--dark-800);
+  --card-bg: var(--dark-700);
+  --card-border: rgba(138, 43, 226, 0.1);
+}
+
+/* Light theme overrides */
+.light-theme {
+  --bg-color: #ffffff;
+  --bg-color-secondary: #f8f9fa;
+  --bg-color-tertiary: #e9ecef;
+  --text-color: #212529;
+  --text-color-secondary: #343a40;
+  --text-color-tertiary: #495057;
+  --border-color: rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 10px rgba(138, 43, 226, 0.3);
+  --header-bg: #ffffff;
+  --footer-bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --card-border: rgba(138, 43, 226, 0.1);
+}
+
+/* Custom button styles */
+.btn-purple {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--light);
+}
+
+.btn-purple:hover, .btn-purple:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg), var(--shadow-purple);
+}
+
+.btn-outline-purple {
+  color: var(--primary);
+  border-color: var(--primary);
+  background-color: transparent;
+}
+
+.btn-outline-purple:hover, .btn-outline-purple:focus {
+  background-color: var(--primary);
+  color: var(--light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-purple);
+}
+
+/* Hover effects */
+.product-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-lg), var(--shadow-purple);
+  border-color: var(--primary-transparent);
+}
+
+/* Product image styles */
+.product-image {
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.5s ease;
+  position: relative;
+  background-color: var(--dark);
+  overflow: hidden;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Card styles */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg), var(--shadow-purple);
+}
+
+/* Hero section with purple gradient */
+.hero-bg {
+  background: linear-gradient(135deg, var(--dark) 0%, var(--primary-dark) 50%, var(--primary) 100%);
+}
+
+/* Navigation styles */
+.navbar-nav .nav-link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background-color: var(--accent);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+  opacity: 0;
+  box-shadow: var(--shadow-glow);
+}
+
+.navbar-nav .nav-link:hover::before,
+.navbar-nav .nav-link.active::before {
+  width: 40%;
+  opacity: 1;
+}
+
+/* Search form with purple accent */
+.search-form .btn {
+  background-color: var(--primary);
+}
+
+.search-form .btn:hover {
+  background-color: var(--primary-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.cart-icon-container:hover {
+  background-color: var(--primary-transparent);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-purple);
+}
+
+/* Badge styles */
+.badge-new {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-purple);
+}
+
+.badge-top {
+  background-color: var(--accent);
+  color: var(--dark);
+  box-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+}
+
+/* CTA Section with purple gradient */
+.cta-section {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+/* Services section style */
+.service-icon {
+  background-color: var(--primary-transparent);
+  color: var(--primary);
+}
+
+.service-card:hover .service-icon {
+  background-color: var(--primary);
+  color: var(--light);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Footer styles */
+.footer-title::after {
+  background-color: var(--primary);
+}
+
+.footer-links a:hover {
+  color: var(--primary);
+}
+
+/* Animation for fadeIn elements */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Admin panel styles */
+.admin-container {
+  background-color: var(--dark-800);
+  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color);
+}
+
+.form-container {
+  background-color: var(--dark-700);
+  border-radius: 10px;
+  padding: 2rem;
+  border: 1px solid var(--primary-transparent);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.dropzone:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-transparent);
+}
+
+.dropzone-icon {
+  color: var(--primary);
+}

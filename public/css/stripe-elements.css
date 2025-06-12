@@ -1,0 +1,103 @@
+/**
+ * Styles pour les éléments Stripe
+ */
+
+/* Base des éléments de paiement */
+.StripeElement {
+    background-color: #2b2b2c;
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.StripeElement--focus {
+    border-color: #6200b3;
+    box-shadow: 0 0 0 1px #6200b3;
+}
+
+.StripeElement--invalid {
+    border-color: #dc3545;
+}
+
+.StripeElement--webkit-autofill {
+    background-color: #333 !important;
+}
+
+/* Styles pour le form de paiement */
+.payment-form {
+    margin-top: 20px;
+}
+
+.stripe-card-element {
+    margin-bottom: 20px;
+}
+
+#card-errors {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Bouton de paiement */
+.stripe-payment-button {
+    background: linear-gradient(to right, #6200b3, #8a00ff);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+    cursor: pointer;
+}
+
+.stripe-payment-button:hover {
+    background: linear-gradient(to right, #5000a0, #7800e0);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(98, 0, 179, 0.3);
+}
+
+.stripe-payment-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Animation de chargement */
+.payment-processing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-processing-spinner {
+    margin-right: 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Personnalisation des éléments Stripe */
+.card-element-container {
+    background-color: #1d1d1d;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .StripeElement {
+        padding: 10px;
+    }
+    
+    .stripe-payment-button {
+        padding: 10px 15px;
+    }
+}

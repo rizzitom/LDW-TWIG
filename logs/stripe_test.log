@@ -1,0 +1,17 @@
+2025-04-18 19:13:49 - Connexion à la base de données établie
+2025-04-18 19:13:49 - Initialisation de Stripe réussie
+2025-04-18 19:13:49 - Clé publique Stripe: pk_live_51RDozlG7RjirpzdIvkXjsNZ9TcQ6phh5CJ2Xx18wrMJLxaw9sAYzNhSnFe28zRRUgtmHdSFXSbfAOew6LV8Jiodh00E6moh5PE
+2025-04-18 19:13:49 - Création d'une intention de paiement de test...
+2025-04-18 19:13:50 - Intention de paiement créée avec succès!
+2025-04-18 19:13:50 - Payment Intent ID: pi_3RFKMEG7RjirpzdI0Tbm5Gad
+2025-04-18 19:13:50 - Client Secret: pi_3RFKMEG...[masqué]
+2025-04-18 19:13:50 - Vérification du statut de l'intention de paiement...
+2025-04-18 19:13:50 - Vérification réussie
+2025-04-18 19:13:50 - Statut: requires_payment_method
+2025-04-18 19:13:50 - Montant: 1 EUR
+2025-04-18 19:13:50 - Annulation de l'intention de paiement...
+2025-04-18 19:13:51 - Annulation réussie
+2025-04-18 19:13:51 - Test d'enregistrement dans la base de données...
+2025-04-18 19:13:51 - Enregistrement du paiement réussi
+2025-04-18 19:13:51 - Paiement récupéré avec succès: ID 1
+2025-04-18 19:13:51 - Test terminé

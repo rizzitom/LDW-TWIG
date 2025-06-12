@@ -1,0 +1,526 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Statistiques avancées{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=admin" class="btn btn-outline-light me-2">
+    <i class="fas fa-arrow-left me-2"></i> Retour au tableau de bord
+</a>
+<button type="button" class="btn btn-outline-light" onclick="window.print()">
+    <i class="fas fa-print me-2"></i> Imprimer
+</button>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Vue d'ensemble -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card-admin">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Vue d'ensemble</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-value">{{ stats.basic.ca_total|number_format(2, ',', ' ') }} €</div>
+                            <div class="stat-label">Chiffre d'affaires total</div>
+                            <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-value">{{ stats.panier_moyen|number_format(2, ',', ' ') }} €</div>
+                            <div class="stat-label">Panier moyen</div>
+                            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-value">{{ stats.basic.total_commandes }}</div>
+                            <div class="stat-label">Nombre total de commandes</div>
+                            <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-value">{{ stats.basic.total_clients }}</div>
+                            <div class="stat-label">Clients inscrits</div>
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Évolution des ventes -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card-admin">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Évolution des ventes (12 derniers mois)</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 400px;">
+                    <canvas id="salesEvolutionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Repartition des ventes -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card-admin h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Ventes par catégorie</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="categoriesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card-admin h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Ventes par jour de la semaine</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="dayOfWeekChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produits populaires -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card-admin">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-trophy me-2"></i> Produits les plus vendus</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px">#</th>
+                                <th style="width: 80px">Image</th>
+                                <th>Produit</th>
+                                <th class="text-center">Quantité vendue</th>
+                                <th class="text-end">Chiffre d'affaires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if stats.produits_populaires|length > 0 %}
+                                {% for produit in stats.produits_populaires %}
+                                <tr class="hoverable-row" onclick="window.location='index.php?page=produit&action=modifier&id={{ produit.id }}'">
+                                    <td>{{ produit.id }}</td>
+                                    <td>
+                                        <div style="width: 60px; height: 60px; background-image: url('{{ produit.image_url }}'); background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 5px;"></div>
+                                    </td>
+                                    <td>{{ produit.nom }}</td>
+                                    <td class="text-center">{{ produit.total_vendu }}</td>
+                                    <td class="text-end">{{ produit.total_ca|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                                        <p>Aucune donnée disponible</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clients fidèles -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card-admin">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-check me-2"></i> Clients fidèles</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Email</th>
+                                <th class="text-center">Nombre de commandes</th>
+                                <th class="text-end">Total dépensé</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if stats.clients_fideles|length > 0 %}
+                                {% for client in stats.clients_fideles %}
+                                <tr>
+                                    <td>{{ client.id }}</td>
+                                    <td>{{ client.nom }} {{ client.prenom }}</td>
+                                    <td>{{ client.email }}</td>
+                                    <td class="text-center">{{ client.nombre_commandes }}</td>
+                                    <td class="text-end">{{ client.total_depense|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+                                        <p>Aucune donnée disponible</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Indicateurs de performance -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card-admin">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i> Indicateurs de performance</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h6>Taux de conversion des devis</h6>
+                        <div class="progress-bar-admin mt-2 mb-4">
+                            {% set completed_quotes = 0 %}
+                            {% if stats.basic.devis_attente is defined and stats.basic.devis_attente > 0 %}
+                                {% set completed_quotes = (stats.basic.total_commandes / stats.basic.devis_attente) * 100 %}
+                            {% endif %}
+                            {% set progress = completed_quotes > 100 ? 100 : completed_quotes %}
+                            <div class="progress-value" style="width: {{ progress < 1 ? 1 : progress }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>0%</span>
+                            <span>{{ progress|round(1) }}%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <h6>Rotation des stocks</h6>
+                        <div class="progress-bar-admin mt-2 mb-4">
+                            {% set stock_ratio = 0 %}
+                            {% if stats.basic.produits_actifs is defined and stats.basic.produits_actifs > 0 %}
+                                {% set stock_ratio = ((stats.basic.produits_actifs - stats.basic.produits_rupture) / stats.basic.produits_actifs * 100) %}
+                            {% endif %}
+                            <div class="progress-value" style="width: {{ stock_ratio < 1 ? 1 : stock_ratio }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>0%</span>
+                            <span>{{ stock_ratio|round(1) }}%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+        <h6>Taux de croissance (CA mois en cours vs. mois dernier)</h6>
+        <div class="progress-bar-admin mt-2 mb-4">
+            {% set growth_rate = 15 %} {# Ceci devrait être calculé à partir des données réelles #}
+            {% set growth_rate_capped = growth_rate < 1 ? 1 : (growth_rate > 100 ? 100 : growth_rate) %}
+            <div class="progress-value" style="width: {{ growth_rate_capped }}%"></div>
+        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>0%</span>
+                            <span>{{ growth_rate }}%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <h6>Taux de fidélisation clients</h6>
+                        <div class="progress-bar-admin mt-2 mb-4">
+                            {% set retention_rate = 75 %}
+                            <div class="progress-value" style="width: {{ retention_rate }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>0%</span>
+                            <span>{{ retention_rate }}%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-2">
+                    <i class="fas fa-info-circle me-2"></i> Note: Certains indicateurs sont simulés à titre d'exemple et seront calculés dynamiquement dans une prochaine mise à jour.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser tous les graphiques
+        initCharts();
+    });
+    
+    function initCharts() {
+        // Configuration générale pour tous les graphiques
+        Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        
+        // Graphique d'évolution des ventes
+        const salesEvolutionCtx = document.getElementById('salesEvolutionChart');
+        if (salesEvolutionCtx) {
+            new Chart(salesEvolutionCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ stats.evolution_ca.labels|json_encode|raw }},
+                    datasets: [{
+                        label: 'Chiffre d\'affaires',
+                        data: {{ stats.evolution_ca.values|json_encode|raw }},
+                        backgroundColor: 'rgba(98, 0, 179, 0.2)',
+                        borderColor: '#6200b3',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6200b3',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#6200b3',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('fr-FR') + ' €';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Graphique des ventes par catégorie
+        const categoriesCtx = document.getElementById('categoriesChart');
+        if (categoriesCtx) {
+            new Chart(categoriesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ stats.evolution_ca.labels|json_encode|raw }},
+                    datasets: [{
+                        data: {{ stats.evolution_ca.values|json_encode|raw }},
+                        backgroundColor: [
+                            '#6200b3',
+                            '#9f44d3',
+                            '#bb86fc',
+                            '#3700b3',
+                            '#5e35b1'
+                        ],
+                        borderColor: '#1d1d1d',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.raw);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Graphique des ventes par jour de la semaine
+        const dayOfWeekCtx = document.getElementById('dayOfWeekChart');
+        if (dayOfWeekCtx) {
+            // Préparer les données pour les jours de la semaine
+            const weekDays = [];
+            const salesByDay = [];
+            const ordersByDay = [];
+            
+            {% if stats.ventes_jour is defined %}
+                {% for jour in stats.ventes_jour %}
+                    weekDays.push('{{ jour.jour }}');
+                    salesByDay.push({{ jour.total_ventes }});
+                    ordersByDay.push({{ jour.nombre_commandes }});
+                {% endfor %}
+            {% else %}
+                // Données simulées si non disponibles
+                weekDays.push('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche');
+                salesByDay.push(1200, 950, 1100, 1300, 1800, 2200, 1600);
+                ordersByDay.push(8, 6, 7, 9, 12, 15, 10);
+            {% endif %}
+            
+            new Chart(dayOfWeekCtx, {
+                type: 'bar',
+                data: {
+                    labels: weekDays,
+                    datasets: [
+                        {
+                            label: 'Montant des ventes',
+                            data: salesByDay,
+                            backgroundColor: 'rgba(98, 0, 179, 0.7)',
+                            borderColor: '#6200b3',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Nombre de commandes',
+                            data: ordersByDay,
+                            backgroundColor: 'rgba(187, 134, 252, 0.7)',
+                            borderColor: '#bb86fc',
+                            borderWidth: 1,
+                            type: 'line',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('fr-FR') + ' €';
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        }
+    }
+</style>
+<style>
+    /* Styles spécifiques pour l'impression */
+    @media print {
+        .admin-sidebar, .admin-header, .admin-footer, .btn {
+            display: none !important;
+        }
+        
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        .admin-container, .card-admin, .card-body {
+            background-color: white !important;
+            color: black !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .table {
+            color: black !important;
+        }
+        
+        .table th {
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+    }
+</style>
+{% endblock %}

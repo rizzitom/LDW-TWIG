@@ -1,0 +1,702 @@
+{% extends 'base.twig' %}
+
+{% block title %}Connexion - Le Design Du Web{% endblock %}
+
+{% block head %}
+<style>
+    /* ====== VARIABLES SPÉCIFIQUES AU FORMULAIRE DE CONNEXION ====== */
+    :root {
+        --connexion-card-bg: rgba(40, 40, 50, 0.75);
+        --connexion-gradient: linear-gradient(135deg, rgba(138, 43, 226, 0.8), rgba(93, 25, 168, 0.8));
+        --glass-blur: blur(10px);
+        --input-glow: 0 0 15px rgba(138, 43, 226, 0.2);
+        --field-border-radius: 12px;
+        --brand-shadow: 0 4px 30px rgba(138, 43, 226, 0.15);
+    }
+
+    body.light-theme {
+        --connexion-card-bg: rgba(255, 255, 255, 0.9);
+        --connexion-gradient: linear-gradient(135deg, rgba(138, 43, 226, 0.7), rgba(138, 43, 226, 0.5));
+    }
+
+    /* ====== CONTENEUR PRINCIPAL - ÉCRAN DIVISÉ ====== */
+    .auth-container {
+        margin: -1.5rem -1rem;  /* Compense le padding du container principal */
+        min-height: calc(100vh - 150px - 200px); /* Reprend la hauteur minimale du main */
+        display: flex;
+        overflow: hidden;
+        border-radius: 0.75rem;
+        background-color: var(--fond-primaire);
+    }
+
+    /* ====== CÔTÉ VISUEL/ILLUSTRATION ====== */
+    .auth-visual {
+        display: none; /* Masqué sur mobile */
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (min-width: 992px) {
+        .auth-visual {
+            display: block;
+            flex: 1;
+            background: var(--connexion-gradient), 
+                        url('/public/images/undraw_programmer.svg') no-repeat center center;
+            background-size: cover;
+        }
+    }
+
+    .auth-visual-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        text-align: center;
+        color: white;
+        background: linear-gradient(180deg, 
+                    rgba(0, 0, 0, 0.3) 0%, 
+                    rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    .auth-visual-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-visual-text {
+        font-size: 1.1rem;
+        max-width: 80%;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-visual-shape {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(138, 43, 226, 0.4);
+        filter: blur(60px);
+    }
+
+    .auth-visual-shape:nth-child(1) {
+        width: 300px;
+        height: 300px;
+        top: -50px;
+        left: -100px;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .auth-visual-shape:nth-child(2) {
+        width: 200px;
+        height: 200px;
+        bottom: 50px;
+        right: -50px;
+        background: rgba(187, 134, 252, 0.4);
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+        100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    /* ====== CÔTÉ FORMULAIRE ====== */
+    .auth-form-container {
+        flex: 1;
+        padding: 2.5rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (min-width: 576px) {
+        .auth-form-container {
+            padding: 3rem;
+        }
+    }
+
+    .auth-form-content {
+        max-width: 450px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .auth-logo {
+        display: block;
+        width: 120px;
+        margin: 0 auto 2rem;
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .auth-tabs {
+        display: flex;
+        margin-bottom: 2rem;
+        border-radius: 12px;
+        background-color: rgba(var(--fond-primaire-rgb), 0.5);
+        padding: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--bordure-couleur);
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        color: var(--texte-secondaire);
+        position: relative;
+        z-index: 2;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+    .auth-tab.active {
+        color: white;
+    }
+
+    .auth-tab-slider {
+        position: absolute;
+        height: calc(100% - 1rem);
+        top: 0.5rem;
+        left: 0.5rem;
+        width: calc(50% - 0.5rem);
+        background: var(--violet-principal);
+        border-radius: 8px;
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        z-index: 1;
+        box-shadow: 0 4px 15px rgba(var(--violet-principal-rgb), 0.3);
+    }
+
+    .auth-tab.active ~ .auth-tab-slider {
+        transform: translateX(100%);
+    }
+
+    /* ====== FORMULAIRE ET CHAMPS ====== */
+    .auth-form {
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        background-color: var(--connexion-card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--bordure-couleur);
+        padding: 2rem;
+        box-shadow: var(--brand-shadow);
+    }
+
+    .auth-form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--texte-couleur);
+        text-align: center;
+    }
+
+    .form-floating {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-floating > .form-control {
+        border-radius: var(--field-border-radius);
+        background-color: rgba(var(--fond-primaire-rgb), 0.6);
+        border: 1px solid var(--bordure-couleur);
+        color: var(--texte-couleur);
+        height: calc(3rem + 2px);
+        padding: 1rem 1rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating > label {
+        padding: 0.75rem 1rem;
+        color: var(--texte-secondaire);
+        height: 3rem;
+    }
+
+    .form-floating > .form-control:focus {
+        box-shadow: var(--input-glow);
+        border-color: var(--violet-principal);
+        background-color: rgba(var(--fond-primaire-rgb), 0.8);
+    }
+
+    /* Style spécial pour le champ de mot de passe */
+    .password-field-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--texte-secondaire);
+        cursor: pointer;
+        z-index: 5;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.7;
+        transition: opacity 0.2s, color 0.2s;
+    }
+
+    .password-toggle:hover {
+        opacity: 1;
+        color: var(--violet-accent);
+    }
+
+    .form-check.remember-me {
+        display: flex;
+        align-items: center;
+        padding-left: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-check-input {
+        margin-top: 0;
+        margin-right: 0.5rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        background-color: rgba(var(--fond-primaire-rgb), 0.6);
+        border-color: var(--bordure-couleur);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--violet-principal);
+        border-color: var(--violet-principal);
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--texte-secondaire);
+        user-select: none;
+    }
+
+    /* ====== BOUTONS ET ACTIONS ====== */
+    .auth-submit-btn {
+        background: var(--violet-principal);
+        color: white;
+        border: none;
+        border-radius: var(--field-border-radius);
+        padding: 0.9rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(var(--violet-principal-rgb), 0.3);
+    }
+
+    .auth-submit-btn:hover {
+        background: var(--violet-secondaire);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(var(--violet-principal-rgb), 0.4);
+    }
+
+    .auth-submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .auth-submit-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%, -50%);
+        transform-origin: 50% 50%;
+    }
+
+    .auth-submit-btn:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        20% {
+            transform: scale(25, 25);
+            opacity: 0.3;
+        }
+        100% {
+            opacity: 0;
+            transform: scale(40, 40);
+        }
+    }
+
+    .forgot-password {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .forgot-password a {
+        color: var(--violet-accent);
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .forgot-password a:hover {
+        color: var(--texte-couleur);
+        text-decoration: underline;
+    }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: var(--texte-secondaire);
+        font-size: 0.9rem;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: var(--bordure-couleur);
+    }
+
+    .auth-divider::before {
+        margin-right: 1rem;
+    }
+
+    .auth-divider::after {
+        margin-left: 1rem;
+    }
+
+    .create-account-btn {
+        background: transparent;
+        color: var(--texte-couleur);
+        border: 1px solid var(--bordure-couleur);
+        border-radius: var(--field-border-radius);
+        padding: 0.9rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .create-account-btn:hover {
+        background-color: rgba(var(--violet-principal-rgb), 0.1);
+        border-color: var(--violet-principal);
+        color: var(--violet-accent);
+        transform: translateY(-3px);
+    }
+
+    .create-account-btn i {
+        font-size: 1.1rem;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+    }
+
+    /* ====== ADAPTATIONS RESPONSIVES ====== */
+    @media (max-width: 576px) {
+        .auth-form {
+            padding: 1.5rem;
+        }
+    }
+
+    /* ====== ANIMATIONS SUPPLÉMENTAIRES ====== */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-form {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .auth-form .form-floating:nth-child(1) {
+        animation: fadeIn 0.6s ease-out 0.1s backwards;
+    }
+
+    .auth-form .form-floating:nth-child(2) {
+        animation: fadeIn 0.6s ease-out 0.2s backwards;
+    }
+
+    .auth-form .remember-me {
+        animation: fadeIn 0.6s ease-out 0.3s backwards;
+    }
+
+    .auth-form .auth-submit-btn {
+        animation: fadeIn 0.6s ease-out 0.4s backwards;
+    }
+
+    /* ====== ALERTES STYLISÉES ====== */
+    .alert-styled {
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeIn 0.5s ease-out;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .alert-styled::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+    }
+
+    .alert-header {
+        display: flex;
+        align-items: center;
+        padding: 0.9rem 1.25rem;
+        border-bottom: 1px solid var(--bordure-couleur);
+    }
+
+    .alert-header i {
+        font-size: 1.3rem;
+        margin-right: 0.75rem;
+    }
+
+    .alert-body {
+        padding: 1rem 1.25rem;
+    }
+
+    .alert-body p {
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-body p:last-child {
+        margin-bottom: 0;
+    }
+
+    .alert-help {
+        font-size: 0.9rem;
+        opacity: 0.85;
+        padding-top: 0.25rem;
+        font-style: italic;
+    }
+
+    .alert-styled.alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #f8d7da;
+    }
+
+    .alert-styled.alert-danger::before {
+        background-color: #dc3545;
+    }
+
+    .alert-styled.alert-info {
+        background-color: rgba(13, 202, 240, 0.1);
+        color: #d1ecf1;
+    }
+
+    .alert-styled.alert-info::before {
+        background-color: #0dcaf0;
+    }
+
+    .alert-styled.alert-danger .alert-header i {
+        color: #dc3545;
+    }
+
+    .alert-styled.alert-info .alert-header i {
+        color: #0dcaf0;
+    }
+    
+    .alert-styled.alert-danger .alert-header {
+        background-color: rgba(220, 53, 69, 0.15);
+    }
+    
+    .alert-styled.alert-info .alert-header {
+        background-color: rgba(13, 202, 240, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <!-- Côté visuel avec animation (visible seulement sur desktop) -->
+    <div class="auth-visual">
+        <div class="auth-visual-shape"></div>
+        <div class="auth-visual-shape"></div>
+        <div class="auth-visual-overlay">
+            <h2 class="auth-visual-title">Bienvenue sur Le Design Du Web</h2>
+            <p class="auth-visual-text">Accédez à votre espace personnel pour gérer vos projets, commandes et services en ligne.</p>
+        </div>
+    </div>
+
+    <!-- Côté formulaire -->
+    <div class="auth-form-container">
+        <div class="auth-form-content">
+            <!-- Logo centré en haut du formulaire (visible sur mobile) -->
+            <img src="{{ asset('images/logov2/Logosfblanc.png') }}" alt="Le Design Du Web" class="auth-logo d-md-none" id="auth-logo">
+
+            <!-- Options de navigation entre Connexion et Inscription -->
+            <div class="auth-tabs">
+                <div class="auth-tab active">Se connecter</div>
+                <a href="?page=inscrire" class="auth-tab">S'inscrire</a>
+                <div class="auth-tab-slider"></div>
+            </div>
+
+            <!-- Messages d'erreur et d'information améliorés -->
+            <div id="auth-messages">
+                {% if form.message is defined or form.message_title is defined %}
+                <div class="alert-styled alert-danger" role="alert">
+                    <div class="alert-header">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>{{ form.message_title|default('Erreur de connexion') }}</strong>
+                    </div>
+                    <div class="alert-body">
+                        <p>{{ form.message }}</p>
+                        {% if form.message_help is defined %}
+                        <p class="alert-help">{{ form.message_help }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if get.redirect is defined and get.redirect == 'devis' %}
+                <div class="alert-styled alert-info" role="alert">
+                    <div class="alert-header">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Authentification requise</strong>
+                    </div>
+                    <div class="alert-body">
+                        <p>Vous devez être connecté pour demander un devis. Si vous n'avez pas encore de compte, vous pouvez en créer un en quelques instants.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Formulaire de connexion avec effet glass morphism -->
+            <div class="auth-form">
+                <h2 class="auth-form-title">Connexion</h2>
+                <form action="?page=connexion" method="post">
+                    <!-- CSRF Token de sécurité -->
+                    <input type="hidden" name="csrf_token" value="{{ form.csrf_token }}">
+                    
+                    <!-- Propagation des paramètres de redirection -->
+                    {% if get.redirect is defined %}
+                    <input type="hidden" name="redirect" value="{{ get.redirect }}">
+                    {% endif %}
+                    {% if get.type is defined %}
+                    <input type="hidden" name="type" value="{{ get.type }}">
+                    {% endif %}
+                    
+                    <!-- Champ Email avec label flottant -->
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="inputEmail" name="inputEmail" 
+                               placeholder="nom@exemple.com" required>
+                        <label for="inputEmail">Adresse email</label>
+                    </div>
+                    
+                    <!-- Champ Mot de passe avec bouton bascule de visibilité -->
+                    <div class="form-floating password-field-container">
+                        <input type="password" class="form-control" id="inputPassword" name="inputPassword" 
+                               placeholder="Mot de passe" minlength="8" required>
+                        <label for="inputPassword">Mot de passe</label>
+                        <button type="button" class="password-toggle" id="togglePasswordBtn" title="Afficher/Masquer le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Option "Rester connecté" -->
+                    <div class="form-check remember-me">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Rester connecté</label>
+                    </div>
+                    
+                    <!-- Bouton de connexion avec effet ripple -->
+                    <button type="submit" name="btConnecter" class="auth-submit-btn">
+                        <i class="fas fa-sign-in-alt me-2"></i> Se connecter
+                    </button>
+                    
+                    <!-- Lien mot de passe oublié -->
+                    <div class="forgot-password">
+                        <a href="#password-reset">Mot de passe oublié ?</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Séparateur -->
+            <div class="auth-divider">ou</div>
+            
+            <!-- Option de création de compte -->
+            <a href="?page=inscrire" class="create-account-btn">
+                <i class="fas fa-user-plus"></i> Créer un compte
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion du toggle de visibilité du mot de passe
+    const passwordInput = document.getElementById('inputPassword');
+    const toggleButton = document.getElementById('togglePasswordBtn');
+    const toggleIcon = toggleButton.querySelector('i');
+
+    toggleButton.addEventListener('click', function () {
+        // Toggle le type de l'input
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+
+        // Toggle l'icône
+        toggleIcon.classList.toggle('fa-eye');
+        toggleIcon.classList.toggle('fa-eye-slash');
+    });
+    
+    // Gestion du logo en fonction du thème
+    const updateLogoForTheme = () => {
+        const authLogo = document.getElementById('auth-logo');
+        if (authLogo) {
+            const isLightTheme = document.body.classList.contains('light-theme');
+            authLogo.src = isLightTheme ? 
+                '/public/images/logov2/Logosfnoir.png' : 
+                '/public/images/logov2/Logosfblanc.png';
+        }
+    };
+    
+    // Applique au chargement
+    updateLogoForTheme();
+    
+    // Observer pour changement de thème
+    if (window.MutationObserver) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    updateLogoForTheme();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { attributes: true });
+    }
+});
+</script>
+{% endblock %}

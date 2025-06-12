@@ -1,0 +1,802 @@
+{% extends 'base.twig' %}
+
+{% block title %}Nos Services Innovants - Le Design Du Web{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <script src="{{ get_asset_url('/public/js/react/devisApp.bundle.js', true) }}" defer></script>
+    <style>
+        /* ============================================== */
+        /* STYLES PAGE SERVICES (REFONTE V4 - 2025)      */
+        /* ============================================== */
+
+        /* --- Background & Container Styles --- */
+        .services-hero {
+            position: relative;
+            background: linear-gradient(180deg, 
+                        rgba(var(--violet-principal-rgb), 0.03) 0%, 
+                        rgba(var(--violet-principal-rgb), 0.01) 100%);
+            overflow: hidden;
+            padding: 4rem 1rem;
+            margin-top: -2rem; /* Compense le padding du container */
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        /* Effet de particules sur l'arrière-plan */
+        .services-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background-image: 
+                radial-gradient(circle at 20% 35%, rgba(var(--violet-principal-rgb), 0.07) 0%, transparent 50%),
+                radial-gradient(circle at 75% 44%, rgba(var(--violet-accent-rgb), 0.05) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .services-page-container {
+            position: relative;
+            padding-top: 1px; /* Empêche margin collapse */
+            padding-bottom: 3rem;
+        }
+        
+        /* Effet lignes de grille sur l'arrière-plan */
+        .services-page-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(to right, rgba(var(--violet-principal-rgb), 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(var(--violet-principal-rgb), 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Header & Text Styles --- */
+        .hero-subtitle {
+            color: var(--violet-accent);
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: inline-block;
+            position: relative;
+            padding: 0.5rem 1.5rem;
+            background: rgba(var(--violet-principal-rgb), 0.08);
+            border-radius: 50px;
+            z-index: 1;
+        }
+        
+        .hero-title {
+            color: var(--texte-couleur);
+            font-weight: 800;
+            font-size: clamp(2.5rem, 7vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            position: relative;
+        }
+        
+        /* Effet de soulignement stylisé */
+        .hero-title span {
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
+        }
+        
+        .hero-title span::after {
+            content: '';
+            position: absolute;
+            bottom: 0.2rem;
+            left: 0;
+            height: 0.4rem;
+            width: 100%;
+            background: linear-gradient(90deg, var(--violet-principal), var(--violet-accent));
+            z-index: -1;
+            opacity: 0.3;
+            border-radius: 4px;
+        }
+        
+        .hero-description {
+            color: var(--texte-secondaire);
+            font-size: 1.25rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Séparateur décoratif */
+        .fancy-divider {
+            height: 5px;
+            width: 80px;
+            margin: 2rem auto;
+            background: linear-gradient(90deg, var(--violet-principal), var(--violet-accent));
+            border-radius: 5px;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .section-title h2 {
+            color: var(--texte-couleur);
+            font-weight: 700;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title p {
+            color: var(--texte-secondaire);
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* --- Service Card Styles (V4) --- */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .service-card {
+            background-color: var(--fond-secondaire);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: 0 10px 30px rgba(var(--violet-principal-rgb), 0.08);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        box-shadow 0.4s ease;
+            border: 1px solid rgba(var(--bordure-couleur), 0.5);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 40px rgba(var(--violet-principal-rgb), 0.15);
+        }
+        
+        /* Effet de lueur en bordure au survol */
+        .service-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--violet-principal), var(--violet-accent), transparent 60%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .service-card:hover::before {
+            opacity: 1;
+        }
+        
+        .service-card-header {
+            position: relative;
+            padding: 2rem 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .service-icon-container {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(var(--violet-principal-rgb), 0.15), rgba(var(--violet-accent-rgb), 0.05));
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Effet brillant sur l'icône */
+        .service-icon-container::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            20%, 100% { transform: translateX(100%); }
+        }
+        
+        .service-card:hover .service-icon-container {
+            transform: scale(1.15) rotate(-10deg);
+        }
+        
+        .service-icon {
+            font-size: 2.8rem;
+            color: var(--violet-principal);
+            z-index: 2;
+            transition: color 0.4s ease;
+        }
+        
+        .service-card:hover .service-icon {
+            color: var(--violet-accent);
+        }
+        
+        .service-badge {
+            background: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--violet-accent);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        
+        .service-card-body {
+            padding: 1.5rem 2rem 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .service-title {
+            color: var(--texte-couleur);
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .service-card:hover .service-title {
+            color: var(--violet-accent);
+        }
+        
+        .service-description {
+            color: var(--texte-secondaire);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Liste des caractéristiques avec animation */
+        .service-features {
+            margin: 1.5rem 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .service-features li {
+            position: relative;
+            padding-left: 1.8rem;
+            margin-bottom: 0.75rem;
+            color: var(--texte-secondaire);
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        
+        .service-features li:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 18px;
+            height: 18px;
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .service-features li:after {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            font-size: 0.7rem;
+            position: absolute;
+            left: 5px;
+            top: 0.5rem;
+            color: var(--violet-accent);
+        }
+        
+        .service-card:hover .service-features li {
+            transform: translateY(-3px);
+            opacity: 0.9;
+        }
+        
+        .service-card:hover .service-features li:before {
+            background-color: rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        /* Animation délai pour chaque élément de la liste */
+        .service-card:hover .service-features li:nth-child(1) {
+            transition-delay: 0.05s;
+        }
+        
+        .service-card:hover .service-features li:nth-child(2) {
+            transition-delay: 0.1s;
+        }
+        
+        .service-card:hover .service-features li:nth-child(3) {
+            transition-delay: 0.15s;
+        }
+        
+        .service-card:hover .service-features li:nth-child(4) {
+            transition-delay: 0.2s;
+        }
+
+        /* Section prix et bouton */
+        .service-card-footer {
+            padding: 0 2rem 2rem;
+            display: flex;
+            flex-direction: column;
+            margin-top: auto;
+        }
+        
+        .service-price {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 1.5rem;
+            color: var(--texte-secondaire);
+            font-size: 1rem;
+        }
+        
+        .price-amount {
+            color: var(--violet-accent);
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-right: 0.5rem;
+        }
+        
+        .price-period {
+            color: var(--texte-secondaire);
+            font-size: 1rem;
+        }
+        
+        .tax-label {
+            margin-left: auto;
+            color: var(--texte-mute);
+            font-size: 0.9rem;
+        }
+        
+        .service-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .service-cta i {
+            margin-right: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-cta:hover i {
+            transform: translateX(3px);
+        }
+        
+        /* Effet d'ondulation au clic */
+        .service-cta::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        
+        .service-cta:active::after {
+            transform: scale(3);
+            opacity: 0;
+            transition: 0s;
+        }
+        
+        .service-cta-primary {
+            background: linear-gradient(135deg, var(--violet-principal), var(--violet-secondaire));
+            color: white;
+            box-shadow: 0 5px 15px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        
+        .service-cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(var(--violet-principal-rgb), 0.4);
+        }
+        
+        .service-cta-secondary {
+            background: transparent;
+            color: var(--violet-accent);
+            border: 2px solid var(--violet-accent);
+        }
+        
+        .service-cta-secondary:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.05);
+            transform: translateY(-3px);
+        }
+
+        /* Toggle Switch (pas de changement majeur nécessaire) */
+        /* ... styles .toggle-container, .toggle-switch, .slider ... */
+         .toggle-container { display: flex; justify-content: center; align-items: center; margin-top: 4rem; padding: 1.2rem; background-color: var(--fond-secondaire); border-radius: 0.75rem; gap: 1rem; color: var(--texte-secondaire); font-weight: 500; border: 1px solid var(--bordure-couleur); box-shadow: 0 4px 10px var(--ombre-couleur); }
+         .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+         .toggle-switch input { opacity: 0; width: 0; height: 0; }
+         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--fond-tertiaire); border: 1px solid var(--bordure-couleur); transition: .4s; border-radius: 34px; }
+         .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: var(--texte-mute); transition: .4s; border-radius: 50%; }
+         input:checked + .slider { background-color: var(--violet-principal); border-color: var(--violet-principal); }
+         input:focus + .slider { box-shadow: 0 0 0 3px rgba(var(--violet-principal-rgb), 0.25); } /* Focus visible */
+         input:checked + .slider:before { transform: translateX(26px); background-color: var(--white); }
+         .toggle-container label { transition: color 0.3s ease, font-weight 0.3s ease; }
+         .toggle-container label.active { color: var(--violet-accent); font-weight: 700; }
+         
+         /* Styles pour la carte de devis */
+         .bg-gradient-purple {
+             background: linear-gradient(135deg, var(--violet-principal), var(--violet-secondaire));
+             border: none;
+             border-radius: 1rem;
+             box-shadow: 0 10px 25px rgba(var(--violet-principal-rgb), 0.3);
+             overflow: hidden;
+             position: relative;
+         }
+         
+         .bg-gradient-purple::before {
+             content: '';
+             position: absolute;
+             top: -50%;
+             left: -50%;
+             width: 200%;
+             height: 200%;
+             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+             opacity: 0.6;
+             z-index: 0;
+         }
+         
+         .bg-gradient-purple .card-body {
+             position: relative;
+             z-index: 1;
+         }
+         
+         .text-white-50 {
+             color: rgba(255, 255, 255, 0.8) !important;
+         }
+
+
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="services-hero">
+    <div class="container">
+        <div class="hero-subtitle animate__animated animate__fadeInUp">Expertise Technologique</div>
+        <h1 class="hero-title animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+            Solutions <span>Numériques</span> Sur-Mesure
+        </h1>
+        <p class="hero-description animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+            Votre vision, notre expertise. Chez LDW, nous transformons vos idées en solutions digitales 
+            performantes qui propulsent votre entreprise vers l'avenir numérique.
+        </p>
+        <div class="fancy-divider animate__animated animate__fadeInUp" style="animation-delay: 0.3s;"></div>
+    </div>
+</div>
+
+<div class="container services-page-container">
+    <div class="section-title">
+        <h2>Nos Services Premium</h2>
+        <p>Découvrez notre gamme complète de prestations informatiques, conçues pour répondre à tous vos besoins numériques.</p>
+    </div>
+
+    <div class="service-grid">
+        {# Service 1: Développement Web #}
+        <div class="service-card animate__animated animate__fadeInUp">
+            <div class="service-card-header">
+                <div class="service-icon-container">
+                    <i class="fas fa-laptop-code service-icon"></i>
+                </div>
+                <span class="service-badge">Populaire</span>
+            </div>
+            <div class="service-card-body">
+                <h3 class="service-title">Développement Web / Mobile</h3>
+                <p class="service-description">
+                    Création de sites vitrines élégants, plateformes e-commerce robustes, applications web/mobile personnalisées. 
+                </p>
+                <ul class="service-features">
+                    <li>Design Responsive Unique</li>
+                    <li>Optimisation SEO Avancée</li>
+                    <li>Interface d'administration simple</li>
+                    <li>Technologies Modernes (PHP, Symfony, JS...)</li>
+                </ul>
+            </div>
+            <div class="service-card-footer">
+                <div class="service-price">
+                    <span class="price-amount" id="prix-dev">18</span>
+                    <span class="price-period">€/h</span>
+                    <span class="tax-label" id="label-dev">(HT)</span>
+                </div>
+                <a href="{% if session.id is defined %}index.php?page=devis&type=developpement-web{% else %}index.php?page=connexion&redirect=devis&type=developpement-web{% endif %}" class="service-cta service-cta-primary">
+                    <i class="fas fa-paper-plane"></i> Demander un Devis
+                </a>
+            </div>
+        </div>
+
+                {# Service 2: SEO/SEA #}
+        <div class="service-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+            <div class="service-card-header">
+                <div class="service-icon-container">
+                    <i class="fas fa-search service-icon"></i>
+                </div>
+                <span class="service-badge">Performance</span>
+            </div>
+            <div class="service-card-body">
+                <h3 class="service-title">Expertise SEO/SEA</h3>
+                <p class="service-description">
+                    Boostez votre visibilité en ligne. Notre expertise en référencement naturel (SEO) 
+                    et référencement payant (SEA) vous permet d'attirer un trafic ciblé et qualifié.
+                </p>
+                <ul class="service-features">
+                    <li>Audit SEO Complet</li>
+                    <li>Optimisation Technique</li>
+                    <li>Stratégie Mots-Clés Personnalisée</li>
+                    <li>Campagnes Google Ads Rentables</li>
+                </ul>
+            </div>
+            <div class="service-card-footer">
+                <div class="service-price">
+                    <span class="price-amount" id="prix-seo">25</span>
+                    <span class="price-period">€/h</span>
+                    <span class="tax-label" id="label-seo">(HT)</span>
+                </div>
+                <a href="{% if session.id is defined %}index.php?page=devis&type=seo{% else %}index.php?page=connexion&redirect=devis&type=seo{% endif %}" class="service-cta service-cta-secondary">
+                    <i class="fas fa-paper-plane"></i> Demander un Devis
+                </a>
+            </div>
+        </div>
+
+        {# Service 3: CopyWriting #}
+        <div class="service-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+            <div class="service-card-header">
+                <div class="service-icon-container">
+                    <i class="fas fa-pen-fancy service-icon"></i>
+                </div>
+                <span class="service-badge">Efficace</span>
+            </div>
+            <div class="service-card-body">
+                <h3 class="service-title">Copywriting & Contenu</h3>
+                <p class="service-description">
+                    Des textes persuasifs qui convertissent. Nous créons des contenus engageants pour 
+                    votre site web, blog, réseaux sociaux et supports marketing.
+                </p>
+                <ul class="service-features">
+                    <li>Rédaction Optimisée SEO</li>
+                    <li>Storytelling Impactant</li>
+                    <li>Adaptation au Ton de Marque</li>
+                    <li>Création de Contenu Stratégique</li>
+                </ul>
+            </div>
+            <div class="service-card-footer">
+                <div class="service-price">
+                    <span class="price-amount" id="prix-copywriting">22</span>
+                    <span class="price-period">€/h</span>
+                    <span class="tax-label" id="label-copywriting">(HT)</span>
+                </div>
+                <a href="{% if session.id is defined %}index.php?page=devis&type=copywriting{% else %}index.php?page=connexion&redirect=devis&type=copywriting{% endif %}" class="service-cta service-cta-primary">
+                    <i class="fas fa-paper-plane"></i> Demander un Devis
+                </a>
+            </div>
+        </div>
+    </div>
+
+           {# Service 4: Montage PC 
+        <div class="service-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+            <div class="service-card-header">
+                <div class="service-icon-container">
+                    <i class="fas fa-desktop service-icon"></i>
+                </div>
+                <span class="service-badge">Sur-Mesure</span>
+            </div>
+            <div class="service-card-body">
+                <h3 class="service-title">PC sur Mesure</h3>
+                <p class="service-description">
+                    Configurez la machine de vos rêves ! Nous assemblons des PC optimisés pour le gaming, 
+                    la création de contenu ou un usage professionnel intensif, avec des composants de qualité. 
+                    <br><br>Livraison Gratuite sur 50 km autour d'Aix-En-Provence
+                </p>
+                <ul class="service-features">
+                    <li>Sélection Composants Premium</li>
+                    <li>Assemblage Expert & Tests</li>
+                    <li>Optimisation Performance</li>
+                    <li>Conseils Personnalisés</li>
+                </ul>
+            </div>
+            <div class="service-card-footer">
+                <div class="service-price">
+                    <span class="price-amount" id="prix-montage">20</span>
+                    <span class="price-period">€/h</span>
+                    <span class="tax-label" id="label-montage">(HT)</span>
+                </div>
+                <a href="{% if session.id is defined %}index.php?page=devis&type=montage-pc{% else %}index.php?page=connexion&redirect=devis&type=montage-pc{% endif %}" class="service-cta service-cta-secondary">
+                    <i class="fas fa-paper-plane"></i> Demander un Devis
+                </a>
+            </div>
+        </div>
+    </div> #}
+
+    {# Toggle HT/TTC #}
+    <div class="toggle-container">
+        <label id="label-ht" class="active">Tarifs Hors Taxes</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggle-prix">
+            <span class="slider"></span>
+        </label>
+        <label id="label-ttc">Tarifs TTC</label>
+    </div>
+    
+    {# Demande de devis React - Section Améliorée #}
+    <section class="devis-section mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-gradient-purple p-4 mb-5 animate__animated animate__fadeInUp">
+                    <div class="card-body position-relative overflow-hidden">
+                        <!-- Éléments décoratifs -->
+                        <div class="position-absolute" style="top: -30px; right: -20px; transform: rotate(10deg); opacity: 0.07; font-size: 10rem; z-index: 0;">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        
+                        <div class="row align-items-center position-relative">
+                            <div class="col-lg-7 text-lg-start text-center mb-4 mb-lg-0">
+                                <span class="badge bg-black text-violet-principal px-3 py-2 mb-3">SIMPLE & RAPIDE</span>
+                                <h3 class="text-white mb-3 fw-bold">Lancez votre projet dès aujourd'hui</h3>
+                                <p class="text-white-50 mb-4">Notre équipe créera une proposition sur mesure en fonction de vos besoins spécifiques, budget et échéances.</p>
+                                <div class="d-flex flex-wrap gap-4 justify-content-lg-start justify-content-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-white bg-opacity-10 p-2 me-2">
+                                            <i class="fas fa-check text-white"></i>
+                                        </div>
+                                        <span class="text-white-50">Réponse sous 24h</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-white bg-opacity-10 p-2 me-2">
+                                            <i class="fas fa-check text-white"></i>
+                                        </div>
+                                        <span class="text-white-50">Sans engagement</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5 text-center">
+                                <img src="{{ get_asset_url('/public/images/undraw_agreement.svg') }}" alt="Devis" class="img-fluid" style="max-height: 180px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        // Script amélioré pour le toggle HT/TTC avec animation
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('toggle-prix');
+            const prices = {
+                dev: { ht: 18, element: document.getElementById('prix-dev'), label: document.getElementById('label-dev') },
+                montage: { ht: 20, element: document.getElementById('prix-montage'), label: document.getElementById('label-montage') },
+                copywriting: { ht: 22, element: document.getElementById('prix-copywriting'), label: document.getElementById('label-copywriting') },
+                seo: { ht: 25, element: document.getElementById('prix-seo'), label: document.getElementById('label-seo') }
+            };
+            const labelHT = document.getElementById('label-ht');
+            const labelTTC = document.getElementById('label-ttc');
+            const tvaRate = 1.20;
+
+            // Animation de compteur pour les prix
+            function animateValue(element, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const currentValue = Math.floor(progress * (end - start) + start);
+                    element.textContent = currentValue;
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        element.textContent = end; // Assurez-vous d'atteindre exactement la valeur finale
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            function updatePrices() {
+                const isTTC = toggle.checked;
+                
+                // Animation des labels
+                labelHT.classList.toggle('active', !isTTC);
+                labelTTC.classList.toggle('active', isTTC);
+
+                for (const key in prices) {
+                    const service = prices[key];
+                    if (service.element && service.label) {
+                        let currentPrice = parseFloat(service.element.textContent.replace(',', '.'));
+                        let targetPrice;
+                        
+                        if (isTTC) {
+                            targetPrice = Math.round(service.ht * tvaRate * 100) / 100;
+                            service.label.textContent = '(TTC)';
+                        } else {
+                            targetPrice = service.ht;
+                            service.label.textContent = '(HT)';
+                        }
+                        
+                        // Animation du prix
+                        animateValue(service.element, Math.round(currentPrice), Math.round(targetPrice), 500);
+                        
+                        // Si le prix final contient des décimales (seulement en TTC)
+                        if (isTTC && targetPrice % 1 !== 0) {
+                            setTimeout(() => {
+                                service.element.textContent = targetPrice.toFixed(2).replace('.', ',');
+                            }, 550);
+                        }
+                    }
+                }
+            }
+
+            toggle.addEventListener('change', updatePrices);
+            updatePrices(); // Initialisation
+
+            // Animation de surbrillance au survol
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    const iconContainer = this.querySelector('.service-icon-container');
+                    if (iconContainer) {
+                        iconContainer.style.transform = 'scale(1.15) rotate(-10deg)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    const iconContainer = this.querySelector('.service-icon-container');
+                    if (iconContainer) {
+                        iconContainer.style.transform = '';
+                    }
+                });
+                
+                // Support tactile et clavier (accessibilité)
+                card.addEventListener('focusin', function() {
+                    this.classList.add('focus-within');
+                });
+                
+                card.addEventListener('focusout', function() {
+                    this.classList.remove('focus-within');
+                });
+            });
+        });
+    </script>
+{% endblock %}

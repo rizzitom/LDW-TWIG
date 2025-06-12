@@ -1,0 +1,1246 @@
+{% extends "base.twig" %}
+
+{% block title %}Boutique - Le Design Du Web{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
+{# Supprimez ou commentez la ligne suivante si Animate.css est déjà chargé dans base.twig #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+    /* --- Palette de couleurs et Variables --- */
+    :root { /* Variables pour le thème sombre (par défaut) */
+        --violet-principal: #8A2BE2; /* Bleu Violet */
+        --violet-secondaire: #5D19A8; /* Violet plus sombre */
+        --violet-accent: #BB86FC;    /* Violet clair accent */
+        
+        /* Thème sombre (défaut) */
+        --fond-primaire: #121212;
+        --fond-secondaire: #1E1E1E;  /* Pour cartes, sections, légèrement plus clair */
+        --fond-tertiaire: #2a2a2e;
+        --texte-primaire: #FFFFFF;
+        --texte-secondaire: rgba(255, 255, 255, 0.7); /* Texte secondaire */
+        --texte-tertiaire: rgba(255, 255, 255, 0.5); /* Texte moins important */
+        --bordure-couleur: rgba(255, 255, 255, 0.1);    /* Bordures subtiles */
+        --ombre-couleur: rgba(0, 0, 0, 0.4); /* Ombre plus prononcée */
+        --ombre-couleur-legere: rgba(0, 0, 0, 0.25);
+        
+        /* Stock indicators */
+        --stock-available: #66BB6A; /* Vert */
+        --stock-low: #FFA726; /* Orange */
+        --stock-out: #EF5350; /* Rouge */
+
+        /* Versions RGB pour rgba() */
+        --violet-principal-rgb: 138, 43, 226;
+        --violet-secondaire-rgb: 93, 25, 168;
+        --violet-accent-rgb: 187, 134, 252;
+        --fond-primaire-rgb: 18, 18, 18;
+        --fond-secondaire-rgb: 30, 30, 30;
+
+        /* Transitions */
+        --transition-rapide: all 0.2s ease-in-out;
+        --transition-standard: all 0.35s ease-in-out;
+    }
+    
+    /* --- Thème Clair --- */
+    body.light-theme {
+        --fond-primaire: #f8f9fa;
+        --fond-secondaire: #ffffff;
+        --fond-tertiaire: #e9ecef;
+        --texte-primaire: #212529;
+        --texte-secondaire: rgba(0, 0, 0, 0.7);
+        --texte-tertiaire: rgba(0, 0, 0, 0.5);
+        --bordure-couleur: rgba(0, 0, 0, 0.1);
+        --ombre-couleur: rgba(0, 0, 0, 0.1);
+        --ombre-couleur-legere: rgba(0, 0, 0, 0.06);
+        
+        /* Stock indicators restent les mêmes */
+        
+        --fond-primaire-rgb: 248, 249, 250;
+        --fond-secondaire-rgb: 255, 255, 255;
+    }
+
+    /* --- Styles Généraux --- */
+    body {
+        background-color: var(--fond-primaire);
+        color: var(--texte-primaire);
+    }
+
+    .btn-purple {
+        background-color: var(--violet-principal);
+        border-color: var(--violet-principal);
+        color: #FFFFFF;
+        transition: var(--transition-standard);
+    }
+    .btn-purple:hover, .btn-purple:focus {
+        background-color: var(--violet-secondaire);
+        border-color: var(--violet-secondaire);
+        color: #FFFFFF;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(var(--violet-principal-rgb), 0.3);
+    }
+     .btn-outline-purple {
+        color: var(--violet-accent);
+        border-color: var(--violet-accent);
+        transition: var(--transition-standard);
+    }
+    .btn-outline-purple:hover, .btn-outline-purple:focus {
+        color: var(--fond-primaire);
+        background-color: var(--violet-accent);
+        border-color: var(--violet-accent);
+        box-shadow: 0 2px 10px rgba(var(--violet-accent-rgb), 0.2);
+    }
+
+    /* --- Hero Section --- */
+    .hero-boutique {
+        background: linear-gradient(140deg, var(--violet-principal) 0%, var(--violet-secondaire) 100%);
+        min-height: 280px; /* Légèrement plus haut */
+        border-radius: 1.5rem; /* Plus arrondi */
+        margin-bottom: 4rem; /* Plus d'espace */
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(var(--violet-principal-rgb), 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .hero-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(var(--fond-secondaire-rgb), 0.6); /* Overlay adaptatif */
+        z-index: 1;
+    }
+
+    .hero-pattern { /* Motif plus subtil */
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.5;
+        z-index: 0;
+    }
+
+    .hero-content {
+        position: relative; z-index: 2; padding: 2.5rem;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 6vw, 3.5rem); /* Plus grand */
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #FFFFFF; /* Toujours blanc pour contraste sur gradient */
+        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        color: rgba(255, 255, 255, 0.85); /* Légèrement atténué pour hiérarchie */
+        max-width: 650px;
+        margin: 0 auto;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        opacity: 0.9;
+    }
+
+    /* --- Featured Products Slider --- */
+    .featured-products { margin-bottom: 4rem; }
+
+    .featured-products-title {
+        font-size: clamp(1.8rem, 4vw, 2.2rem);
+        font-weight: 600;
+        margin-bottom: 2.5rem; /* Plus d'espace */
+        position: relative;
+        display: inline-block;
+        color: var(--texte-primaire);
+    }
+
+    .featured-products-title::after { /* Soulignement plus marqué */
+        content: ''; position: absolute;
+        bottom: -12px; left: 0;
+        width: 70px; height: 4px;
+        background-color: var(--violet-accent); /* Utilisation de l'accent */
+        border-radius: 3px;
+    }
+
+    .featured-swiper-container { position: relative; overflow: visible; }
+
+    .swiper {
+        width: 100%;
+        padding-top: 15px; /* Espace pour ombres */
+        padding-bottom: 50px; /* Espace pour pagination */
+    }
+    .swiper-slide { height: auto; display: flex; }
+
+    /* Carte produit vedette - Modernisée */
+    .featured-product {
+        background-color: var(--fond-secondaire);
+        border: 1px solid var(--bordure-couleur);
+        border-radius: 1rem; /* Cohérent avec hero */
+        padding: 1.5rem;
+        display: flex; flex-direction: column;
+        width: 100%; height: 100%;
+        transition: var(--transition-standard);
+        box-shadow: 0 6px 20px var(--ombre-couleur-legere);
+        will-change: transform, box-shadow; /* Performance hint */
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+    }
+
+    .featured-product:hover {
+        transform: translateY(-10px) scale(1.02); /* Effet plus prononcé */
+        box-shadow: 0 12px 30px rgba(var(--violet-principal-rgb), 0.2); /* Ombre colorée au survol */
+        border-color: rgba(var(--violet-accent-rgb), 0.5);
+    }
+
+    .featured-product-image {
+        max-height: 180px; width: auto; max-width: 85%;
+        object-fit: contain; margin-bottom: 1.5rem;
+        align-self: center;
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Transition plus douce */
+    }
+    .featured-product:hover .featured-product-image { transform: scale(1.08); }
+
+    .featured-product-content { display: flex; flex-direction: column; flex-grow: 1; text-align: center; }
+
+    .featured-product-title {
+        font-size: 1.2rem; /* Légèrement plus petit */
+        font-weight: 600; margin-bottom: 0.75rem;
+        color: var(--texte-primaire);
+        min-height: 2.6em; /* Env. 2 lignes */
+        line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+     .featured-product a:hover .featured-product-title { color: var(--violet-accent); }
+
+
+    .featured-product-price-container {
+        display: flex; align-items: baseline; justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+    .featured-product .product-price { color: var(--violet-accent); font-size: 1.5rem; font-weight: bold; }
+    .featured-product .product-price-promo { color: var(--texte-gris-moyen); margin-right: 0.75rem; font-size: 1rem; text-decoration: line-through;}
+
+    .featured-product .btn { margin-top: auto; width: 100%; padding: 0.6rem 1rem; } /* Bouton plus visible */
+
+    /* Style Swiper Nav/Pagination Modernisé */
+    .swiper-button-next, .swiper-button-prev {
+        color: #FFFFFF; /* Toujours blanc pour lisibilité */
+        background-color: rgba(var(--fond-secondaire-rgb), 0.6);
+        backdrop-filter: blur(8px); /* Effet verre dépoli */
+        width: 44px; height: 44px;
+        border-radius: 50%;
+        transition: var(--transition-rapide);
+        box-shadow: 0 3px 8px var(--ombre-couleur-legere);
+    }
+    .swiper-button-next:hover, .swiper-button-prev:hover {
+        background-color: rgba(var(--violet-principal-rgb), 0.8);
+        transform: scale(1.1);
+        color: var(--texte-blanc);
+    }
+    .swiper-button-next:after, .swiper-button-prev:after { font-size: 18px; font-weight: bold; }
+
+    .swiper-pagination-bullet {
+        background-color: var(--texte-gris-moyen);
+        opacity: 0.7; width: 10px; height: 10px; /* Plus gros */
+        transition: var(--transition-rapide);
+    }
+    .swiper-pagination-bullet-active {
+        background-color: var(--violet-accent); /* Accent */
+        opacity: 1;
+        transform: scale(1.3);
+    }
+
+    /* --- Sidebar (Filtres et Catégories) --- */
+    .sidebar-container {
+        position: sticky; top: 90px; /* Ajuster si header a hauteur différente */
+        align-self: flex-start; z-index: 10;
+    }
+
+    .category-filter, .filter-section {
+        background-color: var(--fond-secondaire);
+        border-radius: 1rem; padding: 1.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px var(--ombre-couleur-legere);
+        border: 1px solid var(--bordure-couleur);
+    }
+
+    .category-title, .filter-title {
+        font-size: 1.3rem; margin-bottom: 1.25rem; padding-bottom: 0.8rem;
+        border-bottom: 1px solid var(--bordure-couleur);
+        color: var(--texte-primaire); font-weight: 600;
+        display: flex; /* Pour aligner l'icône collapse */
+        justify-content: space-between;
+        align-items: center;
+    }
+     /* Icônes collapse Font Awesome */
+    .filter-title::after {
+        font-family: 'Font Awesome 5 Free'; font-weight: 900;
+        font-size: 0.9em; color: var(--texte-tertiaire);
+        transition: transform 0.2s ease-in-out;
+        content: '\f078'; /* down */
+        display: none; /* Caché par défaut, affiché en mobile */
+    }
+    .filter-title:not(.collapsed)::after { content: '\f077'; /* up */ }
+    .filter-title.collapsed + * { display: none; } /* Caché si collapsed */
+
+    .category-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+    .category-item { margin-bottom: 0.3rem; }
+
+    .category-link {
+        display: flex; align-items: center;
+        color: var(--texte-secondaire); text-decoration: none;
+        transition: var(--transition-rapide);
+        padding: 0.6rem 1rem; /* Plus d'espace */
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        position: relative; overflow: hidden; /* Pour effet hover */
+    }
+    .category-link::before { /* Effet de fond au survol */
+         content: ''; position: absolute;
+         top: 0; left: -100%; width: 100%; height: 100%;
+         background-color: rgba(var(--violet-principal-rgb), 0.15);
+         transition: left 0.3s ease-in-out;
+         z-index: -1;
+         border-radius: 0.5rem;
+    }
+
+    .category-link:hover {
+        color: var(--texte-primaire);
+        transform: translateX(5px);
+    }
+    .category-link:hover::before { left: 0; }
+
+    .category-link.active {
+        color: var(--violet-accent);
+        font-weight: 600;
+        background-color: rgba(var(--violet-principal-rgb), 0.1);
+    }
+    .category-link.active::before { background-color: transparent; } /* Pas besoin d'effet hover si déjà actif */
+
+    .category-link i.fas { /* Style icônes */
+        margin-right: 0.8rem; font-size: 0.9rem;
+        width: 18px; text-align: center;
+        opacity: 0.8; transition: color 0.2s ease;
+    }
+    .category-link:hover i.fas { color: var(--violet-accent); opacity: 1;}
+    .category-link.active i.fas { color: var(--violet-accent); opacity: 1; }
+
+    /* Sous-catégories */
+    .subcategory-list {
+        list-style: none; padding-left: 1.8rem; /* Indentation plus marquée */
+        margin-top: 0.5rem; margin-bottom: 0.75rem;
+        border-left: 2px solid rgba(var(--violet-principal-rgb), 0.3); /* Ligne violette */
+    }
+    .subcategory-item { margin-bottom: 0.2rem; }
+    .subcategory-list .category-link {
+        font-size: 0.9rem; padding: 0.4rem 0.8rem;
+    }
+    .subcategory-list .category-link i.fas { font-size: 0.7rem; margin-right: 0.6rem; width: 14px; }
+    .subcategory-list .category-link.active { background-color: rgba(var(--violet-principal-rgb), 0.2); }
+
+    /* --- Product Grid Cards --- */
+    .product-grid { /* Classe ajoutée pour cibler la grille principale */ }
+
+    .product-card {
+        background-color: var(--fond-secondaire);
+        border: 1px solid var(--bordure-couleur);
+        border-radius: 1rem; overflow: hidden;
+        transition: var(--transition-standard);
+        height: 100%; position: relative;
+        box-shadow: 0 5px 15px var(--ombre-couleur-legere);
+        display: flex; flex-direction: column;
+        will-change: transform, box-shadow; /* Performance */
+        transform-style: preserve-3d;
+        backface-visibility: hidden;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px var(--ombre-couleur);
+        border-color: rgba(var(--violet-accent-rgb), 0.4);
+    }
+
+    .product-image {
+        height: 220px; /* Hauteur un peu plus grande */
+        background-size: contain; background-position: center; background-repeat: no-repeat;
+        background-color: var(--fond-primaire); /* Fond contrasté pour l'image */
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative; /* Pour badges */
+    }
+    .product-card:hover .product-image { transform: scale(1.05); }
+
+    .product-badge { /* Badges améliorés */
+        position: absolute; top: 12px; z-index: 5;
+        padding: 0.4em 0.9em;
+        border-radius: 50px;
+        font-size: 0.7rem; font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .badge-promo { background-color: var(--violet-principal); color: var(--texte-blanc); right: 12px; }
+    .badge-new { background-color: var(--violet-accent); color: var(--fond-noir); left: 12px; }
+
+    .product-card-body {
+        padding: 1.25rem; /* Padding ajusté */
+        flex-grow: 1; display: flex; flex-direction: column;
+    }
+
+    .product-title {
+        font-size: 1.1rem; font-weight: 600; margin-bottom: 0.6rem;
+        color: var(--texte-primaire);
+        min-height: 2.8em; /* ~2 lignes */
+        line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .product-card-body a:hover .product-title { color: var(--violet-accent); }
+
+    .product-description { /* Optionnel: Peut être activé si description courte ajoutée */
+        color: var(--texte-secondaire); font-size: 0.85rem;
+        margin-bottom: 1rem;
+        min-height: 2.6em; /* ~2 lignes */
+        line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
+        flex-grow: 1; /* Pousse le footer vers le bas */
+    }
+
+    .product-footer {
+        display: flex; justify-content: space-between; align-items: center;
+        padding-top: 1rem; margin-top: auto; /* Pousse en bas */
+        border-top: 1px solid var(--bordure-couleur);
+    }
+
+    .product-price-container { display: flex; flex-direction: column; align-items: flex-start; }
+    .product-price { font-size: 1.3rem; font-weight: bold; color: var(--violet-accent); }
+    .product-price-promo { font-size: 0.9rem; text-decoration: line-through; color: var(--texte-tertiaire); }
+
+    .product-stock-status { display: block; font-size: 0.8rem; margin-top: 0.3rem; }
+    .stock-indicator { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    /* Couleurs stock plus vives */
+    .stock-available { color: #66BB6A; } .stock-available .stock-indicator { background-color: #66BB6A; }
+    .stock-low { color: #FFA726; } .stock-low .stock-indicator { background-color: #FFA726; }
+    .stock-out { color: #EF5350; } .stock-out .stock-indicator { background-color: #EF5350; }
+
+    .product-actions { display: flex; gap: 0.6rem; align-items: center; }
+    .product-action { /* Boutons actions modernisés */
+        background: rgba(var(--violet-principal-rgb), 0.1);
+        border: 1px solid transparent;
+        color: var(--texte-gris-clair);
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        transition: var(--transition-rapide);
+        cursor: pointer; padding: 0;
+    }
+     .product-action i { font-size: 0.9rem; }
+
+    .product-action:hover {
+        background-color: var(--violet-principal);
+        color: var(--texte-blanc);
+        border-color: var(--violet-principal);
+        transform: scale(1.1);
+    }
+     .product-action:disabled, .product-action[disabled] { /* Style désactivé */
+         background-color: rgba(var(--texte-gris-moyen), 0.2);
+         color: var(--texte-gris-moyen);
+         cursor: not-allowed;
+         transform: none;
+     }
+
+    /* --- Filtres Form Styling --- */
+    .filter-form .form-label {
+        color: var(--texte-secondaire); font-size: 0.9rem; margin-bottom: 0.4rem; font-weight: 500;
+    }
+    .filter-form .form-control, .filter-form .form-select {
+        background-color: var(--fond-primaire); border-color: var(--bordure-couleur);
+        color: var(--texte-primaire); font-size: 0.9rem;
+        padding: 0.6rem 0.8rem; border-radius: 0.5rem; /* Style cohérent */
+        transition: var(--transition-rapide);
+    }
+    .filter-form .form-control::placeholder { color: var(--texte-tertiaire); }
+    .filter-form .form-control option, .filter-form .form-select option {
+        background-color: var(--fond-secondaire); color: var(--texte-primaire);
+    }
+    /* Flèche select custom adaptée au thème */
+    body.light-theme .filter-form .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23212529' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    body:not(.light-theme) .filter-form .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cccccc' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    .filter-form .form-select {
+        background-repeat: no-repeat;
+        background-position:
+    .filter-form .form-select { /* Flèche select custom */
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23cccccc' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+         background-repeat: no-repeat;
+         background-position: right 0.75rem center;
+         background-size: 16px 12px;
+    }
+
+    .filter-form .form-control:focus, .filter-form .form-select:focus {
+        border-color: var(--violet-principal);
+        box-shadow: 0 0 0 0.25rem rgba(var(--violet-principal-rgb), 0.25);
+        background-color: var(--fond-noir); color: var(--texte-blanc);
+    }
+
+    /* Checkbox styling */
+    .filter-form .form-check { margin-bottom: 0.8rem; }
+    .filter-form .form-check-input {
+        background-color: var(--fond-noir); border: 1px solid var(--bordure-sombre);
+        transition: var(--transition-rapide); float: none; margin-right: 0.5em; /* Alignement */
+    }
+    .filter-form .form-check-input:checked {
+        background-color: var(--violet-principal); border-color: var(--violet-principal);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e"); /* Checkmark blanc */
+    }
+    .filter-form .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(var(--violet-principal-rgb), 0.25);
+    }
+    .filter-form .form-check-label { color: var(--texte-gris-clair); font-size: 0.9rem; }
+
+    /* Bouton Filtrer / Réinitialiser */
+    .filter-form .btn-purple { width: 100%; margin-bottom: 0.5rem; padding: 0.7rem; }
+    .filter-form .btn-outline-secondary {
+         width: 100%;
+         color: var(--texte-gris-moyen);
+         border-color: var(--bordure-sombre);
+    }
+     .filter-form .btn-outline-secondary:hover {
+          color: var(--texte-blanc);
+          background-color: var(--bordure-sombre);
+          border-color: var(--bordure-sombre);
+     }
+
+
+    /* --- noUiSlider Styling --- */
+    #price-slider { margin-bottom: 1.5rem; height: 8px; } /* Plus épais */
+    .noUi-target { background: var(--bordure-sombre); border: none; box-shadow: none; border-radius: 4px;}
+    .noUi-connect { background: var(--violet-principal); border-radius: 4px;}
+    .noUi-handle {
+        background: var(--violet-accent); border: none;
+        border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        cursor: grab; width: 18px; height: 18px; right: -9px; top: -5px; /* Ajustement position */
+    }
+    .noUi-handle:focus { outline: none; }
+    .noUi-handle:active { cursor: grabbing; transform: scale(1.2); }
+    .noUi-handle:before, .noUi-handle:after { display: none; }
+
+    .price-range-display {
+        display: flex; justify-content: space-between;
+        font-size: 0.9rem; color: var(--texte-gris-clair); margin-top: 1rem;
+        font-weight: 500;
+    }
+
+    /* --- Listing Header (Titre catégorie / Résultats) --- */
+    .listing-header {
+        background-color: var(--fond-noir-leger);
+        border-radius: 1rem; padding: 1.25rem 1.75rem;
+        margin-bottom: 2rem; border: 1px solid var(--bordure-sombre);
+        box-shadow: 0 4px 10px var(--ombre-couleur-legere);
+    }
+    .listing-header h2 {
+        font-size: 1.5rem; font-weight: 600; color: var(--texte-blanc); margin-bottom: 0;
+    }
+    .listing-header .badge { /* Badge nombre produits */
+        background-color: var(--violet-accent) !important;
+        color: var(--fond-noir) !important;
+        font-size: 0.9rem; font-weight: bold;
+        padding: 0.5em 1em; border-radius: 50px;
+    }
+
+    /* --- Pagination --- */
+    .pagination { margin-top: 3rem; justify-content: center; }
+    .page-item { margin: 0 0.2rem; }
+    .page-link {
+        background-color: var(--fond-noir-leger);
+        border: 1px solid var(--bordure-sombre);
+        color: var(--texte-gris-clair);
+        border-radius: 0.5rem; /* Cohérent */
+        transition: var(--transition-rapide);
+        padding: 0.6rem 1rem; /* Plus grand */
+        min-width: 40px; text-align: center;
+    }
+    .page-link:hover {
+        background-color: var(--violet-principal); border-color: var(--violet-principal);
+        color: var(--texte-blanc); z-index: 2;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(var(--violet-principal-rgb), 0.2);
+    }
+    .page-item.active .page-link {
+        background-color: var(--violet-principal); border-color: var(--violet-principal);
+        color: var(--texte-blanc); z-index: 3; font-weight: bold;
+        box-shadow: 0 3px 10px rgba(var(--violet-principal-rgb), 0.3);
+    }
+    .page-item.disabled .page-link {
+        background-color: var(--fond-noir); border-color: var(--bordure-sombre);
+        color: var(--texte-gris-moyen); opacity: 0.5; cursor: not-allowed;
+        transform: none; box-shadow: none;
+    }
+
+    /* --- Empty State --- */
+    .empty-state {
+        background-color: var(--fond-noir-leger); border-radius: 1rem;
+        padding: 4rem 2rem; text-align: center; margin-top: 2.5rem;
+        border: 2px dashed var(--bordure-sombre); /* Plus visible */
+    }
+    .empty-state-icon {
+        font-size: 4rem; color: var(--violet-accent);
+        margin-bottom: 1.5rem; opacity: 0.7;
+        display: block; /* Pour centrer */
+    }
+    .empty-state-title {
+        font-size: 1.6rem; margin-bottom: 1rem;
+        color: var(--texte-blanc); font-weight: 600;
+    }
+    .empty-state-text {
+        color: var(--texte-gris-clair); margin-bottom: 2rem;
+        max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6;
+    }
+    .empty-state .btn-purple { padding: 0.8rem 1.8rem; font-size: 1rem; }
+
+    /* --- Floating Notification for Add to Cart --- */
+    .alert-floating {
+        position: fixed; bottom: 25px; right: 25px;
+        z-index: 1060; min-width: 280px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+        border-radius: 0.75rem;
+        border: none; /* Retiré bordure gauche standard */
+        background-color: var(--fond-noir-leger);
+        color: var(--texte-blanc);
+        padding: 1.25rem 1.75rem;
+        display: flex; align-items: center;
+        border-top: 4px solid; /* Bordure en haut pour couleur statut */
+    }
+    /* Style succès / erreur */
+    .alert-floating.alert-success { border-top-color: #66BB6A; } /* Vert succès */
+    .alert-floating.alert-danger { border-top-color: #EF5350; }  /* Rouge erreur */
+
+    .alert-floating i.fas {
+        font-size: 1.3rem; margin-right: 1rem;
+        /* Couleur dynamique basée sur le type (pas possible en CSS pur sans JS add class) */
+    }
+    .alert-floating.alert-success i.fas { color: #66BB6A; }
+    .alert-floating.alert-danger i.fas { color: #EF5350; }
+
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 991.98px) { /* lg breakpoint */
+        .sidebar-container { position: static; margin-bottom: 2.5rem; top: auto; }
+        .hero-title { font-size: clamp(2rem, 5vw, 3rem); }
+        .featured-products-title { font-size: clamp(1.6rem, 3.5vw, 2rem); }
+        .listing-header { padding: 1rem 1.25rem; }
+        .listing-header h2 { font-size: 1.3rem; }
+         /* Afficher icône collapse pour filtres */
+        .filter-title::after { display: inline-block; cursor: pointer; }
+         /* Cacher contenu filtre par défaut */
+         .filter-title.collapsed + * { display: none; }
+    }
+
+    @media (max-width: 767.98px) { /* md breakpoint */
+        .hero-content { padding: 2rem 1.5rem; }
+        .hero-title { font-size: clamp(1.8rem, 5vw, 2.5rem); }
+        .hero-subtitle { font-size: clamp(1rem, 3vw, 1.1rem); }
+        .product-grid { margin-top: 2rem; }
+        .listing-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+        .listing-header h2 { font-size: 1.2rem; }
+        .pagination { margin-top: 2.5rem;}
+        .page-link { padding: 0.5rem 0.8rem; }
+        .product-footer { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+        .product-actions { align-self: flex-end; } /* Aligner boutons à droite */
+        .alert-floating { min-width: auto; width: calc(100% - 40px); left: 20px; right: 20px; bottom: 15px; }
+    }
+
+     @media (max-width: 575.98px) { /* sm breakpoint */
+         .hero-boutique { min-height: 240px; border-radius: 1rem; }
+         .featured-product { padding: 1rem; }
+         .featured-product-image { max-height: 150px; }
+         .featured-product .btn { padding: 0.5rem 0.8rem; }
+         .product-card { border-radius: 0.75rem; }
+         .product-image { height: 180px; }
+         .product-card-body { padding: 1rem; }
+         .product-title { font-size: 1rem; min-height: 2.6em; }
+         .product-price { font-size: 1.2rem; }
+     }
+
+</style>
+{% endblock %}
+
+{% block body %}
+{# --- HERO SECTION --- #}
+<div class="hero-boutique mb-5">
+    <div class="hero-overlay"></div>
+    <div class="hero-pattern"></div>
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title animate__animated animate__fadeInDown">Boutique LDW</h1>
+            <p class="hero-subtitle animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">Votre source de confiance pour le matériel informatique, les composants, les périphériques et les dernières innovations high-tech.</p>
+        </div>
+    </div>
+</div>
+
+{# --- MAIN CONTAINER --- #}
+<div class="container">
+
+    {# --- FEATURED PRODUCTS --- #}
+    {% if produits_vedette|length > 0 %}
+    <section class="featured-products">
+        <h2 class="featured-products-title">Nos Produits Vedettes</h2>
+        <div class="featured-swiper-container">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    {% for produit in produits_vedette %}
+                    <div class="swiper-slide">
+                        <div class="featured-product"> {# Carte produit vedette #}
+                            <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none d-block text-center mb-3">
+                                <img src="{{ asset(produit.image_url|default('images/placeholder.png')) }}" alt="{{ produit.nom }}" class="featured-product-image">
+                            </a>
+                            <div class="featured-product-content">
+                                <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none">
+                                    <h3 class="featured-product-title">{{ produit.nom }}</h3>
+                                </a>
+                                <div class="featured-product-price-container mt-auto"> {# mt-auto pousse prix/bouton vers le bas #}
+                                    {% if produit.prix_promo %}
+                                    <span class="product-price-promo me-2">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                    <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                                    {% else %}
+                                    <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                    {% endif %}
+                                </div>
+                                <a href="index.php?page=produit&slug={{ produit.slug }}" class="btn btn-sm btn-purple mt-2"> {# Bouton thème #}
+                                    <i class="fas fa-search-plus me-1"></i> Voir Détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {# Swiper Navigation/Pagination #}
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {# --- MAIN CONTENT ROW (SIDEBAR + GRID) --- #}
+    <div class="row">
+        {# --- SIDEBAR --- #}
+        <aside class="col-lg-3">
+            <div class="sidebar-container">
+                {# Categories Filter #}
+                <div class="category-filter mb-4">
+                     {# Ajout 'collapsed' pour initier état fermé en mobile, géré par JS #}
+                    <h3 class="category-title filter-title collapsed">Catégories</h3>
+                    <ul class="category-list">
+                        <li class="category-item">
+                            <a href="index.php?page=boutique" class="category-link {% if not categorie_active %}active{% endif %}">
+                                <i class="fas fa-th-large"></i> Tous les produits {# Icône changée #}
+                            </a>
+                        </li>
+                        {% for categorie in categories %}
+                        <li class="category-item">
+                            {# Lien Catégorie Principale #}
+                            <a href="index.php?page=boutique&categorie={{ categorie.id }}"
+                               class="category-link {% if categorie_active and (categorie_active.id == categorie.id or (categorie_active.id_parent == categorie.id and not categorie_active.id == categorie.id)) %}active{% endif %}"> {# Ajustement logique active pour parent #}
+                                {# Icône dynamique (simplifiée) #}
+                                {% set cat_icon = 'fa-folder-open' %}
+                                {% if 'informatique' in categorie.nom|lower %}{% set cat_icon = 'fa-laptop-code' %}
+                                {% elseif 'composant' in categorie.nom|lower %}{% set cat_icon = 'fa-microchip' %}
+                                {% elseif 'périphérique' in categorie.nom|lower %}{% set cat_icon = 'fa-keyboard' %}
+                                {% elseif 'écran' in categorie.nom|lower %}{% set cat_icon = 'fa-desktop' %}
+                                {% elseif 'réseau' in categorie.nom|lower %}{% set cat_icon = 'fa-network-wired' %}
+                                {% elseif 'son' in categorie.nom|lower or 'audio' in categorie.nom|lower %}{% set cat_icon = 'fa-headphones-alt' %}
+                                {% elseif 'accessoire' in categorie.nom|lower %}{% set cat_icon = 'fa-puzzle-piece' %}
+                                {% endif %}
+                                <i class="fas {{ cat_icon }}"></i>
+                                {{ categorie.nom }}
+                            </a>
+
+                            {# Sous-catégories (affichées si parent actif ou enfant actif) #}
+                            {% if categorie.children|length > 0 %}
+                                {% set is_parent_or_child_active = (categorie_active and (categorie_active.id == categorie.id or categorie_active.id_parent == categorie.id)) %}
+                                <ul class="subcategory-list" {% if not is_parent_or_child_active %} style="display: none;" {% endif %}>
+                                    {% for subcategorie in categorie.children %}
+                                    <li class="subcategory-item">
+                                        <a href="index.php?page=boutique&categorie={{ subcategorie.id }}"
+                                           class="category-link {% if categorie_active and categorie_active.id == subcategorie.id %}active{% endif %}">
+                                            <i class="fas fa-chevron-right"></i> {# Icône changée #}
+                                            {{ subcategorie.nom }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                {# Other Filters #}
+                <div class="filter-section mb-4">
+                    <h3 class="filter-title collapsed">Filtres</h3> {# Ajout 'collapsed' #}
+                    <form action="index.php" method="get" class="filter-form">
+                        {# Hidden Inputs #}
+                        <input type="hidden" name="page" value="boutique">
+                        {% if categorie_active %}<input type="hidden" name="categorie" value="{{ categorie_active.id }}">{% endif %}
+                        {% if recherche %}<input type="hidden" name="recherche" value="{{ recherche }}">{% endif %}
+
+                        {# Price Range Slider #}
+                        <div class="mb-4"> {# Plus d'espace #}
+                             <label class="form-label mb-2">Gamme de prix</label>
+                             <div id="price-slider"></div>
+                             <div class="price-range-display mt-3"> {# Plus d'espace #}
+                                 <span id="price-min-display">0 €</span>
+                                 <span id="price-max-display">2000 €</span> {# Sera mis à jour par JS #}
+                             </div>
+                             <input type="hidden" id="prix_min" name="prix_min" value="{{ app.request.query.get('prix_min', 0) }}">
+                             <input type="hidden" id="prix_max" name="prix_max" value="{{ app.request.query.get('prix_max', 2000) }}"> {# Default Max à ajuster #}
+                        </div>
+
+                        {# Checkboxes #}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="en_stock" name="en_stock" value="1" {% if app.request.query.get('en_stock') %}checked{% endif %}>
+                                <label class="form-check-label" for="en_stock"> En stock uniquement</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="en_promo" name="en_promo" value="1" {% if app.request.query.get('en_promo') %}checked{% endif %}>
+                                <label class="form-check-label" for="en_promo"> En promotion uniquement</label>
+                            </div>
+                        </div>
+
+                        {# Sort Select #}
+                        <div class="mb-4"> {# Plus d'espace #}
+                            <label for="tri" class="form-label">Trier par</label>
+                            <select class="form-select" id="tri" name="tri">
+                                <option value="pertinence" {% if app.request.query.get('tri', 'pertinence') == 'pertinence' %}selected{% endif %}>Pertinence</option>
+                                <option value="recent" {% if app.request.query.get('tri') == 'recent' %}selected{% endif %}>Nouveautés</option>
+                                <option value="prix_asc" {% if app.request.query.get('tri') == 'prix_asc' %}selected{% endif %}>Prix croissant</option>
+                                <option value="prix_desc" {% if app.request.query.get('tri') == 'prix_desc' %}selected{% endif %}>Prix décroissant</option>
+                                <option value="nom_asc" {% if app.request.query.get('tri') == 'nom_asc' %}selected{% endif %}>Nom (A-Z)</option>
+                                <option value="nom_desc" {% if app.request.query.get('tri') == 'nom_desc' %}selected{% endif %}>Nom (Z-A)</option>
+                            </select>
+                        </div>
+
+                        {# Submit / Reset Buttons #}
+                        <button type="submit" class="btn btn-purple">
+                            <i class="fas fa-filter me-1"></i> Appliquer
+                        </button>
+                        {% set has_filters = app.request.query.get('prix_min') or app.request.query.get('prix_max') != 2000 or app.request.query.get('en_stock') or app.request.query.get('en_promo') or app.request.query.get('tri') != 'pertinence' %}
+                        {% if has_filters or categorie_active or recherche %}
+                             <a href="index.php?page=boutique{% if categorie_active %}&categorie={{ categorie_active.id }}{% endif %}" class="btn btn-sm btn-outline-secondary mt-2">Réinitialiser les filtres</a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        {# --- PRODUCT LISTING --- #}
+        <main class="col-lg-9">
+            {# Listing Header #}
+            <div class="listing-header d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">
+                    {% if categorie_active %}{{ categorie_active.nom }}
+                    {% elseif recherche %}Résultats pour "{{ recherche }}"
+                    {% else %}Tous nos produits
+                    {% endif %}
+                </h2>
+                {% if pagination.nombre_total is defined %}
+                <span class="badge rounded-pill">{{ pagination.nombre_total }} produit{% if pagination.nombre_total > 1 %}s{% endif %}</span>
+                {% endif %}
+            </div>
+
+            {# Product Grid #}
+            {% if produits|length > 0 %}
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-4 product-grid"> {# g-4 pour gouttières #}
+                {% for produit in produits %}
+                <div class="col d-flex align-items-stretch"> {# Assure hauteur égale #}
+                    <div class="product-card animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index0 * 0.07 }}s; animation-duration: 0.6s;"> {# Animation subtile #}
+                        {# Badges #}
+                        {% set has_badge = false %}
+                        {% if produit.nouveau %}{% set has_badge = true %}<div class="product-badge badge-new">Nouveau</div>{% endif %}
+                        {% if produit.prix_promo %}{% set has_badge = true %}<div class="product-badge badge-promo" {% if produit.nouveau %}style="top: 50px;"{% endif %}>Promo</div>{% endif %}
+
+                        {# Image Link #}
+                        <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none d-block">
+                            <div class="product-image" style="background-image: url('{{ asset(produit.image_url|default('images/placeholder.png')) }}')"></div>
+                        </a>
+
+                        {# Card Body #}
+                        <div class="product-card-body">
+                            <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none">
+                                <h3 class="product-title">{{ produit.nom }}</h3>
+                            </a>
+
+                            {# Description (optionnelle) - Décommenter si besoin #}
+                            {# <p class="product-description">{{ produit.description_courte|default(produit.description|slice(0, 60) ~ '...') }}</p> #}
+
+                            {# Footer (Price, Stock, Actions) #}
+                            <div class="product-footer mt-auto"> {# mt-auto pour pousser en bas si pas de description longue #}
+                                <div class="product-price-container">
+                                    {% if produit.prix_promo %}
+                                    <span class="product-price-promo">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                    <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                                    {% else %}
+                                    <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                    {% endif %}
+                                    {# Stock Status #}
+                                    <div class="product-stock-status">
+                                        {% if produit.stock <= 0 %} <span class="stock-out"><span class="stock-indicator"></span> Rupture</span>
+                                        {% elseif produit.stock < 5 %} <span class="stock-low"><span class="stock-indicator"></span> Stock limité</span>
+                                        {% else %} <span class="stock-available"><span class="stock-indicator"></span> En stock</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="product-actions">
+                                    <a href="index.php?page=produit&slug={{ produit.slug }}" class="product-action" title="Voir le produit" data-bs-toggle="tooltip" data-bs-placement="top">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {# Add to Cart Form #}
+                                    <form action="{{ get_asset_url('index.php?page=panier&action=ajouter') }}" method="post" class="d-inline form-add-cart">
+                                        <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                                        <input type="hidden" name="quantite" value="1">
+                                        <button type="submit" class="product-action" title="Ajouter au panier" data-bs-toggle="tooltip" data-bs-placement="top" {% if produit.stock <= 0 %}disabled{% endif %}>
+                                            {# L'icône sera changée dynamiquement par JS #}
+                                            <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div> {# End Product Footer #}
+                        </div> {# End Product Card Body #}
+                    </div> {# End Product Card #}
+                </div> {# End Col #}
+                {% endfor %}
+            </div> {# End Product Grid Row #}
+
+            {# --- PAGINATION --- #}
+             {% if pagination.nombre_pages > 1 %}
+            <nav aria-label="Pagination" class="d-flex justify-content-center">
+                <ul class="pagination">
+                    {# Previous Page #}
+                    <li class="page-item {% if pagination.page_courante <= 1 %}disabled{% endif %}">
+                        <a class="page-link" href="{{ pagination.page_courante > 1 ? 'index.php?page=boutique&page_num=' ~ (pagination.page_courante - 1) ~ pagination.query_string : '#' }}" aria-label="Précédent">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {# Page Numbers #}
+                    {% for i in pagination.range %}
+                        {% if i == '...' %}
+                             <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% else %}
+                             <li class="page-item {% if i == pagination.page_courante %}active{% endif %}">
+                                 <a class="page-link" href="index.php?page=boutique&page_num={{ i }}{{ pagination.query_string }}">{{ i }}</a>
+                             </li>
+                        {% endif %}
+                    {% endfor %}
+                    {# Next Page #}
+                    <li class="page-item {% if pagination.page_courante >= pagination.nombre_pages %}disabled{% endif %}">
+                        <a class="page-link" href="{{ pagination.page_courante < pagination.nombre_pages ? 'index.php?page=boutique&page_num=' ~ (pagination.page_courante + 1) ~ pagination.query_string : '#' }}" aria-label="Suivant">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+             {% endif %}
+
+            {% else %}
+                {# --- EMPTY STATE --- #}
+                <div class="empty-state">
+                    <i class="fas fa-box-open empty-state-icon"></i>
+                    <h3 class="empty-state-title">Oups ! Aucun produit trouvé</h3>
+                    <p class="empty-state-text">Il semble qu'aucun produit ne corresponde à votre sélection actuelle. Essayez d'ajuster vos filtres ou explorez nos catégories.</p>
+                    <a href="index.php?page=boutique" class="btn btn-purple">
+                        <i class="fas fa-sync-alt me-1"></i> Voir tous les produits
+                    </a>
+                </div>
+            {% endif %} {# End if produits|length > 0 #}
+        </main> {# End Main Col #}
+    </div> {# End Main Content Row #}
+</div> {# End Main Container #}
+{% endblock %}
+
+
+{% block scripts %}
+{# --- SCRIPTS --- #}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+{# Assurez-vous que Bootstrap JS est chargé (soit ici, soit dans base.twig) pour les tooltips #}
+{# <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.x.x/dist/js/bootstrap.bundle.min.js"></script> #}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // --- Initialize Tooltips (Bootstrap) ---
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // --- Initialize Swiper for featured products ---
+        const featuredSwiperContainer = document.querySelector('.featured-swiper-container .swiper');
+        if (featuredSwiperContainer) {
+            const featuredSwiper = new Swiper(featuredSwiperContainer, {
+                slidesPerView: 1,
+                spaceBetween: 25, // Espace ajusté
+                loop: true,
+                autoplay: {
+                    delay: 5000, // Délai légèrement augmenté
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true, // Pause au survol
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: true, // Style dynamique
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: { // Ajustement des breakpoints
+                    576: { slidesPerView: 2, spaceBetween: 20 },
+                    768: { slidesPerView: 2, spaceBetween: 25 }, // Ajout breakpoint MD
+                    992: { slidesPerView: 3, spaceBetween: 30 },
+                    1400: { slidesPerView: 4, spaceBetween: 30 } // Pour très grands écrans
+                },
+                speed: 700, // Vitesse transition
+                effect: 'slide', // Ou 'fade', 'cube', 'coverflow', 'flip', 'creative', 'cards'
+                // grabCursor: true, // Curseur main
+            });
+        }
+
+        // --- Quick Add to Cart (AJAX) ---
+        const addToCartForms = document.querySelectorAll('.form-add-cart');
+        addToCartForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const button = form.querySelector('button[type="submit"]');
+                const icon = button.querySelector('i');
+                const originalIconClass = icon.className; // Sauvegarde classe icône initiale
+
+                // Indicate loading visually
+                button.disabled = true;
+                icon.className = 'fas fa-spinner fa-spin'; // Icône chargement
+
+                const formData = new FormData(form);
+
+                // Create a URL with the current domain
+                const url = new URL(window.location.origin);
+                // Set the path and parameters
+                url.pathname = "/index.php";
+                url.searchParams.set("page", "panier");
+                url.searchParams.set("action", "ajouter");
+                url.searchParams.set("ajax", "1");
+                // Ajouter un timestamp pour éviter la mise en cache
+                url.searchParams.set("_", Date.now());
+                
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (!response.ok) { // Gère erreurs HTTP
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json(); // Attend une réponse JSON
+                })
+                .then(data => {
+                    // Vérifie la structure de la réponse attendue
+                    if (data && data.success !== undefined) {
+                         if (data.success) {
+                            icon.className = 'fas fa-check'; // Icône succès
+                            showFloatingAlert(data.message || 'Produit ajouté !', 'success');
+
+                            // Mise à jour compteur panier (si existe)
+                            const cartCountElement = document.querySelector('.cart-count'); // Ajuster sélecteur si besoin
+                            if (cartCountElement && data.panier && data.panier.nombre_articles !== undefined) {
+                                const nombreArticles = data.panier.nombre_articles;
+                                cartCountElement.textContent = nombreArticles;
+                                cartCountElement.style.display = nombreArticles > 0 ? 'inline-block' : 'none';
+                                
+                                // Cacher l'icône d'exclamation si le panier n'est pas vide
+                                const exclamationIcon = document.querySelector('.fa-exclamation-triangle');
+                                if (exclamationIcon && nombreArticles > 0) {
+                                    exclamationIcon.classList.add('d-none');
+                                }
+                                
+                                // Animer le compteur
+                                cartCountElement.classList.add('animate__animated', 'animate__bounceIn');
+                                setTimeout(() => cartCountElement.classList.remove('animate__animated', 'animate__bounceIn'), 1000);
+                            }
+                        } else {
+                            icon.className = 'fas fa-times'; // Icône erreur
+                            showFloatingAlert(data.message || 'Erreur ajout.', 'danger');
+                        }
+                    } else {
+                         // Réponse inattendue du serveur
+                         icon.className = 'fas fa-exclamation-triangle';
+                         showFloatingAlert('Réponse serveur invalide.', 'danger');
+                         console.error('Invalid JSON response:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    icon.className = 'fas fa-exclamation-triangle'; // Icône erreur générique
+                     showFloatingAlert('Erreur réseau ou serveur.', 'danger');
+                })
+                .finally(() => {
+                     // Reset button after a delay, only if not already reset
+                     setTimeout(() => {
+                        if (icon.className !== originalIconClass) { // Evite reset si déjà une autre action
+                             icon.className = originalIconClass;
+                             button.disabled = false;
+                        }
+                    }, 2000); // Délai avant de réactiver le bouton
+                });
+            });
+        });
+
+        // --- Floating Alert Function ---
+        let activeAlert = null; // Pour éviter alertes multiples superposées
+        function showFloatingAlert(message, type = 'success') {
+             // Supprime l'alerte précédente si elle existe
+             if (activeAlert) {
+                 activeAlert.remove();
+             }
+
+            const alertDiv = document.createElement('div');
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'; // Icône adaptée
+            alertDiv.className = `alert alert-${type} alert-floating animate__animated animate__fadeInUp`; // Animation changée
+            alertDiv.innerHTML = `<i class="fas ${iconClass} me-2"></i> ${message}`;
+            document.body.appendChild(alertDiv);
+            activeAlert = alertDiv; // Référence la nouvelle alerte
+
+            // Auto-hide
+            setTimeout(() => {
+                alertDiv.classList.remove('animate__fadeInUp');
+                alertDiv.classList.add('animate__fadeOutDown'); // Animation sortie
+                setTimeout(() => {
+                     alertDiv.remove();
+                     if (activeAlert === alertDiv) { // Nettoie référence si c'est la même alerte
+                          activeAlert = null;
+                     }
+                }, 500); // Attend fin animation avant de supprimer
+            }, 3500); // Durée affichage
+        }
+
+
+        // --- Price Range Slider (noUiSlider) ---
+        const priceSlider = document.getElementById('price-slider');
+        if (priceSlider) {
+            const minPriceInput = document.getElementById('prix_min');
+            const maxPriceInput = document.getElementById('prix_max');
+            const minPriceDisplay = document.getElementById('price-min-display');
+            const maxPriceDisplay = document.getElementById('price-max-display');
+
+            // !! IMPORTANT: Définir un max réaliste basé sur vos produits !!
+            const maxProductPrice = 2500; // <---- METTRE ICI LE PRIX MAX APPROX DES PRDTS
+
+            const currentMin = parseInt(minPriceInput.value) || 0;
+             // Assure que le max courant n'est pas supérieur au max possible
+            const currentMax = Math.min(parseInt(maxPriceInput.value) || maxProductPrice, maxProductPrice);
+
+             // Met à jour la valeur de l'input si elle dépassait le max possible
+             if (parseInt(maxPriceInput.value) > maxProductPrice) {
+                 maxPriceInput.value = maxProductPrice;
+             }
+
+            noUiSlider.create(priceSlider, {
+                start: [currentMin, currentMax],
+                connect: true, // Barre colorée entre les poignées
+                range: {
+                    'min': 0,
+                    'max': maxProductPrice // Utilise le max défini
+                },
+                step: 10, // Pas de 10€
+                format: { // Format pour nombres entiers, sans décimales
+                    to: value => Math.round(value),
+                    from: value => Number(value)
+                },
+                 // Tooltips optionnels (peuvent être utiles)
+                 // tooltips: [true, true],
+            });
+
+            // Update display and hidden inputs on slider change
+            priceSlider.noUiSlider.on('update', function (values, handle) {
+                const value = values[handle];
+                const formattedValue = value + ' €';
+                if (handle === 0) { // Poignée gauche (min)
+                    minPriceInput.value = value;
+                    minPriceDisplay.textContent = formattedValue;
+                } else { // Poignée droite (max)
+                    maxPriceInput.value = value;
+                    maxPriceDisplay.textContent = formattedValue;
+                }
+            });
+
+             // Optionnel: Met à jour l'affichage initial au cas où les valeurs par défaut sont utilisées
+             minPriceDisplay.textContent = currentMin + ' €';
+             maxPriceDisplay.textContent = currentMax + ' €';
+        }
+
+
+        // --- Mobile Filter Collapse/Expand ---
+        const filterTitles = document.querySelectorAll('.sidebar-container .filter-title');
+        function setupMobileFilters() {
+            filterTitles.forEach(title => {
+                const content = title.nextElementSibling; // Contenu = élément suivant le titre
+                if (!content) return; // Sécurité
+
+                if (window.innerWidth < 992) { // Si écran < lg
+                    // Cache le contenu si le titre a la classe 'collapsed'
+                    if (title.classList.contains('collapsed')) {
+                        content.style.display = 'none';
+                    } else {
+                         content.style.display = 'block'; // Assure visibilité si non 'collapsed'
+                    }
+                    // Ajoute/Met à jour l'écouteur de clic
+                    title.onclick = function(e) { // Utilise onclick pour simplicité (écrase précédent si existe)
+                        e.preventDefault();
+                        const isCollapsed = content.style.display === 'none';
+                        content.style.display = isCollapsed ? 'block' : 'none';
+                        title.classList.toggle('collapsed', !isCollapsed);
+                    }
+                } else { // Si écran >= lg
+                    // Assure que tout est visible et retire le listener
+                    content.style.display = ''; // Reset display (revient au CSS par défaut)
+                    title.classList.remove('collapsed'); // Retire classe collapse
+                    title.onclick = null; // Supprime le listener
+                }
+            });
+        }
+
+        setupMobileFilters(); // Applique à l'initialisation
+        window.addEventListener('resize', setupMobileFilters); // Réapplique au redimensionnement
+
+
+        // --- Toggle Subcategories Visibility (optional enhancement) ---
+        // Ce code garde les sous-catégories visibles si le parent ou un enfant est actif.
+        // Il ne gère pas le clic pour déplier/replier si non actif.
+        const categoryLinks = document.querySelectorAll('.category-list > .category-item > .category-link'); // Liens parents directs
+        categoryLinks.forEach(link => {
+            const parentLi = link.closest('.category-item');
+            const subList = parentLi.querySelector('.subcategory-list');
+            if (subList) {
+                 let parentIsActive = link.classList.contains('active');
+                 let childIsActive = subList.querySelector('.category-link.active') !== null;
+
+                 if (parentIsActive || childIsActive) {
+                     subList.style.display = 'block';
+                 } else {
+                     subList.style.display = 'none';
+                 }
+                 // Pour ajouter le toggle au clic (même si non actif):
+                 // link.addEventListener('click', function(e) { ... Gérer affichage subList ... });
+            }
+        });
+
+    }); // End DOMContentLoaded
+</script>
+{% endblock %}

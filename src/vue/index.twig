@@ -1,0 +1,357 @@
+{% extends "base.twig" %}
+
+{% block title %}Accueil - Le Design Du Web{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ get_asset_url('css/home.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-pattern"></div>
+    
+    <div class="container">
+        <div class="hero-content">
+            <span class="hero-subtitle animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">Votre Boutique High-Tech</span>
+            <h1 class="hero-title animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">Explorez l'Innovation chez Le Design Du Web</h1>
+            <p class="hero-description animate__animated animate__fadeInUp" style="animation-delay: 0.6s;">Trouvez les derniers gadgets, composants et services tech. Qualité et expertise à votre portée.</p>
+            
+            <div class="hero-buttons animate__animated animate__fadeInUp" style="animation-delay: 0.8s;">
+                <a href="index.php?page=boutique" class="btn btn-purple btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i> Explorer la boutique
+                </a>
+                <a href="index.php?page=services" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-cogs me-2"></i> Découvrir nos services
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {# L'image est optionnelle et cachée sur petits écrans par le CSS #}
+    <img src="{{ get_asset_url('images/services/Dev.png') }}" alt="Appareils High-tech" class="hero-image">
+</section>
+
+<section class="container">
+    <h2 class="section-title">Catégories populaires</h2>
+    
+    <div class="categories-grid">
+        {# Catégorie 1 #}
+        <a href="index.php?page=boutique&categorie=3" class="category-card">
+            <img src="{{ get_asset_url('images/pc.PNG') }}" alt="Ordinateurs" class="category-image">
+            <div class="category-content">
+                 <h3 class="category-name">Ordinateurs</h3>
+                 <span class="category-count">PC Fixes & Portables</span> {# Texte plus descriptif #}
+            </div>
+        </a>
+        
+        {# Catégorie 2 #}
+        <a href="index.php?page=boutique&categorie=9" class="category-card">
+            <img src="{{ get_asset_url('images/smartphones.PNG') }}" alt="Smartphones" class="category-image">
+             <div class="category-content">
+                <h3 class="category-name">Smartphones</h3>
+                <span class="category-count">Mobiles & Accessoires</span>
+            </div>
+        </a>
+        
+        {# Catégorie 3 #}
+        <a href="index.php?page=boutique&categorie=6" class="category-card">
+            <img src="{{ get_asset_url('images/tv.PNG') }}" alt="TV & Écrans" class="category-image">
+             <div class="category-content">
+                <h3 class="category-name">TV & Écrans</h3>
+                <span class="category-count">Moniteurs & Télévisions</span>
+            </div>
+        </a>
+        
+        {# Catégorie 4 #}
+        <a href="index.php?page=boutique&categorie=7" class="category-card">
+            <img src="{{ get_asset_url('images/son.PNG') }}" alt="Audio" class="category-image">
+            <div class="category-content">
+                <h3 class="category-name">Audio</h3>
+                <span class="category-count">Casques & Enceintes</span>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section class="container featured-products">
+    <div class="featured-header">
+        <h2 class="section-title">Produits en vedette</h2>
+        <a href="index.php?page=boutique" class="see-all">
+            Voir tous les produits <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+        {% if produits_vedette|length > 0 %}
+            {% for produit in produits_vedette %}
+                <div class="col">
+                    <div class="product-card fade-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                         <div class="product-image" style="background-image: url('{{ get_asset_url(produit.image_url) }}')">
+                            {% if produit.prix_promo is not null and produit.prix_promo < produit.prix %}
+                                {% set reduction = ((produit.prix - produit.prix_promo) / produit.prix * 100)|round %}
+                                <div class="product-badge badge-promo">-{{ reduction }}%</div>
+                            {% elseif produit.created_at > date('-1 month') %}
+                                <div class="product-badge badge-new">Nouveau</div>
+                            {% elseif produit.est_featured %}
+                                <div class="product-badge badge-top">Top Vente</div>
+                            {% endif %}
+                         </div>
+                        <div class="product-card-body">
+                             <div>
+                                <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none">
+                                    <h3 class="product-title">{{ produit.nom }}</h3>
+                                </a>
+                                <p class="product-description">{{ produit.description_courte|default(produit.description|striptags|slice(0, 100) ~ '...') }}</p>
+                            </div>
+                            <div class="product-footer">
+                                <div class="product-price-container">
+                                    {% if produit.prix_promo is not null and produit.prix_promo < produit.prix %}
+                                        <div>
+                                            <span class="product-price-promo">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                            <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                                    {% endif %}
+                                    <div class="product-stock-status">
+                                        {% if produit.stock > 10 %}
+                                            <span class="stock-available"><span class="stock-indicator"></span> En stock</span>
+                                        {% elseif produit.stock > 0 %}
+                                            <span class="stock-low"><span class="stock-indicator"></span> Stock limité</span>
+                                        {% else %}
+                                            <span class="stock-unavailable"><span class="stock-indicator"></span> Rupture</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="product-actions">
+                                    <a href="index.php?page=produit&slug={{ produit.slug }}" class="product-action" title="Voir le produit">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if produit.stock > 0 %}
+                                        <button type="button" class="product-action add-to-cart-btn" data-product-id="{{ produit.id }}" title="Ajouter au panier">
+                                            <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                <p>Aucun produit en vedette n'est disponible pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="services-section">
+    <div class="container">
+        <h2 class="section-title text-center">Nos Services Experts</h2> 
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
+            <div class="col">
+                <div class="service-card fade-in" style="animation-delay: 0s;">
+                    <div class="service-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3 class="service-title">Dépannage Informatique</h3>
+                    <p class="service-description">Intervention rapide pour résoudre pannes matérielles et problèmes logiciels sur PC et Mac.</p>
+                    <a href="index.php?page=services#depannage" class="btn btn-outline-purple">En savoir plus</a> {# Bouton outline #}
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="service-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="service-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="service-title">Développement Web</h3>
+                    <p class="service-description">Création de sites vitrines, e-commerce et applications web sur mesure, performants et modernes.</p>
+                    <a href="index.php?page=services#dev-web" class="btn btn-outline-purple">En savoir plus</a>
+                </div>
+            </div>
+            
+            <div class="col">
+                 <div class="service-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="service-icon">
+                        <i class="fas fa-cogs"></i> {# Icône maintenance #}
+                    </div>
+                    <h3 class="service-title">Montage PC sur Mesure</h3>
+                    <p class="service-description">Assemblez le PC de vos rêves (gaming, bureautique, création) avec nos composants sélectionnés.</p>
+                    <a href="index.php?page=services#montage" class="btn btn-outline-purple">En savoir plus</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container cta-section">
+    <div class="cta-pattern"></div>
+    <div class="cta-content">
+        <h2 class="cta-title">Prêt à vivre l'expérience LDW ?</h2>
+        <p class="cta-text">Découvrez une sélection high-tech pointue et un service client à votre écoute. Rejoignez notre communauté !</p>
+        <div class="cta-buttons">
+            <a href="index.php?page=boutique" class="btn btn-light btn-lg">
+                 <i class="fas fa-store me-2"></i> Visiter la boutique
+            </a>
+            <a href="index.php?page=contact" class="btn btn-outline-light btn-lg">
+                 <i class="fas fa-envelope me-2"></i> Nous contacter
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="container newsletter-section">
+    <div class="row align-items-center g-3">
+        <div class="col-lg-6">
+            <h3 class="newsletter-title"><i class="fas fa-paper-plane me-2"></i> Restez Connecté</h3>
+            <p class="newsletter-text mb-lg-0">Inscrivez-vous pour recevoir nos offres exclusives, nouveautés et astuces tech directement dans votre boîte mail.</p>
+        </div>
+        <div class="col-lg-6">
+            <form class="newsletter-form">
+                <input type="email" class="newsletter-input form-control form-control-lg" placeholder="Votre adresse email" required>
+                <button type="submit" class="btn btn-purple btn-lg">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion des boutons "Ajouter au panier"
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        const cartCountBadge = document.querySelector('.cart-count');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                
+                // Animation pour indiquer que le produit est en cours d'ajout
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                this.disabled = true;
+                
+                // Appel AJAX pour ajouter le produit au panier
+                fetch('index.php?page=panier&action=ajouter&ajax=1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id_produit=${productId}&quantite=1`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Restaurer le bouton
+                    this.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    this.disabled = false;
+                    
+                    // Afficher un toast de notification
+                    if (data.success) {
+                        // Mise à jour du compteur de produits dans le panier
+                        if (cartCountBadge) {
+                            cartCountBadge.textContent = data.panier.nombre_articles;
+                            cartCountBadge.style.display = data.panier.nombre_articles > 0 ? 'flex' : 'none';
+                        }
+                        
+                        // Toast de succès
+                        const toastEl = document.createElement('div');
+                        toastEl.className = 'toast show custom-toast success-toast';
+                        toastEl.setAttribute('role', 'alert');
+                        toastEl.setAttribute('aria-live', 'assertive');
+                        toastEl.setAttribute('aria-atomic', 'true');
+                        toastEl.innerHTML = `
+                            <div class="toast-header">
+                                <i class="fas fa-check-circle me-2 text-success"></i>
+                                <strong class="me-auto">Produit ajouté</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                Produit ajouté à votre panier avec succès.
+                                <div class="mt-2">
+                                    <a href="index.php?page=panier" class="btn btn-sm btn-primary">Voir le panier</a>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(toastEl);
+                        
+                        // Supprimer le toast après 5 secondes
+                        setTimeout(() => {
+                            toastEl.remove();
+                        }, 5000);
+                        
+                        // Listener pour le bouton de fermeture
+                        const closeBtn = toastEl.querySelector('.btn-close');
+                        if (closeBtn) {
+                            closeBtn.addEventListener('click', () => {
+                                toastEl.remove();
+                            });
+                        }
+                    } else {
+                        // Toast d'erreur
+                        const toastEl = document.createElement('div');
+                        toastEl.className = 'toast show custom-toast error-toast';
+                        toastEl.setAttribute('role', 'alert');
+                        toastEl.setAttribute('aria-live', 'assertive');
+                        toastEl.setAttribute('aria-atomic', 'true');
+                        toastEl.innerHTML = `
+                            <div class="toast-header">
+                                <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                                <strong class="me-auto">Erreur</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${data.message || "Impossible d'ajouter le produit au panier."}
+                            </div>
+                        `;
+                        document.body.appendChild(toastEl);
+                        
+                        // Supprimer le toast après 5 secondes
+                        setTimeout(() => {
+                            toastEl.remove();
+                        }, 5000);
+                        
+                        // Listener pour le bouton de fermeture
+                        const closeBtn = toastEl.querySelector('.btn-close');
+                        if (closeBtn) {
+                            closeBtn.addEventListener('click', () => {
+                                toastEl.remove();
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    this.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    this.disabled = false;
+                    
+                    // Toast d'erreur technique
+                    const toastEl = document.createElement('div');
+                    toastEl.className = 'toast show custom-toast error-toast';
+                    toastEl.innerHTML = `
+                        <div class="toast-header">
+                            <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                            <strong class="me-auto">Erreur technique</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            Une erreur est survenue lors de l'ajout au panier.
+                        </div>
+                    `;
+                    document.body.appendChild(toastEl);
+                    
+                    setTimeout(() => {
+                        toastEl.remove();
+                    }, 5000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.twig" %}
+
+{% block title %}Mentions Légales - Le Design Du Web{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1 class="mb-4">Mentions Légales</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <p class="text-muted mb-4">Dernière mise à jour : {{ "now"|date("d/m/Y") }}</p>
+            
+            <h2>Informations légales</h2>
+            <p>Ce site est édité par :</p>
+            <ul>
+                <li><strong>Raison sociale</strong> : {{ entreprise.nom }}</li>
+                <li><strong>Forme juridique</strong> : Entrepreneur individuel</li>
+                <li><strong>SIREN</strong> : {{ entreprise.siren }}</li>
+                <li><strong>SIRET</strong> : {{ entreprise.siret }}</li>
+                <li><strong>TVA intracommunautaire</strong> : FR59948362355</li>
+                <li><strong>Adresse</strong> : {{ entreprise.adresse }}</li>
+                <li><strong>Email</strong> : {{ entreprise.email }}</li>
+                <li><strong>Téléphone</strong> : {{ entreprise.telephone }}</li>
+                <li><strong>Directeur de la publication</strong> : Le propriétaire du site</li>
+            </ul>
+            
+            <h2>Hébergement</h2>
+            <p>Ce site est hébergé par :</p>
+            <ul>
+                <li><strong>Nom</strong> : OVH SAS</li>
+                <li><strong>Adresse</strong> : 2 rue Kellermann - 59100 Roubaix - France</li>
+                <li><strong>Téléphone</strong> : 1007</li>
+            </ul>
+            
+            <h2>Propriété intellectuelle</h2>
+            <p>L'ensemble du contenu de ce site (structure, textes, logos, images, photographies, vidéos, sons, etc.) est la propriété exclusive de {{ entreprise.nom }} ou de ses partenaires, et est protégé par le droit d'auteur et le droit des marques.</p>
+            <p>Toute reproduction, représentation, modification, publication, adaptation ou exploitation quelconque des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable de {{ entreprise.nom }}.</p>
+            <p>Toute exploitation non autorisée du site ou d'un quelconque des éléments qu'il contient sera considérée comme constitutive d'une contrefaçon et poursuivie conformément aux dispositions des articles L.335-2 et suivants du Code de la Propriété Intellectuelle.</p>
+            
+            <h2>Liens hypertextes</h2>
+            <p>Ce site peut contenir des liens hypertextes vers d'autres sites internet sur lesquels {{ entreprise.nom }} n'exerce aucun contrôle. Malgré les vérifications régulières que nous effectuons, nous ne pouvons être tenus pour responsables du contenu de ces sites, des modifications ou mises à jour qui leur sont apportées.</p>
+            <p>{{ entreprise.nom }} n'est pas responsable de la disponibilité de ces sites et ne peut en garantir le contenu ni la pertinence.</p>
+            <p>La création de liens hypertextes vers le site www.ledesignduwebshop.fr est soumise à l'accord préalable de {{ entreprise.nom }}.</p>
+            
+            <h2>Données personnelles</h2>
+            <p>Les informations concernant la collecte et le traitement des données personnelles sont détaillées dans notre <a href="index.php?page=legal&doc=politique-de-confidentialite">Politique de Confidentialité</a>.</p>
+            
+            <h2>Cookies</h2>
+            <p>Le site www.ledesignduwebshop.fr utilise des cookies pour améliorer l'expérience utilisateur. En naviguant sur notre site, vous acceptez l'utilisation de ces cookies conformément à notre <a href="index.php?page=legal&doc=politique-de-confidentialite">Politique de Confidentialité</a>.</p>
+            
+            <h2>Droit applicable et juridiction compétente</h2>
+            <p>Les présentes mentions légales sont soumises au droit français. En cas de litige relatif à l'interprétation ou à l'exécution des présentes, les tribunaux français seront seuls compétents.</p>
+            
+            <h2>Contact</h2>
+            <p>Pour toute question concernant les présentes mentions légales, vous pouvez nous contacter à l'adresse suivante : {{ entreprise.email }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

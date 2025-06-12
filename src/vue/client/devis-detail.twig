@@ -1,0 +1,509 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Détail du devis #{{ devis.id }}{% endblock %}
+
+{% block client_actions %}
+<div class="d-flex align-items-center">
+    <a href="index.php?page=devis" class="btn btn-outline-purple me-2">
+        <i class="fas fa-arrow-left me-1"></i> Retour aux devis
+    </a>
+    {% if devis.statut == 'termine' and devis.montant_estime %}
+        <a href="index.php?page=devis-detail&id={{ devis.id }}&action=accepter" class="btn btn-success">
+            <i class="fas fa-check me-1"></i> Accepter le devis
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block client_content %}
+    {% if message %}
+        <div class="alert alert-{{ message.type }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-{{ message.type == 'success' ? 'check-circle' : 'exclamation-circle' }} me-2"></i> {{ message.text }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Détails du devis -->
+            <div class="client-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-file-invoice-dollar"></i> Détails de la demande
+                    </div>
+                    <span class="status-badge 
+                        {% if devis.statut == 'en_attente' %}status-pending
+                        {% elseif devis.statut == 'en_cours' %}status-processing
+                        {% elseif devis.statut == 'termine' %}status-delivered
+                        {% elseif devis.statut == 'rejete' %}status-cancelled{% endif %}">
+                        {% if devis.statut == 'en_attente' %}En attente
+                        {% elseif devis.statut == 'en_cours' %}En cours
+                        {% elseif devis.statut == 'termine' %}Terminé
+                        {% elseif devis.statut == 'rejete' %}Rejeté{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted">Service demandé</p>
+                            <p class="mb-3 fs-5 fw-semibold">{{ devis.service_nom }}</p>
+                            
+                            <p class="mb-1 text-muted">Date de la demande</p>
+                            <p class="mb-3">{{ devis.date_demande|date("d/m/Y à H:i") }}</p>
+                            
+                            {% if devis.date_reponse %}
+                                <p class="mb-1 text-muted">Date de réponse</p>
+                                <p class="mb-3">{{ devis.date_reponse|date("d/m/Y à H:i") }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if devis.montant_estime %}
+                                <div class="price-card mb-3">
+                                    <div class="price-label">Montant estimé</div>
+                                    <div class="price-value">{{ devis.montant_estime|number_format(2, ',', ' ') }} €</div>
+                                    <div class="price-note">Ce montant est une estimation basée sur les informations fournies</div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if devis.statut == 'termine' and devis.montant_estime %}
+                                <div class="d-grid gap-2 mt-4">
+                                    <a href="index.php?page=devis-detail&id={{ devis.id }}&action=accepter" class="btn btn-success">
+                                        <i class="fas fa-check-circle me-2"></i> Accepter ce devis
+                                    </a>
+                                    <button type="button" class="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#contactModal">
+                                        <i class="fas fa-comment-alt me-2"></i> Demander des modifications
+                                    </button>
+                                </div>
+                            {% elseif devis.statut == 'en_attente' %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i> Votre demande est en cours d'analyse. Nous vous contacterons dans les plus brefs délais.
+                                </div>
+                            {% elseif devis.statut == 'en_cours' %}
+                                <div class="alert alert-primary">
+                                    <i class="fas fa-cog me-2"></i> Nous préparons actuellement votre devis personnalisé.
+                                </div>
+                            {% elseif devis.statut == 'rejete' %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> Cette demande a été rejetée ou annulée.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h5 class="border-bottom pb-2 mb-3">Description de votre demande</h5>
+                    <div class="description-content p-3 bg-light rounded mb-4" style="white-space: pre-wrap;">{{ devis.description_demande }}</div>
+                    
+                    {% if devis.reponse_admin %}
+                        <h5 class="border-bottom pb-2 mb-3">Notre réponse</h5>
+                        <div class="response-content p-3 bg-light rounded" style="white-space: pre-wrap;">{{ devis.reponse_admin }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Conversation -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-comments"></i> Conversation
+                </div>
+                <div class="card-body">
+                    {% if messages|length > 0 %}
+                        <div class="messages-container">
+                            {% for message in messages %}
+                                <div class="message-item {{ message.is_client ? 'message-client' : 'message-admin' }}">
+                                    <div class="message-header">
+                                        <div class="message-author">
+                                            {% if message.is_client %}
+                                                <i class="fas fa-user me-2"></i> Vous
+                                            {% else %}
+                                                <i class="fas fa-headset me-2"></i> Support LDW
+                                            {% endif %}
+                                        </div>
+                                        <div class="message-date">{{ message.date_creation|date("d/m/Y à H:i") }}</div>
+                                    </div>
+                                    <div class="message-content">{{ message.contenu|nl2br }}</div>
+                                    {% if message.pieces_jointes|length > 0 %}
+                                        <div class="message-attachments">
+                                            <div class="attachments-title"><i class="fas fa-paperclip me-2"></i> Pièces jointes:</div>
+                                            <div class="attachments-list">
+                                                {% for piece in message.pieces_jointes %}
+                                                    <a href="{{ piece.chemin_fichier }}" class="attachment-item" target="_blank">
+                                                        <i class="fas fa-file me-1"></i> {{ piece.nom_fichier }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-3x mb-3 text-muted"></i>
+                            <p>Aucun message dans cette conversation pour le moment.</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if devis.statut != 'rejete' %}
+                        <form action="index.php?page=devis-detail&id={{ devis.id }}" method="post" enctype="multipart/form-data" class="mt-4">
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Votre message</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="attachment" class="form-label">Pièce jointe (optionnel)</label>
+                                <input class="form-control" type="file" id="attachment" name="attachment">
+                                <div class="form-text">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 5 Mo)</div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" name="envoyer_message" class="btn btn-purple">
+                                    <i class="fas fa-paper-plane me-2"></i> Envoyer
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Statut et actions -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tasks"></i> Statut et actions
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-semibold">Demande envoyée</p>
+                                <small class="text-muted">{{ devis.date_demande|date("d/m/Y à H:i") }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker {{ devis.statut != 'en_attente' ? 'bg-success' : 'bg-light' }}"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-semibold">Analyse en cours</p>
+                                <small class="text-muted">
+                                    {% if devis.statut != 'en_attente' %}
+                                        Terminé
+                                    {% else %}
+                                        En cours
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker {{ devis.statut == 'termine' or devis.statut == 'rejete' ? 'bg-success' : 'bg-light' }}"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-semibold">Devis préparé</p>
+                                <small class="text-muted">
+                                    {% if devis.statut == 'termine' or devis.statut == 'rejete' %}
+                                        {{ devis.date_reponse ? devis.date_reponse|date("d/m/Y") : 'Terminé' }}
+                                    {% else %}
+                                        En attente
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-light"></div>
+                            <div class="timeline-content">
+                                <p class="mb-0 fw-semibold">Devis accepté</p>
+                                <small class="text-muted">En attente</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        {% if devis.statut == 'en_attente' %}
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelQuoteModal">
+                                <i class="fas fa-times me-2"></i> Annuler la demande
+                            </button>
+                        {% endif %}
+                        
+                        <button type="button" class="btn btn-outline-purple" data-bs-toggle="modal" data-bs-target="#contactModal">
+                            <i class="fas fa-envelope me-2"></i> Contacter le support
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Informations utiles -->
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i> Informations utiles
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Délais de traitement</h6>
+                    <p class="small">Nous traitons généralement les demandes de devis sous 48h ouvrées. Pour les projets complexes, ce délai peut être légèrement plus long.</p>
+                    
+                    <h6 class="mb-3 mt-4">Besoin d'aide ?</h6>
+                    <p class="small">Notre équipe est disponible pour répondre à vos questions du lundi au vendredi de 9h à 18h.</p>
+                    
+                    <div class="contact-info mt-3">
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>01 23 45 67 89</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>contact@ldw.fr</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modal d'annulation -->
+    {% if devis.statut == 'en_attente' %}
+        <div class="modal fade" id="cancelQuoteModal" tabindex="-1" aria-labelledby="cancelQuoteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="index.php?page=devis-detail&id={{ devis.id }}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelQuoteModalLabel">Confirmer l'annulation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">Êtes-vous sûr de vouloir annuler votre demande de devis #{{ devis.id }} ?</p>
+                            <p class="text-danger mt-3 mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Cette action est irréversible.</p>
+                            <div class="mt-3">
+                                <label for="motif_annulation" class="form-label">Motif d'annulation (optionnel)</label>
+                                <select class="form-select" id="motif_annulation" name="motif_annulation">
+                                    <option value="erreur_demande">Erreur de demande</option>
+                                    <option value="changement_avis">Changement d'avis</option>
+                                    <option value="autre_prestataire">Autre prestataire choisi</option>
+                                    <option value="projet_annule">Projet annulé</option>
+                                    <option value="autre">Autre raison</option>
+                                </select>
+                            </div>
+                            <div class="mt-3">
+                                <label for="commentaire_annulation" class="form-label">Commentaire (optionnel)</label>
+                                <textarea class="form-control" id="commentaire_annulation" name="commentaire_annulation" rows="3" placeholder="Précisez votre raison ici..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" name="annuler_devis" class="btn btn-danger">Confirmer l'annulation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Modal de contact -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=devis-detail&id={{ devis.id }}" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contactModalLabel">Contacter notre équipe</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="contact_sujet" class="form-label">Sujet</label>
+                            <select class="form-select" id="contact_sujet" name="contact_sujet" required>
+                                <option value="question">Question sur le devis</option>
+                                <option value="modification">Demande de modification</option>
+                                <option value="information">Demande d'information complémentaire</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contact_message" class="form-label">Votre message</label>
+                            <textarea class="form-control" id="contact_message" name="contact_message" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contact_attachment" class="form-label">Pièce jointe (optionnel)</label>
+                            <input class="form-control" type="file" id="contact_attachment" name="contact_attachment">
+                            <div class="form-text">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 5 Mo)</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="contact_support" class="btn btn-purple">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_styles %}
+<style>
+    /* Styles pour la timeline */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 10px;
+        width: 2px;
+        background-color: var(--bordure-couleur);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--fond-primaire);
+        background-color: var(--bordure-couleur);
+    }
+    
+    .timeline-content {
+        padding-bottom: 5px;
+    }
+    
+    /* Styles pour les messages */
+    .messages-container {
+        max-height: 500px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+    
+    .message-item {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        position: relative;
+    }
+    
+    .message-client {
+        background-color: rgba(var(--violet-principal-rgb), 0.1);
+        margin-left: 20px;
+    }
+    
+    .message-admin {
+        background-color: var(--fond-tertiaire);
+        margin-right: 20px;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .message-author {
+        font-weight: 600;
+    }
+    
+    .message-date {
+        color: var(--texte-secondaire);
+    }
+    
+    .message-content {
+        white-space: pre-wrap;
+    }
+    
+    .message-attachments {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid var(--bordure-couleur);
+    }
+    
+    .attachments-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .attachments-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .attachment-item {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        background-color: var(--fond-secondaire);
+        border-radius: 5px;
+        font-size: 0.85rem;
+        color: var(--texte-couleur);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .attachment-item:hover {
+        background-color: var(--violet-principal);
+        color: white;
+    }
+    
+    /* Styles pour la carte de prix */
+    .price-card {
+        background: linear-gradient(135deg, var(--violet-principal), var(--violet-secondaire));
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(var(--violet-principal-rgb), 0.3);
+    }
+    
+    .price-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+    
+    .price-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .price-note {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+    
+    /* Styles pour les informations de contact */
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .contact-item i {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(var(--violet-principal-rgb), 0.1);
+        color: var(--violet-principal);
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}

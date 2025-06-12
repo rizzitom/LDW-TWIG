@@ -1,0 +1,930 @@
+{% extends "base.twig" %}
+
+{% block title %}Panier - Le Design Du Web{% endblock %}
+
+{% block head %}
+<style>
+    .page-title {
+        margin-bottom: 2.5rem; 
+        position: relative;
+        display: inline-block;
+        color: var(--texte-blanc);
+        font-weight: 700;
+    }
+    .page-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        width: 60px;
+        height: 4px;
+        background-color: var(--violet-principal); 
+        border-radius: 2px; 
+    }
+
+    /* Indicateur Étapes Checkout */
+    .checkout-progress {
+        margin-bottom: 2.5rem; 
+        padding: 1rem 0;
+    }
+    .steps-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        margin: 0 1rem; /* Espace bords */
+    }
+    .steps-container::before { /* Ligne de progression */
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: 5%; 
+        right: 5%;
+        height: 2px;
+        background-color: var(--bordure-sombre); 
+        z-index: 1;
+    }
+    .step {
+        width: 22%; 
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 0.25rem;
+    }
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%; 
+        background-color: var(--fond-noir-leger); 
+        color: var(--texte-gris-clair); 
+        border: 2px solid var(--bordure-sombre); 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        position: relative;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
+        font-size: 1.2rem; 
+    }
+    .step.active .step-icon {
+        background-color: var(--violet-principal); 
+        border-color: var(--violet-principal);
+        color: var(--texte-blanc); 
+        box-shadow: 0 0 0 4px rgba(var(--bs-primary-rgb), 0.25); 
+    }
+    .step.completed .step-icon { 
+        background-color: var(--violet-secondaire); 
+        border-color: var(--violet-secondaire);
+        color: var(--texte-blanc);
+    }
+     .step.completed .step-icon::after { 
+         content: '\f00c'; 
+         font-family: 'Font Awesome 5 Free';
+         font-weight: 900;
+         font-size: 1rem;
+         position: absolute;
+         bottom: -5px;
+         right: -5px;
+         background-color: #4CAF50; 
+         color: white;
+         border-radius: 50%;
+         width: 20px;
+         height: 20px;
+         line-height: 20px; 
+         text-align: center;
+     }
+
+    .step-label {
+        font-size: 0.85rem; 
+        color: var(--texte-gris-clair); 
+        margin-top: 0.25rem;
+        transition: color 0.3s ease, font-weight 0.3s ease;
+    }
+    .step.active .step-label {
+        color: var(--violet-principal); 
+        font-weight: 600;
+    }
+    .step.completed .step-label {
+        color: var(--texte-blanc); 
+    }
+
+    /* Conteneur et Items Panier */
+    .cart-container {
+        background-color: var(--fond-noir-leger); 
+        border-radius: 0.75rem; 
+        padding: 1.5rem; 
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--bordure-sombre); 
+    }
+    .cart-item {
+        background-color: var(--fond-noir); 
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid var(--bordure-sombre); 
+        gap: 1rem; 
+    }
+    .cart-item:last-child { margin-bottom: 0; }
+
+    .cart-item:hover {
+        box-shadow: 0 3px 10px rgba(0,0,0, 0.2);
+    }
+    .cart-item-image {
+        width: 80px; /* Taille image réduite */
+        height: 80px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 0.3rem; 
+        background-color: var(--fond-noir-leger); 
+        flex-shrink: 0; 
+    }
+
+    .cart-item-details {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+    }
+    .cart-item-title {
+        font-size: 1rem; 
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--texte-blanc); 
+        display: -webkit-box; 
+         -webkit-line-clamp: 2;
+         -webkit-box-orient: vertical;
+         overflow: hidden;
+         text-overflow: ellipsis;
+    }
+     .cart-item-title a { color: inherit; text-decoration: none;}
+     .cart-item-title a:hover { color: var(--violet-accent); }
+
+    .cart-item-price {
+        font-weight: 600;
+        color: var(--violet-accent); 
+        font-size: 1.1rem; 
+    }
+
+    /* Actions par item (Quantité, Supprimer) */
+    .cart-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem; 
+        margin-left: auto; 
+        flex-shrink: 0; 
+    }
+
+    /* Groupe Quantité */
+    .quantity-input-group {
+        display: flex;
+        align-items: center;
+        background-color: var(--fond-noir); 
+        border-radius: 50px; 
+        overflow: hidden;
+        width: 110px; 
+        border: 1px solid var(--bordure-sombre); 
+    }
+    .quantity-btn {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--texte-gris-clair); 
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .quantity-btn:hover {
+        background-color: var(--fond-noir-leger);
+        color: var(--violet-principal); 
+    }
+    .quantity-input {
+        width: 48px; 
+        text-align: center;
+        border: none;
+        background: none;
+        color: var(--texte-blanc); 
+        font-weight: 500;
+        padding: 0 0.2rem; 
+        height: 30px;
+        border-left: 1px solid var(--bordure-sombre);
+        border-right: 1px solid var(--bordure-sombre);
+    }
+    .quantity-input:focus { outline: none; }
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .quantity-input[type=number] { -moz-appearance: textfield; }
+
+    .remove-cart-item {
+        width: 32px; 
+        height: 32px;
+        border-radius: 50%; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(220, 53, 69, 0.1); /* Rouge transparent */
+        color: #dc3545; /* Rouge */
+        border: none;
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        text-decoration: none; 
+    }
+    .remove-cart-item:hover {
+        background-color: #dc3545; /* Rouge plein */
+        color: var(--texte-blanc); 
+        transform: rotate(90deg) scale(1.1);
+    }
+
+    /* Récapitulatif Panier */
+    .cart-summary {
+        background-color: var(--fond-noir-leger); 
+        border-radius: 0.75rem; 
+        padding: 1.5rem; 
+        position: sticky;
+        top: 80px; 
+        border: 1px solid var(--bordure-sombre); 
+        box-shadow: 0 5px 15px rgba(0,0,0, 0.25);
+    }
+    .cart-summary-title {
+        color: var(--texte-blanc); 
+        font-size: 1.25rem; 
+        font-weight: 600;
+        border-bottom: 1px solid var(--bordure-sombre); 
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .cart-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem; 
+        color: var(--texte-gris-clair); 
+        font-size: 0.95rem;
+    }
+     .cart-summary-row span:last-child { font-weight: 500; }
+
+    .cart-summary-total {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--texte-blanc); 
+        border-top: 1px solid var(--bordure-sombre); 
+        padding-top: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+    }
+    .cart-summary-total span:last-child { color: var(--violet-accent); } 
+
+    .checkout-btn {
+        background-color: var(--violet-principal); 
+        color: var(--texte-blanc); 
+        border: none;
+        padding: 0.8rem 1.5rem; 
+        border-radius: 50px; 
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 10px rgba(var(--bs-primary-rgb), 0.2); 
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        width: 100%; 
+    }
+    .checkout-btn:hover {
+        background-color: var(--violet-secondaire); 
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(var(--bs-primary-rgb), 0.3); 
+        color: var(--texte-blanc);
+    }
+
+    /* Payment Methods Icons */
+    .payment-methods i {
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+    }
+    .payment-methods i:hover { opacity: 1; }
+
+    /* Actions globales Panier */
+    .cart-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; 
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--bordure-sombre); 
+    }
+    .continue-shopping {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px; 
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        color: var(--texte-gris-clair);
+        background-color: transparent;
+        border: 1px solid var(--bordure-sombre);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .continue-shopping:hover {
+        background-color: var(--fond-noir); 
+        transform: translateX(-3px);
+        color: var(--violet-accent); 
+        border-color: var(--fond-noir);
+    }
+    .cart-action-clear .btn-outline-danger { 
+        color: #dc3545;
+        border-color: rgba(220, 53, 69, 0.3);
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+    }
+     .cart-action-clear .btn-outline-danger:hover {
+         background-color: #dc3545;
+         color: var(--texte-blanc);
+         border-color: #dc3545;
+     }
+
+
+    /* Panier Vide */
+    .cart-empty {
+        text-align: center;
+        padding: 3rem 1rem;
+        background-color: var(--fond-noir-leger); 
+        border-radius: 0.75rem;
+        border: 1px dashed var(--bordure-sombre); 
+    }
+    .cart-empty-icon {
+        font-size: 4.5rem; 
+        color: var(--violet-principal); 
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+    .cart-empty-title {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        color: var(--texte-blanc);
+        font-weight: 600;
+    }
+    .cart-empty-text {
+        color: var(--texte-gris-clair);
+        max-width: 500px;
+        margin: 0 auto 1.5rem;
+    }
+    .cart-empty .btn-primary { 
+        background-color: var(--violet-principal);
+        border-color: var(--violet-principal);
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+    }
+    .cart-empty .btn-primary:hover {
+        background-color: var(--violet-secondaire);
+        border-color: var(--violet-secondaire);
+    }
+    .alert-floating { 
+        position: fixed;
+        top: 20px;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 250px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        border-radius: 0.5rem;
+        border-left: 5px solid;
+        background-color: var(--fond-noir-leger);
+        color: var(--texte-blanc);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .alert-floating.alert-success { border-color: #198754; } 
+    .alert-floating.alert-success i { color: #198754; }
+    .alert-floating.alert-danger { border-color: #dc3545; } 
+    .alert-floating.alert-danger i { color: #dc3545; }
+
+
+    /* Responsive */
+    @media (max-width: 991.98px) {
+        .steps-container { margin: 0; }
+        .step-label { font-size: 0.75rem; }
+        .cart-summary { position: static; margin-top: 1.5rem; }
+    }
+    @media (max-width: 767.98px) {
+        .cart-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem; 
+            padding: 0.8rem;
+        }
+        .cart-item-image {
+            width: 100%;
+            height: 150px; 
+            margin-bottom: 0.8rem;
+        }
+        .cart-item-actions {
+            margin-top: 0.8rem;
+            width: 100%;
+            justify-content: space-between; 
+            margin-left: 0; 
+        }
+        .cart-actions {
+            flex-direction: column;
+            gap: 0.8rem;
+            align-items: stretch; 
+        }
+        .continue-shopping { order: 2; justify-content: center; }
+        .cart-action-clear { order: 1; }
+        .cart-action-clear .btn { width: 100%; } 
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="page-title">Votre Panier d'Achats</h1>
+
+    {# Affichage messages flash (si envoyés par le contrôleur) #}
+    {% if message %}
+    <div class="alert {% if success|default(true) %}alert-success{% else %}alert-danger{% endif %} alert-floating animate__animated animate__fadeInRight" role="alert">
+         <i class="fas {% if success|default(true) %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %} me-2"></i> {{ message }}
+    </div>
+    {% endif %}
+
+    {# Affichage erreur stock (si envoyée par le contrôleur) #}
+    {% if erreur %}
+    <div class="alert alert-danger mb-4" role="alert">
+         <i class="fas fa-exclamation-triangle me-2"></i> <strong>Erreur :</strong> {{ erreur }}
+        {% if produits_indisponibles|length > 0 %}
+            <ul class="mt-2 mb-0 ps-3" style="font-size: 0.9em;">
+                {% for produit in produits_indisponibles %}
+                <li>{{ produit.nom }} - Demandé: {{ produit.quantite_demandee }}, Disponible: {{ produit.stock_disponible }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% set etape_actuelle = etape|default('panier') %} 
+    <div class="checkout-progress">
+        <div class="steps-container">
+            <div class="step {% if etape_actuelle == 'panier' %}active{% elseif etape_actuelle in ['livraison', 'paiement', 'confirmation'] %}completed{% endif %}">
+                <div class="step-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="step-label">Panier</div>
+            </div>
+            <div class="step {% if etape_actuelle == 'livraison' %}active{% elseif etape_actuelle in ['paiement', 'confirmation'] %}completed{% endif %}">
+                <div class="step-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="step-label">Livraison</div>
+            </div>
+            <div class="step {% if etape_actuelle == 'paiement' %}active{% elseif etape_actuelle == 'confirmation' %}completed{% endif %}">
+                <div class="step-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="step-label">Paiement</div>
+            </div>
+            <div class="step {% if etape_actuelle == 'confirmation' %}active completed{% endif %}"> {# Active ET completed pour la dernière #}
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-label">Confirmation</div>
+            </div>
+        </div>
+    </div>
+
+    {% if panier.produits|default([])|length > 0 %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="cart-container">
+                {% for produit in panier.produits %}
+                <div class="cart-item">
+                    <a href="{{ get_asset_url('index.php?page=produit&slug=' ~ produit.slug|default('#')) }}">
+                         <div class="cart-item-image" style="background-image: url('{{ produit.image_url|default('/public/images/placeholder.png') }}')"></div>
+                    </a>
+                    <div class="cart-item-details">
+                         <h5 class="cart-item-title">
+                              <a href="{{ get_asset_url('index.php?page=produit&slug=' ~ produit.slug|default('#')) }}">{{ produit.nom }}</a>
+                         </h5>
+                         <span class="cart-item-price">{{ (produit.prix * produit.quantite)|number_format(2, ',', ' ') }} €
+                              {% if produit.quantite > 1 %}
+                                   <small class="text-muted" style="font-size: 0.8em; font-weight: 400;">({{ produit.prix|number_format(2, ',', ' ') }} € / unité)</small>
+                              {% endif %}
+                         </span>
+                    </div>
+                    <div class="cart-item-actions">
+                         {# Formulaire Quantité #}
+                        <form action="{{ get_asset_url('index.php?page=panier&action=mettre-a-jour') }}" method="post" class="d-inline-block form-update-quantity">
+                            <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                            <div class="quantity-input-group">
+                                <button type="button" class="quantity-btn minus-btn" data-product="{{ produit.id }}" {% if produit.quantite <= 1 %}disabled{% endif %}>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" name="quantite" value="{{ produit.quantite }}" min="1" max="{{ produit.stock|default(99) }}" class="quantity-input product-{{ produit.id }}" aria-label="Quantité pour {{ produit.nom }}">
+                                <button type="button" class="quantity-btn plus-btn" data-product="{{ produit.id }}" {% if produit.stock is defined and produit.quantite >= produit.stock %}disabled{% endif %}>
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                             <button type="submit" class="visually-hidden">Mettre à jour</button>
+                        </form>
+                         {# Bouton Supprimer #}
+                        <a href="#" class="remove-cart-item" title="Supprimer l'article" data-product-id="{{ produit.id }}">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {# Actions globales #}
+            <div class="cart-actions">
+                <a href="#" id="continue-shopping-btn" class="continue-shopping">
+                    <i class="fas fa-chevron-left me-1"></i> Continuer mes achats
+                </a>
+                 <div class="cart-action-clear">
+                    <a href="{{ get_asset_url('index.php?page=panier&action=vider') }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Voulez-vous vraiment vider votre panier ?');">
+                        <i class="fas fa-trash-alt me-1"></i> Vider le panier
+                    </a>
+                 </div>
+            </div>
+        </div>
+
+        {# Récapitulatif #}
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h3 class="cart-summary-title">Récapitulatif</h3>
+
+                <div class="cart-summary-row">
+                    <span>Sous-total (HT)</span>
+                    <span>{{ panier.total|number_format(2, ',', ' ') }} €</span>
+                </div>
+
+                <div class="cart-summary-row">
+                    <span>TVA (20%)</span>
+                    <span>{{ panier.tva|number_format(2, ',', ' ') }} €</span>
+                </div>
+
+                <div class="cart-summary-row">
+                    <span>Frais de livraison</span>
+                    {% if panier.frais_livraison == 0 %}
+                        <span class="text-success">Offerte{% if panier.total < 50 %} à partir de 50€{% endif %}</span>
+                    {% else %}
+                        <span>{{ panier.frais_livraison|number_format(2, ',', ' ') }} €</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-2 mt-2">
+                    <label for="pays_livraison" class="form-label small">Pays de livraison :</label>
+                    <select id="pays_livraison" class="form-select form-select-sm">
+                        <option value="France" {% if panier.pays_livraison == 'France' %}selected{% endif %}>France</option>
+                        <option value="International" {% if panier.pays_livraison != 'France' %}selected{% endif %}>International</option>
+                    </select>
+                </div>
+
+                <div class="cart-summary-total">
+                    <span>Total (TTC)</span>
+                    {% set total_ttc = panier.total + panier.frais_livraison + panier.tva %}
+                    <span>{{ total_ttc|number_format(2, ',', ' ') }} €</span>
+                </div>
+
+                <div class="mt-4">
+                    <a href="#" id="checkout-btn" class="checkout-btn">
+                        <i class="fas fa-shield-alt me-1"></i> Procéder au paiement
+                    </a>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-lock me-1"></i> Paiement 100% sécurisé par nos partenaires.
+                    </small>
+                </div>
+
+                 <div class="payment-methods mt-3 d-flex justify-content-center gap-3">
+                    <i class="fab fa-cc-visa fa-2x text-muted" title="Visa"></i>
+                    <i class="fab fa-cc-mastercard fa-2x text-muted" title="Mastercard"></i>
+                    <i class="fab fa-cc-paypal fa-2x text-muted" title="Paypal"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+     {# Panier Vide #}
+    <div class="cart-empty">
+        <i class="fas fa-shopping-basket cart-empty-icon"></i>
+        <h3 class="cart-empty-title">Votre panier est désespérément vide</h3>
+        <p class="cart-empty-text">Parcourez nos catégories pour trouver les pépites high-tech qu'il vous faut !</p>
+        <a href="#" id="explore-store-btn" class="btn btn-purple btn-lg"> {# Bouton thème #}
+            <i class="fas fa-store me-2"></i> Explorer la boutique
+        </a>
+    </div>
+    {% endif %}
+</div> 
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Gestion du changement de pays de livraison
+    const paysLivraisonSelect = document.getElementById('pays_livraison');
+    if (paysLivraisonSelect) {
+        paysLivraisonSelect.addEventListener('change', function() {
+            // Appeler l'API pour mettre à jour le pays de livraison
+            // Créer l'URL complète avec le domaine actuel
+            const url = new URL(window.location.origin);
+            // Définir le chemin et les paramètres
+            url.pathname = "/index.php";
+            url.searchParams.set("page", "panier");
+            url.searchParams.set("action", "pays-livraison");
+            url.searchParams.set("ajax", "1");
+            // Ajouter un timestamp pour éviter la mise en cache
+            url.searchParams.set("_", Date.now());
+            
+            fetch(url.toString(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'pays=' + encodeURIComponent(this.value)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+    }
+
+    function handleQuantityChange(inputElement, increment) {
+         const currentValue = parseInt(inputElement.value);
+         const newValue = currentValue + increment;
+         const min = parseInt(inputElement.min) || 1;
+         const max = parseInt(inputElement.max) || 99; 
+
+         if (newValue >= min && newValue <= max) {
+             inputElement.value = newValue;
+             // Soumettre le formulaire parent
+             inputElement.closest('form.form-update-quantity').submit();
+         }
+    }
+
+    // Boutons Moins (-)
+    document.querySelectorAll('.minus-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.product;
+            const input = document.querySelector(`.quantity-input.product-${productId}`);
+            if (input) {
+                // Mettre à jour la valeur
+                const currentValue = parseInt(input.value);
+                const newValue = currentValue - 1;
+                const min = parseInt(input.min) || 1;
+                
+                if (newValue >= min) {
+                    input.value = newValue;
+                    
+                    // Soumettre le formulaire via HTTPS
+                    const form = input.closest('form.form-update-quantity');
+                    if (form) {
+                        const formData = new FormData(form);
+                        
+                        // Créer une URL avec le domaine actuel
+                        const url = new URL(window.location.origin);
+                        // Définir le chemin et les paramètres
+                        url.pathname = "/index.php";
+                        url.searchParams.set("page", "panier");
+                        url.searchParams.set("action", "mettre-a-jour");
+                        // Ajouter un timestamp pour éviter la mise en cache
+                        url.searchParams.set("_", Date.now());
+                        
+                        // Soumettre le formulaire via fetch avec HTTPS
+                        fetch(url.toString(), {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(error => console.error('Erreur:', error));
+                    }
+                }
+            }
+        });
+    });
+
+    // Boutons Plus (+)
+    document.querySelectorAll('.plus-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.product;
+            const input = document.querySelector(`.quantity-input.product-${productId}`);
+            if (input) {
+                // Mettre à jour la valeur
+                const currentValue = parseInt(input.value);
+                const newValue = currentValue + 1;
+                const max = parseInt(input.max) || 99;
+                
+                if (newValue <= max) {
+                    input.value = newValue;
+                    
+                    // Soumettre le formulaire via HTTPS
+                    const form = input.closest('form.form-update-quantity');
+                    if (form) {
+                        const formData = new FormData(form);
+                        
+                        // Créer une URL avec le domaine actuel
+                        const url = new URL(window.location.origin);
+                        // Définir le chemin et les paramètres
+                        url.pathname = "/index.php";
+                        url.searchParams.set("page", "panier");
+                        url.searchParams.set("action", "mettre-a-jour");
+                        // Ajouter un timestamp pour éviter la mise en cache
+                        url.searchParams.set("_", Date.now());
+                        
+                        // Soumettre le formulaire via fetch avec HTTPS
+                        fetch(url.toString(), {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(error => console.error('Erreur:', error));
+                    }
+                }
+            }
+        });
+    });
+
+    // Soumission si l'utilisateur change manuellement la quantité et quitte le champ
+    document.querySelectorAll('.quantity-input').forEach(input => {
+         input.addEventListener('change', function() {
+             const min = parseInt(this.min) || 1;
+             const max = parseInt(this.max) || 99;
+             let value = parseInt(this.value);
+
+             if (isNaN(value) || value < min) {
+                 this.value = min;
+             } else if (value > max) {
+                 this.value = max;
+             }
+             
+                 // Intercepter la soumission du formulaire pour utiliser HTTPS
+                 const form = this.closest('form.form-update-quantity');
+                 if (form) {
+                     const formData = new FormData(form);
+                     
+                     // Créer une URL avec le domaine actuel
+                     const url = new URL(window.location.origin);
+                     // Définir le chemin et les paramètres
+                     url.pathname = "/index.php";
+                     url.searchParams.set("page", "panier");
+                     url.searchParams.set("action", "mettre-a-jour");
+                     // Ajouter un timestamp pour éviter la mise en cache
+                     url.searchParams.set("_", Date.now());
+                 
+                 // Soumettre le formulaire via fetch avec HTTPS
+                 fetch(url.toString(), {
+                     method: 'POST',
+                     body: formData
+                 })
+                 .then(response => {
+                     if (response.ok) {
+                         window.location.reload();
+                     }
+                 })
+                 .catch(error => console.error('Erreur:', error));
+                 
+                 // Empêcher la soumission normale du formulaire
+                 return false;
+             }
+         });
+    });
+
+    // Gestion des boutons de suppression d'article
+    document.querySelectorAll('.remove-cart-item').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (confirm('Voulez-vous vraiment supprimer cet article du panier ?')) {
+                const productId = this.dataset.productId;
+                
+                // Créer une URL avec le domaine actuel
+                const url = new URL(window.location.origin);
+                // Définir le chemin et les paramètres
+                url.pathname = "/index.php";
+                url.searchParams.set("page", "panier");
+                url.searchParams.set("action", "supprimer");
+                url.searchParams.set("id", productId);
+                // Ajouter un timestamp pour éviter la mise en cache
+                url.searchParams.set("_", Date.now());
+                
+                // Rediriger vers l'URL avec HTTPS
+                window.location.href = url.toString();
+            }
+        });
+    });
+    
+    // Gestion du bouton "Vider le panier"
+    const clearCartBtn = document.querySelector('.cart-action-clear .btn-outline-danger');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (confirm('Voulez-vous vraiment vider votre panier ?')) {
+                // Créer une URL avec le domaine actuel
+                const url = new URL(window.location.origin);
+                // Définir le chemin et les paramètres
+                url.pathname = "/index.php";
+                url.searchParams.set("page", "panier");
+                url.searchParams.set("action", "vider");
+                // Ajouter un timestamp pour éviter la mise en cache
+                url.searchParams.set("_", Date.now());
+                
+                // Rediriger vers l'URL avec HTTPS
+                window.location.href = url.toString();
+            }
+        });
+    }
+
+    // Gestion du bouton "Procéder au paiement"
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Créer une URL avec le domaine actuel
+            const url = new URL(window.location.origin);
+            // Définir le chemin et les paramètres
+            url.pathname = "/index.php";
+            url.searchParams.set("page", "panier");
+            url.searchParams.set("action", "commander");
+            // Ajouter un timestamp pour éviter la mise en cache
+            url.searchParams.set("_", Date.now());
+            
+            // Rediriger vers l'URL avec HTTPS
+            window.location.href = url.toString();
+        });
+    }
+    
+    // Gestion du bouton "Continuer mes achats"
+    const continueShoppingBtn = document.getElementById('continue-shopping-btn');
+    if (continueShoppingBtn) {
+        continueShoppingBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Créer une URL avec le domaine actuel
+            const url = new URL(window.location.origin);
+            // Définir le chemin et les paramètres
+            url.pathname = "/index.php";
+            url.searchParams.set("page", "boutique");
+            // Ajouter un timestamp pour éviter la mise en cache
+            url.searchParams.set("_", Date.now());
+            
+            // Rediriger vers l'URL avec HTTPS
+            window.location.href = url.toString();
+        });
+    }
+
+    // Gestion du bouton "Explorer la boutique" (panier vide)
+    const exploreStoreBtn = document.getElementById('explore-store-btn');
+    if (exploreStoreBtn) {
+        exploreStoreBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Créer une URL avec le domaine actuel
+            const url = new URL(window.location.origin);
+            // Définir le chemin et les paramètres
+            url.pathname = "/index.php";
+            url.searchParams.set("page", "boutique");
+            // Ajouter un timestamp pour éviter la mise en cache
+            url.searchParams.set("_", Date.now());
+            
+            // Rediriger vers l'URL avec HTTPS
+            window.location.href = url.toString();
+        });
+    }
+
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-floating');
+        alerts.forEach(alert => {
+             if (alert.classList.contains('animate__fadeInRight')) {
+                 alert.classList.remove('animate__fadeInRight');
+                 alert.classList.add('animate__fadeOutRight');
+                 setTimeout(() => alert.remove(), 500); 
+             }
+        });
+    }, 4000); // Délai augmenté à 4s
+
+});
+</script>
+{% endblock %}

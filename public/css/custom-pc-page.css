@@ -1,0 +1,693 @@
+/* ===================================================
+   NETTECH - PC SUR MESURE - STYLE PREMIUM
+   Inspiré par Apple & Gaming Premium (Alienware/ROG)
+   =================================================== */
+
+/* Import des fonts premium */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+/* Variables CSS PC Premium - compatibles avec le thème du site */
+.pc-sur-mesure-container {
+    /* Variables premium utilisant les couleurs du site */
+    --pc-primary-gold: var(--violet-accent, #BB86FC);
+    --pc-primary-gold-light: var(--violet-principal, #8A2BE2);
+    --pc-primary-gold-dark: var(--violet-secondaire, #5D19A8);
+    
+    --pc-bg: var(--fond-primaire, #121212);
+    --pc-surface: var(--fond-secondaire, #1e1e1e);
+    --pc-surface-light: var(--fond-tertiaire, #2a2a2e);
+    
+    --pc-text: var(--texte-couleur, #FFFFFF);
+    --pc-text-secondary: var(--texte-secondaire, rgba(255, 255, 255, 0.7));
+    --pc-text-muted: var(--texte-mute, rgba(255, 255, 255, 0.5));
+    
+    --pc-accent-blue: #007AFF;
+    --pc-accent-green: var(--success-color, #4CAF50);
+    --pc-accent-red: var(--danger-color, #dc3545);
+    
+    --pc-border-radius: 16px;
+    --pc-border-radius-large: 24px;
+    
+    --pc-shadow-premium: 0 8px 32px var(--ombre-couleur, rgba(0, 0, 0, 0.3));
+    --pc-shadow-hover: 0 16px 64px rgba(138, 43, 226, 0.2);
+    
+    --pc-gradient-primary: linear-gradient(135deg, var(--pc-primary-gold) 0%, var(--pc-primary-gold-light) 100%);
+    --pc-gradient-surface: linear-gradient(135deg, var(--pc-bg) 0%, var(--pc-surface) 100%);
+    --pc-gradient-premium: linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(138, 43, 226, 0.05) 100%);
+    
+    /* Style du container */
+    font-family: 'Inter', sans-serif;
+    color: var(--pc-text);
+    padding: 0;
+    margin: 0;
+}
+
+/* Hero Banner Premium */
+.premium-hero {
+    background: var(--pc-gradient-surface);
+    position: relative;
+    padding: 100px 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+.premium-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 122, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.premium-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.premium-hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    margin-bottom: 20px;
+    background: var(--pc-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.premium-hero p {
+    font-size: 1.2rem;
+    color: var(--pc-text-secondary);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.premium-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.premium-stat {
+    text-align: center;
+}
+
+.premium-stat-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--pc-primary-gold);
+    display: block;
+}
+
+.premium-stat-label {
+    font-size: 0.9rem;
+    color: var(--pc-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Filtres Premium */
+.filters-premium {
+    background: var(--pc-surface);
+    border-radius: var(--pc-border-radius-large);
+    padding: 32px;
+    margin: 60px auto;
+    max-width: 1200px;
+    box-shadow: var(--pc-shadow-premium);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.filters-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--pc-primary-gold);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.filter-group {
+    position: relative;
+}
+
+.filter-label {
+    display: block;
+    font-weight: 600;
+    color: var(--pc-text);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-select {
+    width: 100%;
+    background: var(--pc-bg);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--pc-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    appearance: none;
+    cursor: pointer;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--pc-primary-gold);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+}
+
+/* Grille de produits premium */
+.products-premium {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 32px;
+    margin-top: 40px;
+}
+
+/* Carte produit premium */
+.product-premium {
+    background: var(--pc-surface);
+    border-radius: var(--pc-border-radius-large);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(138, 43, 226, 0.1);
+    box-shadow: var(--pc-shadow-premium);
+}
+
+.product-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--pc-shadow-hover);
+    border-color: rgba(138, 43, 226, 0.4);
+}
+
+.product-image-container {
+    position: relative;
+    height: 240px;
+    background: var(--pc-gradient-premium);
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.product-premium:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-badges {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+}
+
+.product-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+}
+
+.badge-limited {
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    animation: pulse-glow 2s infinite;
+}
+
+.badge-premium {
+    background: var(--pc-gradient-primary);
+    color: var(--pc-bg);
+}
+
+.badge-gaming {
+    background: rgba(0, 122, 255, 0.9);
+    color: white;
+}
+
+/* Contenu de la carte */
+.product-content {
+    padding: 24px;
+}
+
+.product-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--pc-text);
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.product-type {
+    color: var(--pc-primary-gold);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.product-specs {
+    background: rgba(138, 43, 226, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.specs-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pc-primary-gold);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.specs-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.specs-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--bordure-couleur, rgba(255, 255, 255, 0.1));
+    font-size: 0.9rem;
+}
+
+.specs-item:last-child {
+    border-bottom: none;
+}
+
+.specs-label {
+    color: var(--pc-text-secondary);
+    font-weight: 500;
+}
+
+.specs-value {
+    color: var(--pc-text);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Performance Gaming Améliorée */
+.product-performance {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(138, 43, 226, 0.05) 100%);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(0, 122, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.product-performance::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pc-accent-blue) 0%, var(--pc-primary-gold) 100%);
+}
+
+.performance-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--pc-primary-gold);
+    margin-bottom: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.performance-showcase {
+    position: relative;
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.performance-item-enhanced {
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid rgba(0, 122, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.performance-item-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.performance-item-enhanced:hover {
+    transform: translateY(-2px);
+    border-color: var(--pc-primary-gold);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+}
+
+.performance-item-enhanced:hover::before {
+    left: 100%;
+}
+
+.game-info {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.game-icon {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 0 4px rgba(0, 122, 255, 0.5));
+}
+
+.game-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--pc-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.fps-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.fps-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--pc-accent-blue);
+    text-shadow: 0 0 8px rgba(0, 122, 255, 0.3);
+}
+
+.fps-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--pc-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+}
+
+.performance-note {
+    text-align: center;
+    padding: 8px 12px;
+    background: rgba(255, 152, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.performance-note small {
+    font-family: 'Orbitron', sans-serif;
+    color: #FF9800;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Ancien style pour compatibilité */
+.performance-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.performance-item {
+    background: rgba(0, 122, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-align: center;
+}
+
+.performance-game {
+    font-size: 0.8rem;
+    color: var(--pc-text-secondary);
+    display: block;
+}
+
+.performance-fps {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--pc-accent-blue);
+}
+
+/* Prix et stock */
+.product-pricing {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bordure-couleur, rgba(255, 255, 255, 0.1));
+}
+
+.product-price {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--pc-primary-gold);
+}
+
+.product-stock {
+    text-align: right;
+}
+
+.stock-number {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: block;
+}
+
+.stock-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.stock-high {
+    color: var(--pc-accent-green);
+}
+
+.stock-low {
+    color: #FF9500;
+}
+
+.stock-out {
+    color: var(--pc-accent-red);
+}
+
+/* Bouton premium */
+.add-to-cart-premium {
+    width: 100%;
+    background: var(--pc-gradient-primary);
+    color: var(--pc-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.add-to-cart-premium:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(138, 43, 226, 0.4);
+}
+
+.add-to-cart-premium:disabled {
+    background: rgba(128, 128, 128, 0.3);
+    color: var(--pc-text-muted);
+    cursor: not-allowed;
+}
+
+/* Info admin discrète */
+.admin-info {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--pc-text-muted);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-premium:hover .admin-info {
+    opacity: 1;
+}
+
+/* Animations */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 59, 48, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.8);
+    }
+}
+
+/* État vide */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--pc-text-secondary);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--pc-text-muted);
+    margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .premium-hero {
+        padding: 60px 0;
+    }
+    
+    .premium-stats {
+        gap: 20px;
+    }
+    
+    .filters-premium {
+        margin: 40px 20px;
+        padding: 24px;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 0 20px;
+    }
+    
+    .product-content {
+        padding: 20px;
+    }
+    
+    .performance-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .premium-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .premium-hero p {
+        font-size: 1rem;
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-image-container {
+        height: 200px;
+    }
+}
+
+/* Transitions globales */
+* {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gold);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-gold-light);
+}

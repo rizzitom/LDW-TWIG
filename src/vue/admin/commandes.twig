@@ -1,0 +1,231 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Gestion des commandes{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=admin" class="btn btn-outline-light me-2">
+    <i class="fas fa-arrow-left me-2"></i> Retour au tableau de bord
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Messages de notification -->
+{% if success == 'status_updated' %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i> Le statut de la commande a été mis à jour avec succès.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>
+{% endif %}
+
+{% if error == 'update_failed' %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i> Erreur lors de la mise à jour du statut. Veuillez réessayer.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>
+{% endif %}
+
+<!-- Filtres -->
+<div class="filter-section mb-4">
+    <form action="index.php" method="get" class="row g-3">
+        <input type="hidden" name="page" value="admin">
+        <input type="hidden" name="section" value="commandes">
+        
+        <div class="col-md-3">
+            <label for="statut" class="form-label">Statut</label>
+            <select name="statut" id="statut" class="form-select search-admin">
+                <option value="">Tous les statuts</option>
+                <option value="en_attente" {% if filtres.statut == 'en_attente' %}selected{% endif %}>En attente</option>
+                <option value="validee" {% if filtres.statut == 'validee' %}selected{% endif %}>Validée</option>
+                <option value="en_preparation" {% if filtres.statut == 'en_preparation' %}selected{% endif %}>En préparation</option>
+                <option value="expediee" {% if filtres.statut == 'expediee' %}selected{% endif %}>Expédiée</option>
+                <option value="livree" {% if filtres.statut == 'livree' %}selected{% endif %}>Livrée</option>
+                <option value="annulee" {% if filtres.statut == 'annulee' %}selected{% endif %}>Annulée</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label for="date_debut" class="form-label">Date de début</label>
+            <input type="date" class="form-control search-admin" id="date_debut" name="date_debut" value="{{ filtres.date_debut }}">
+        </div>
+        
+        <div class="col-md-3">
+            <label for="date_fin" class="form-label">Date de fin</label>
+            <input type="date" class="form-control search-admin" id="date_fin" name="date_fin" value="{{ filtres.date_fin }}">
+        </div>
+        
+        <div class="col-md-3">
+            <label for="recherche" class="form-label">Recherche</label>
+            <div class="input-group">
+                <input type="text" class="form-control search-admin" id="recherche" name="recherche" 
+                       placeholder="Réf., client, email..." value="{{ filtres.recherche }}">
+                <button class="btn btn-purple" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-12 text-end mt-4">
+            <button type="submit" class="btn btn-purple">
+                <i class="fas fa-filter me-2"></i> Filtrer
+            </button>
+            <a href="index.php?page=admin&section=commandes" class="btn btn-outline-light ms-2">
+                <i class="fas fa-undo me-2"></i> Réinitialiser
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Liste des commandes -->
+<div class="admin-table">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Réf.</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if commandes|length > 0 %}
+                    {% for commande in commandes %}
+                    <tr>
+                        <td>{{ commande.reference }}</td>
+                        <td>
+                            {{ commande.nom }} {{ commande.prenom }}<br>
+                            <small class="text-muted">{{ commande.email }}</small>
+                        </td>
+                        <td>{{ commande.date_commande|date("d/m/Y H:i") }}</td>
+                        <td>{{ commande.montant_total|number_format(2, ',', ' ') }} €</td>
+                        <td>
+                            {% if commande.statut == 'en_attente' %}
+                                <span class="status-badge status-pending">En attente</span>
+                            {% elseif commande.statut == 'validee' %}
+                                <span class="status-badge status-processing">Validée</span>
+                            {% elseif commande.statut == 'en_preparation' %}
+                                <span class="status-badge status-processing">En préparation</span>
+                            {% elseif commande.statut == 'expediee' %}
+                                <span class="status-badge status-shipped">Expédiée</span>
+                            {% elseif commande.statut == 'livree' %}
+                                <span class="status-badge status-delivered">Livrée</span>
+                            {% elseif commande.statut == 'annulee' %}
+                                <span class="status-badge status-cancelled">Annulée</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex">
+                                <a href="index.php?page=admin&section=commande-detail&id={{ commande.id }}" 
+                                   class="btn btn-sm btn-outline-light me-2" title="Voir les détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        data-bs-toggle="modal" data-bs-target="#changeStatusModal" 
+                                        data-id="{{ commande.id }}" 
+                                        data-status="{{ commande.statut }}" 
+                                        data-reference="{{ commande.reference }}"
+                                        title="Modifier le statut">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+                            <p>Aucune commande trouvée</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.nombre_pages > 1 %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination pagination-admin">
+        {% if pagination.page_courante > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="index.php?page=admin&section=commandes&page_num={{ pagination.page_courante - 1 }}{% for key, value in filtres %}{% if value %}{{ '&' ~ key ~ '=' ~ value }}{% endif %}{% endfor %}" aria-label="Précédent">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for i in range(1, pagination.nombre_pages) %}
+        <li class="page-item {% if i == pagination.page_courante %}active{% endif %}">
+            <a class="page-link" href="index.php?page=admin&section=commandes&page_num={{ i }}{% for key, value in filtres %}{% if value %}{{ '&' ~ key ~ '=' ~ value }}{% endif %}{% endfor %}">{{ i }}</a>
+        </li>
+        {% endfor %}
+        
+        {% if pagination.page_courante < pagination.nombre_pages %}
+        <li class="page-item">
+            <a class="page-link" href="index.php?page=admin&section=commandes&page_num={{ pagination.page_courante + 1 }}{% for key, value in filtres %}{% if value %}{{ '&' ~ key ~ '=' ~ value }}{% endif %}{% endfor %}" aria-label="Suivant">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block admin_modals %}
+<!-- Modal de changement de statut -->
+<div class="modal fade modal-admin" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStatusModalLabel">Modifier le statut de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form action="" method="post" id="changeStatusForm">
+                <div class="modal-body">
+                    <p>Commande : <strong id="orderReference"></strong></p>
+                    <div class="mb-3">
+                        <label for="nouveauStatut" class="form-label">Nouveau statut</label>
+                        <select class="form-select" id="nouveauStatut" name="nouveau_statut" required>
+                            <option value="en_attente">En attente</option>
+                            <option value="validee">Validée</option>
+                            <option value="en_preparation">En préparation</option>
+                            <option value="expediee">Expédiée</option>
+                            <option value="livree">Livrée</option>
+                            <option value="annulee">Annulée</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-purple">Mettre à jour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuration du modal de changement de statut
+        const statusModal = document.getElementById('changeStatusModal');
+        if (statusModal) {
+            statusModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const currentStatus = button.getAttribute('data-status');
+                const reference = button.getAttribute('data-reference');
+                
+                document.getElementById('orderReference').textContent = reference;
+                document.getElementById('nouveauStatut').value = currentStatus;
+                document.getElementById('changeStatusForm').action = 'index.php?page=admin&section=commandes&update_status=1&id=' + id;
+            });
+        }
+    });
+</script>
+{% endblock %}

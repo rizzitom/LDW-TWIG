@@ -1,0 +1,548 @@
+{% extends "base.twig" %}
+
+{# Override base.twig head to add admin-specific styles #}
+{% block head %}
+    {{ parent() }} {# Include base.twig head content (fonts, bootstrap css, etc.) #}
+    <style>
+        /* ============================================== */
+        /* ADMIN BASE STYLES                     */
+        /* ============================================== */
+
+        /* --- Layout --- */
+        .admin-wrapper { /* New wrapper for main content */
+             padding-left: 280px; /* Match sidebar width */
+             transition: padding-left 0.3s ease;
+         }
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px; /* Sidebar width */
+            background-color: var(--fond-secondaire);
+            border-right: 1px solid var(--bordure-couleur);
+            padding: 1.5rem;
+            overflow-y: auto; /* Scroll if content overflows */
+            z-index: 1031; /* Above header scroll but below modals */
+             transition: transform 0.3s ease;
+             box-shadow: 4px 0 15px var(--ombre-couleur);
+        }
+         /* Toggle Sidebar (Example structure - needs JS) */
+         body.sidebar-toggled .admin-sidebar {
+             transform: translateX(-100%);
+         }
+          body.sidebar-toggled .admin-wrapper {
+              padding-left: 0;
+          }
+           body.sidebar-toggled .admin-header .sidebar-toggle-btn i::before {
+               content: "\f0c9"; /* Bars icon */
+           }
+
+        .admin-sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem; /* More space */
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+         .admin-sidebar-header img { height: 35px; }
+         .admin-sidebar-header h4 {
+            margin-bottom: 0;
+            margin-left: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--texte-couleur);
+         }
+
+        .admin-sidebar .nav-link {
+            color: var(--texte-secondaire);
+            padding: 0.8rem 1rem; /* Increased padding */
+            border-radius: 0.5rem; /* Rounded corners */
+            margin-bottom: 0.25rem; /* Reduced margin */
+            transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .admin-sidebar .nav-link:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--texte-couleur);
+            padding-left: 1.25rem; /* Indent on hover */
+        }
+        .admin-sidebar .nav-link.active {
+            background-color: var(--violet-principal);
+            color: var(--white); /* White text on primary bg */
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        .admin-sidebar .nav-link.active:hover {
+             padding-left: 1rem; /* Reset indent on active hover */
+         }
+        .admin-sidebar .nav-link i {
+            width: 22px; /* Increased width */
+            text-align: center;
+            margin-right: 10px; /* Increased margin */
+            font-size: 1.05em; /* Slightly larger icons */
+            opacity: 0.8;
+             transition: opacity 0.2s ease;
+        }
+         .admin-sidebar .nav-link:hover i,
+         .admin-sidebar .nav-link.active i {
+             opacity: 1;
+         }
+
+
+        /* --- Main Content Area --- */
+        .admin-container {
+            /* background-color: var(--fond-primaire); */ /* Removed, uses body bg */
+            padding: 1.5rem; /* Reduced padding */
+            margin-bottom: 2rem;
+            border-radius: 0; /* No radius needed if it's the main area */
+             /* Min height to push footer down */
+             min-height: calc(100vh - 80px); /* Adjust 80px based on header height */
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+         /* Bouton pour afficher/cacher sidebar (Exemple) */
+         .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--texte-secondaire);
+            font-size: 1.5rem;
+            padding: 0 0.5rem;
+             margin-right: 1rem;
+         }
+         .sidebar-toggle-btn:hover { color: var(--violet-accent); }
+
+
+        .admin-title {
+            margin-bottom: 0;
+            font-size: 1.8rem; /* Increased size */
+            font-weight: 700;
+            color: var(--texte-couleur);
+        }
+
+        /* ============================================== */
+        /* STYLES COMPOSANTS ADMIN (Consolidés)   */
+        /* ============================================== */
+
+        /* --- Cartes Admin --- */
+        .card-admin {
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 8px var(--ombre-couleur);
+             height: 100%; /* For equal height cards in rows */
+        }
+        .card-admin .card-header {
+            background-color: var(--fond-tertiaire); /* Header plus subtil */
+            border-bottom: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem 0.75rem 0 0;
+            color: var(--texte-couleur);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+             font-size: 1.05rem;
+        }
+        .card-admin .card-header i {
+            margin-right: 0.5rem;
+            opacity: 0.8;
+        }
+        .card-admin .card-body {
+            padding: 1.5rem;
+        }
+        .card-admin .card-body.p-0 .table-responsive {
+            border-radius: 0 0 0.75rem 0.75rem;
+            overflow: hidden;
+        }
+         /* Adapte bouton dans header de carte */
+         .card-admin .card-header .btn {
+             font-size: 0.8rem;
+             padding: 0.25rem 0.75rem;
+         }
+
+        /* --- Tableaux Admin --- */
+        .admin-table-wrapper { /* New class for rounded corners on responsive table */
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem;
+            overflow: hidden; /* Crucial for radius */
+            box-shadow: 0 3px 8px var(--ombre-couleur);
+        }
+        .table {
+            --bs-table-bg: var(--fond-secondaire);
+            --bs-table-border-color: var(--bordure-couleur);
+            --bs-table-color: var(--texte-couleur);
+            --bs-table-striped-bg: var(--fond-tertiaire);
+            --bs-table-hover-bg: var(--fond-tertiaire);
+            --bs-table-hover-color: var(--texte-couleur);
+            margin-bottom: 0;
+        }
+        .table thead th {
+            font-weight: 600;
+            color: var(--texte-secondaire);
+            border-bottom-width: 1px;
+            font-size: 0.85rem; /* Smaller header */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap; /* Prevent wrapping */
+            padding: 0.75rem 1rem; /* Adjusted padding */
+             background-color: var(--fond-tertiaire); /* Header background */
+             border-top: 0; /* Remove top border on header */
+        }
+        .table tbody td {
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            vertical-align: middle;
+            font-size: 0.9rem; /* Slightly smaller body */
+        }
+        .table-hover tbody tr.hoverable-row:hover {
+            background-color: var(--fond-tertiaire);
+            cursor: pointer;
+        }
+        .table .text-danger { color: var(--danger-color) !important; }
+        .table .text-warning { color: var(--warning-color) !important; }
+        .table .text-muted { color: var(--texte-mute) !important; }
+
+        /* --- Cartes Statistiques --- */
+        .stat-card {
+            background: var(--fond-secondaire); /* Use simple background */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--bordure-couleur);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px var(--ombre-couleur);
+            color: var(--texte-couleur);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--ombre-couleur);
+        }
+        .stat-icon {
+            position: absolute;
+            bottom: 10px; /* Adjusted position */
+            right: 15px;
+            font-size: 3.5rem; /* Adjusted size */
+            opacity: 0.1; /* Reduced opacity */
+            color: var(--violet-principal);
+             transform: rotate(-10deg);
+        }
+        .stat-value {
+            font-size: 2.2rem; /* Adjusted size */
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--violet-accent);
+            line-height: 1.2;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--texte-secondaire);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        .progress-bar-admin {
+            height: 6px;
+            background-color: var(--fond-tertiaire);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: auto;
+        }
+        .progress-value {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--violet-principal), var(--violet-accent)); /* Gradient progress */
+            transition: width 0.5s ease-in-out;
+        }
+
+         /* --- Badges Statut --- */
+        .status-badge {
+            display: inline-block;
+            padding: 0.3em 0.7em; /* Smaller padding */
+            font-size: 0.75rem; /* Smaller text */
+            font-weight: 600; /* Bolder */
+            border-radius: 50px;
+            text-align: center;
+            min-width: 70px; /* Reduced min-width */
+            border: 1px solid transparent; /* Base border */
+        }
+        .status-pending {
+            background-color: rgba(var(--bs-warning-rgb), 0.1);
+            color: var(--warning-color);
+            border-color: rgba(var(--bs-warning-rgb), 0.3);
+        }
+        .status-processing {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--violet-principal);
+            border-color: rgba(var(--bs-primary-rgb), 0.3);
+        }
+        .status-shipped {
+             background-color: rgba(var(--violet-principal-rgb), 0.15);
+             color: var(--violet-accent);
+             border-color: rgba(var(--violet-principal-rgb), 0.4);
+        }
+        .status-delivered {
+            background-color: rgba(var(--bs-success-rgb), 0.1);
+            color: var(--success-color);
+             border-color: rgba(var(--bs-success-rgb), 0.3);
+        }
+        .status-cancelled {
+            background-color: rgba(var(--bs-danger-rgb), 0.1);
+            color: var(--danger-color);
+             border-color: rgba(var(--bs-danger-rgb), 0.3);
+        }
+
+        /* --- Conteneurs Graphiques --- */
+        .chart-container {
+            background-color: var(--fond-secondaire);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--bordure-couleur);
+            box-shadow: 0 4px 10px var(--ombre-couleur);
+            height: 400px;
+            position: relative;
+        }
+        .chart-container h5 {
+            font-weight: 600;
+            color: var(--texte-couleur);
+            font-size: 1.1rem;
+             margin-bottom: 1rem; /* Espace sous titre */
+        }
+        .chart-container canvas { max-height: 330px; }
+
+         /* --- Notifications (Exemple si besoin) --- */
+         /* Style à adapter selon l'implémentation */
+
+         /* --- Filtres Section Admin --- */
+         .filter-section {
+             background-color: var(--fond-secondaire);
+             border-radius: 0.75rem;
+             padding: 1.5rem;
+             margin-bottom: 1.5rem;
+             border: 1px solid var(--bordure-couleur);
+             box-shadow: 0 3px 8px var(--ombre-couleur);
+         }
+
+         /* --- Pagination Admin --- */
+         .pagination-admin { justify-content: center; margin-top: 1.5rem; }
+         .pagination-admin .page-link {
+             color: var(--violet-accent);
+             background-color: var(--fond-tertiaire);
+             border-color: var(--bordure-couleur);
+             margin: 0 0.2rem;
+             border-radius: 0.3rem;
+             transition: background-color 0.2s ease, color 0.2s ease;
+         }
+         .pagination-admin .page-link:hover {
+             background-color: var(--violet-principal);
+             color: var(--white);
+             border-color: var(--violet-principal);
+         }
+         .pagination-admin .page-item.active .page-link {
+             background-color: var(--violet-principal);
+             border-color: var(--violet-principal);
+             color: var(--white);
+         }
+         .pagination-admin .page-item.disabled .page-link {
+             color: var(--texte-mute);
+             background-color: var(--fond-secondaire);
+             border-color: var(--bordure-couleur);
+         }
+
+         /* --- Modals Admin --- */
+         .modal-admin .modal-content {
+             background-color: var(--fond-secondaire);
+             color: var(--texte-couleur);
+             border: 1px solid var(--bordure-couleur);
+             border-radius: 0.75rem;
+         }
+         .modal-admin .modal-header {
+             border-bottom-color: var(--bordure-couleur);
+              background-color: var(--fond-tertiaire);
+             border-top-left-radius: 0.75rem;
+             border-top-right-radius: 0.75rem;
+         }
+          .modal-admin .modal-header .btn-close {
+               filter: invert(1) grayscale(100%) brightness(200%); /* Adapte bouton close pour fond sombre */
+           }
+           body.light-theme .modal-admin .modal-header .btn-close { filter: none; }
+
+         .modal-admin .modal-footer {
+             border-top-color: var(--bordure-couleur);
+              background-color: var(--fond-tertiaire);
+             border-bottom-left-radius: 0.75rem;
+             border-bottom-right-radius: 0.75rem;
+         }
+
+    </style>
+{% endblock %}
+
+{# Le body ici REMPLACE celui de base.twig #}
+{% block body %}
+<div class="d-flex admin-layout-wrapper"> {# Wrapper pour gérer sidebar/content #}
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            {# Logo admin, utilise l'ID pour potentielle mise à jour thème si différent du logo public #}
+            <img src="#" alt="LDW Admin Logo" id="theme-logo-admin-sidebar">
+            <h4>Admin LDW</h4>
+        </div>
+        <nav class="nav flex-column">
+            {# Liens de navigation admin - Vérifier 'admin_page' pour la classe active #}
+            <a class="nav-link {% if admin_page == 'dashboard' or admin_page is not defined %}active{% endif %}" href="index.php?page=admin">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </a>
+            <a class="nav-link {% if admin_page == 'orders' %}active{% endif %}" href="index.php?page=admin&section=commandes">
+                <i class="fas fa-receipt"></i> Commandes {# Icône changée #}
+            </a>
+            <a class="nav-link {% if admin_page == 'products' %}active{% endif %}" href="index.php?page=produit">
+                <i class="fas fa-box-open"></i> Produits {# Icône changée #}
+            </a>
+            <a class="nav-link {% if admin_page == 'categories' %}active{% endif %}" href="index.php?page=type">
+                <i class="fas fa-tags"></i> Catégories
+            </a>
+            <a class="nav-link {% if admin_page == 'quotes' %}active{% endif %}" href="index.php?page=admin&section=devis">
+                <i class="fas fa-file-invoice-dollar"></i> Devis {# Icône changée #}
+            </a>
+             <a class="nav-link {% if admin_page == 'services_admin' %}active{% endif %}" href="index.php?page=admin&section=services"> {# Lien ajouté ? #}
+                 <i class="fas fa-concierge-bell"></i> Services
+             </a>
+            <a class="nav-link {% if admin_page == 'messages' %}active{% endif %}" href="index.php?page=admin&section=messages">
+                <i class="fas fa-envelope"></i> Messages
+            </a>
+            <a class="nav-link {% if admin_page == 'users' %}active{% endif %}" href="index.php?page=utilisateurs">
+                <i class="fas fa-users"></i> Utilisateurs
+            </a>
+            {# <a class="nav-link {% if admin_page == 'statistics' %}active{% endif %}" href="index.php?page=admin&section=statistiques">
+                <i class="fas fa-chart-pie"></i> Statistiques <!-- Icône changée -->
+            </a> #}
+            <a class="nav-link {% if admin_page == 'settings' %}active{% endif %}" href="index.php?page=admin&section=parametres">
+                <i class="fas fa-cogs"></i> Paramètres
+            </a>
+            {# Lien retour site public #}
+             <hr style="border-color: var(--bordure-couleur); margin: 1rem 0;">
+             <a class="nav-link" href="index.php" target="_blank"> {# Ouvre dans un nouvel onglet #}
+                <i class="fas fa-external-link-alt"></i> Voir le site public
+             </a>
+             <a class="nav-link" href="index.php?page=deconnexion">
+                  <i class="fas fa-sign-out-alt"></i> Déconnexion
+              </a>
+        </nav>
+    </aside>
+
+    <div class="admin-wrapper">
+         {# Header admin (optionnel, peut contenir titre page + actions) #}
+         <header class="admin-header">
+             {# Bouton pour cacher/afficher sidebar (mobile) - JS requis #}
+              <button class="sidebar-toggle-btn d-lg-none" type="button" title="Menu" aria-label="Toggle sidebar">
+                   <i class="fas fa-bars"></i>
+              </button>
+             <h1 class="admin-title">{% block admin_title %}Administration{% endblock %}</h1>
+             <div class="admin-actions ms-auto"> {# Actions spécifiques à la page #}
+                  {% block admin_actions %}{% endblock %}
+                   {# Bouton Theme Toggle pour admin #}
+                   <div class="theme-toggle d-inline-block ms-2" id="theme-toggle" title="Changer le thème">
+                        <i class="fas"></i> {# Icône définie par JS #}
+                    </div>
+             </div>
+         </header>
+
+         {# Contenu principal de la page admin #}
+         <main class="admin-container">
+            {% block admin_content %}{% endblock %}
+         </main>
+
+         {# Footer admin (optionnel) #}
+         <footer class="admin-footer text-center py-3 mt-auto">
+             <small class="text-muted">&copy; {{ "now"|date("Y") }} Le Design Du Web - Administration</small>
+         </footer>
+    </div> {# Fin admin-wrapper #}
+
+</div> {# Fin d-flex #}
+
+{% block admin_modals %}{% endblock %}
+
+{# Le bloc scripts de base.twig n'est PAS hérité car body est redéfini. #}
+{# Il faut réinclure les scripts essentiels ici #}
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {# Charger Chart.js ici si nécessaire globalement pour l'admin #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Reprise de la logique de thème de base.twig, adaptée pour les logos admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggleAdmin = document.getElementById('theme-toggle'); // Utilise ID du bouton dans l'admin header
+            const bodyAdmin = document.body;
+            const themeIconAdmin = themeToggleAdmin ? themeToggleAdmin.querySelector('i') : null;
+            const logoAdminSidebar = document.getElementById('theme-logo-admin-sidebar'); // ID du logo sidebar
+
+             // Chemins des logos (supposons les mêmes que le site public pour l'admin)
+             const logoPathLightAdmin = '{{ get_asset_url('/public/images/logov2/Logosfnoir.png') }}';
+             const logoPathDarkAdmin = '{{ get_asset_url('/public/images/logov2/Logosfblanc.png') }}';
+
+             // Fonction pour appliquer le thème (légèrement adaptée)
+             function applyAdminTheme(theme, initialLoad = false) {
+                bodyAdmin.classList.toggle('light-theme', theme === 'light');
+                if (themeIconAdmin) themeIconAdmin.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+                if (logoAdminSidebar) logoAdminSidebar.src = theme === 'light' ? logoPathLightAdmin : logoPathDarkAdmin;
+                 // Appeler initCharts ici si les couleurs des graphiques doivent changer avec le thème
+                 if (typeof initCharts === 'function' && !initialLoad) {
+                    // Délai pour laisser les variables CSS se mettre à jour
+                    setTimeout(initCharts, 50);
+                 }
+             }
+
+             // Récupère et applique thème initial
+             let currentAdminTheme = localStorage.getItem('theme') || 'dark'; // Synchro avec thème public
+             applyAdminTheme(currentAdminTheme, true);
+
+             // Listener pour le bouton
+             if (themeToggleAdmin) {
+                  themeToggleAdmin.addEventListener('click', () => {
+                     currentAdminTheme = bodyAdmin.classList.contains('light-theme') ? 'dark' : 'light';
+                     localStorage.setItem('theme', currentAdminTheme); // Sauvegarde globale
+                     applyAdminTheme(currentAdminTheme);
+                     // Déclencher un événement pour que d'autres scripts (ex: charts) réagissent si besoin
+                      // document.body.dispatchEvent(new CustomEvent('themeChanged'));
+                  });
+             }
+
+             // Logique pour toggle sidebar (exemple simple)
+              const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn');
+              if(sidebarToggleBtn) {
+                  sidebarToggleBtn.addEventListener('click', () => {
+                      bodyAdmin.classList.toggle('sidebar-toggled');
+                  });
+              }
+
+            // Init potentiel pour Flatpickr ou Select2 (si présents sur la page chargée)
+            // initPlugins(); // Appel d'une fonction qui contient ces initialisations
+
+        }); // Fin DOMContentLoaded
+
+         // Laisser initCharts vide ici, elle sera définie dans le bloc admin_scripts des enfants
+         function initCharts() {
+              // Sera surchargée par dashboard.twig ou autre page avec graphiques
+              // console.log("Base admin initCharts called (should be overridden)");
+         }
+
+         // function initPlugins() {
+         //    if (typeof flatpickr !== 'undefined') { ... }
+         //    if (typeof $ !== 'undefined' && typeof $.fn.select2 !== 'undefined') { ... }
+         // }
+
+    </script>
+    {# Bloc pour les scripts spécifiques de la page admin enfant #}
+    {% block admin_scripts %}{% endblock %}
+{% endblock %}
+{% endblock %}

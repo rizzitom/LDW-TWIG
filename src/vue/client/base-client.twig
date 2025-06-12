@@ -1,0 +1,489 @@
+{% extends "base.twig" %}
+
+{% block head %}
+    {{ parent() }} {# Include base.twig head content #}
+    <style>
+        /* ============================================== */
+        /* CLIENT BASE STYLES                     */
+        /* ============================================== */
+
+        /* --- Layout --- */
+        .client-wrapper {
+            padding-left: 280px; /* Match sidebar width */
+            transition: padding-left 0.3s ease;
+        }
+        .client-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px; /* Sidebar width */
+            background-color: var(--fond-secondaire);
+            border-right: 1px solid var(--bordure-couleur);
+            padding: 1.5rem;
+            overflow-y: auto; /* Scroll if content overflows */
+            z-index: 1031; /* Above header scroll but below modals */
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px var(--ombre-couleur);
+        }
+        /* Toggle Sidebar */
+        body.sidebar-toggled .client-sidebar {
+            transform: translateX(-100%);
+        }
+        body.sidebar-toggled .client-wrapper {
+            padding-left: 0;
+        }
+        body.sidebar-toggled .client-header .sidebar-toggle-btn i::before {
+            content: "\f0c9"; /* Bars icon */
+        }
+
+        .client-sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem; /* More space */
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        .client-sidebar-header img { height: 35px; }
+        .client-sidebar-header h4 {
+            margin-bottom: 0;
+            margin-left: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--texte-couleur);
+        }
+
+        .client-sidebar .nav-link {
+            color: var(--texte-secondaire);
+            padding: 0.8rem 1rem; /* Increased padding */
+            border-radius: 0.5rem; /* Rounded corners */
+            margin-bottom: 0.25rem; /* Reduced margin */
+            transition: background-color 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .client-sidebar .nav-link:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--texte-couleur);
+            padding-left: 1.25rem; /* Indent on hover */
+        }
+        .client-sidebar .nav-link.active {
+            background-color: var(--violet-principal);
+            color: var(--white); /* White text on primary bg */
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        .client-sidebar .nav-link.active:hover {
+            padding-left: 1rem; /* Reset indent on active hover */
+        }
+        .client-sidebar .nav-link i {
+            width: 22px; /* Increased width */
+            text-align: center;
+            margin-right: 10px; /* Increased margin */
+            font-size: 1.05em; /* Slightly larger icons */
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+        .client-sidebar .nav-link:hover i,
+        .client-sidebar .nav-link.active i {
+            opacity: 1;
+        }
+
+        /* --- Main Content Area --- */
+        .client-container {
+            padding: 1.5rem; /* Reduced padding */
+            margin-bottom: 2rem;
+            border-radius: 0; /* No radius needed if it's the main area */
+            /* Min height to push footer down */
+            min-height: calc(100vh - 80px); /* Adjust 80px based on header height */
+        }
+        .client-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        /* Bouton pour afficher/cacher sidebar */
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--texte-secondaire);
+            font-size: 1.5rem;
+            padding: 0 0.5rem;
+            margin-right: 1rem;
+        }
+        .sidebar-toggle-btn:hover { color: var(--violet-accent); }
+
+        .client-title {
+            margin-bottom: 0;
+            font-size: 1.8rem; /* Increased size */
+            font-weight: 700;
+            color: var(--texte-couleur);
+        }
+
+        /* Composants spécifiques client */
+        .client-card {
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 8px var(--ombre-couleur);
+            height: 100%; /* For equal height cards in rows */
+        }
+        .client-card .card-header {
+            background-color: var(--fond-tertiaire);
+            border-bottom: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem 0.75rem 0 0;
+            color: var(--texte-couleur);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            font-size: 1.05rem;
+        }
+        .client-card .card-header i {
+            margin-right: 0.5rem;
+            opacity: 0.8;
+        }
+        .client-card .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.3em 0.7em; /* Smaller padding */
+            font-size: 0.75rem; /* Smaller text */
+            font-weight: 600; /* Bolder */
+            border-radius: 50px;
+            text-align: center;
+            min-width: 70px; /* Reduced min-width */
+            border: 1px solid transparent; /* Base border */
+        }
+        .status-pending {
+            background-color: rgba(var(--bs-warning-rgb), 0.1);
+            color: var(--warning-color);
+            border-color: rgba(var(--bs-warning-rgb), 0.3);
+        }
+        .status-processing {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--violet-principal);
+            border-color: rgba(var(--bs-primary-rgb), 0.3);
+        }
+        .status-shipped {
+            background-color: rgba(var(--violet-principal-rgb), 0.15);
+            color: var(--violet-accent);
+            border-color: rgba(var(--violet-principal-rgb), 0.4);
+        }
+        .status-delivered {
+            background-color: rgba(var(--bs-success-rgb), 0.1);
+            color: var(--success-color);
+            border-color: rgba(var(--bs-success-rgb), 0.3);
+        }
+        .status-cancelled {
+            background-color: rgba(var(--bs-danger-rgb), 0.1);
+            color: var(--danger-color);
+            border-color: rgba(var(--bs-danger-rgb), 0.3);
+        }
+
+        /* Tableau commandes */
+        .table-client {
+            --bs-table-bg: var(--fond-secondaire);
+            --bs-table-border-color: var(--bordure-couleur);
+            --bs-table-color: var(--texte-couleur);
+            --bs-table-striped-bg: var(--fond-tertiaire);
+            --bs-table-hover-bg: var(--fond-tertiaire);
+            --bs-table-hover-color: var(--texte-couleur);
+            margin-bottom: 0;
+        }
+        .table-client thead th {
+            font-weight: 600;
+            color: var(--texte-secondaire);
+            border-bottom-width: 1px;
+            font-size: 0.85rem; /* Smaller header */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap; /* Prevent wrapping */
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            background-color: var(--fond-tertiaire); /* Header background */
+            border-top: 0; /* Remove top border on header */
+        }
+        .table-client tbody td {
+            padding: 0.75rem 1rem; /* Adjusted padding */
+            vertical-align: middle;
+            font-size: 0.9rem; /* Slightly smaller body */
+        }
+        .table-client .clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .table-client .clickable-row:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.05);
+        }
+
+        /* Adresse card */
+        .address-card {
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            background-color: var(--fond-secondaire);
+            height: 100%;
+            position: relative;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .address-card:hover {
+            border-color: var(--violet-accent);
+            box-shadow: 0 4px 12px var(--ombre-couleur);
+        }
+        .address-card .address-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .address-card .address-type {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--violet-accent);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+        .address-card address {
+            margin-bottom: 0;
+            font-style: normal;
+            line-height: 1.6;
+        }
+        .address-card.default {
+            border: 2px solid var(--violet-principal);
+        }
+        .address-card .default-badge {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--violet-principal);
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            border: 1px solid rgba(var(--violet-principal-rgb), 0.3);
+        }
+
+        /* Progress tracker for orders */
+        .order-progress {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 2rem 0 3rem;
+        }
+        .order-progress:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--bordure-couleur);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+        }
+        .progress-step-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: var(--fond-secondaire);
+            border: 2px solid var(--bordure-couleur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            color: var(--texte-secondaire);
+            transition: all 0.3s ease;
+        }
+        .progress-step-text {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--texte-secondaire);
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+        .progress-step.completed .progress-step-icon {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        .progress-step.completed .progress-step-text {
+            color: var(--success-color);
+        }
+        .progress-step.active .progress-step-icon {
+            background-color: var(--violet-principal);
+            border-color: var(--violet-principal);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 0 5px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        .progress-step.active .progress-step-text {
+            color: var(--violet-principal);
+            font-weight: 600;
+        }
+        .order-progress.completed:before {
+            background-color: var(--success-color);
+        }
+        
+        /* Pour mobile (responsive) */
+        @media (max-width: 992px) {
+            .client-wrapper {
+                padding-left: 0;
+            }
+            .client-sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            body.sidebar-toggled .client-sidebar {
+                transform: translateX(0);
+            }
+            .sidebar-toggle-btn {
+                display: block;
+            }
+        }
+    </style>
+{% endblock %}
+
+{# Le body ici REMPLACE celui de base.twig #}
+{% block body %}
+<div class="d-flex client-layout-wrapper"> {# Wrapper pour gérer sidebar/content #}
+    <aside class="client-sidebar">
+        <div class="client-sidebar-header d-flex align-items-center justify-content-center">
+        <h4>Mon espace</h4>
+        </div>
+        <div class="text-center mb-3">
+            {% if client.profile_picture %}
+                <img src="{{ asset(client.profile_picture) }}" alt="Photo de profil" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                <p class="mb-0 fw-bold">{{ client.prenom }} {{ client.nom }}</p>
+                <p class="text-muted small">{{ client.email }}</p>
+            {% else %}
+                <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-2" style="width: 80px; height: 80px;">
+                    <i class="fas fa-user-circle text-secondary" style="font-size: 3rem;"></i>
+                </div>
+                <p class="mb-0 fw-bold">{{ client.prenom }} {{ client.nom }}</p>
+                <p class="text-muted small">{{ client.email }}</p>
+            {% endif %}
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link {% if client_page == 'dashboard' or client_page is not defined %}active{% endif %}" href="index.php?page=mon_compte">
+                <i class="fas fa-user-circle"></i> Mon profil
+            </a>
+            <a class="nav-link {% if client_page == 'commandes' %}active{% endif %}" href="index.php?page=commandes">
+                <i class="fas fa-shopping-bag"></i> Mes commandes
+            </a>
+            <a class="nav-link {% if client_page == 'adresses' %}active{% endif %}" href="index.php?page=adresses">
+                <i class="fas fa-map-marker-alt"></i> Mes adresses
+            </a>
+            <a class="nav-link {% if client_page == 'devis' %}active{% endif %}" href="index.php?page=mes-devis">
+                <i class="fas fa-file-invoice-dollar"></i> Mes devis
+            </a>
+            <a class="nav-link {% if client_page == 'messages' %}active{% endif %}" href="index.php?page=messages">
+                <i class="fas fa-envelope"></i> Messages
+            </a>
+            <a class="nav-link {% if client_page == 'securite' %}active{% endif %}" href="index.php?page=securite">
+                <i class="fas fa-shield-alt"></i> Sécurité
+            </a>
+            <hr style="border-color: var(--bordure-couleur); margin: 1rem 0;">
+            <a class="nav-link" href="index.php">
+               <i class="fas fa-store"></i> Retour à la boutique
+            </a>
+            <a class="nav-link" href="index.php?page=deconnexion">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </nav>
+    </aside>
+
+    <div class="client-wrapper">
+        <header class="client-header">
+            <button class="sidebar-toggle-btn d-lg-none" type="button" title="Menu" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="client-title">{% block client_title %}Mon espace client{% endblock %}</h1>
+            <div class="client-actions ms-auto d-flex align-items-center">
+                {% if client.profile_picture %}
+                    <div class="d-none d-lg-flex align-items-center me-3">
+                    </div>
+                {% else %}
+                    <div class="d-none d-lg-flex align-items-center me-3">
+                    </div>
+                {% endif %}
+                {% block client_actions %}{% endblock %}
+            </div>
+        </header>
+
+        <main class="client-container">
+            {% block client_content %}{% endblock %}
+        </main>
+
+        <footer class="text-center py-3 mt-auto">
+            <small class="text-muted">&copy; {{ "now"|date("Y") }} Le Design Du Web - Espace client</small>
+        </footer>
+    </div>
+</div>
+
+{% block client_modals %}{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggleClient = document.getElementById('theme-toggle');
+            const bodyClient = document.body;
+            const logoClientSidebar = document.getElementById('theme-logo-client-sidebar');
+
+            // Chemins des logos (même que le site public)
+            const logoPathLightClient = '{{ get_asset_url('/public/images/logov2/Logosfnoir.png') }}';
+            const logoPathDarkClient = '{{ get_asset_url('/public/images/logov2/Logosfblanc.png') }}';
+
+            // Récupère le thème sauvegardé
+            let currentClientTheme = localStorage.getItem('theme') || 'dark';
+            
+            // Applique le thème initial
+            applyClientTheme(currentClientTheme, true);
+            
+            // Fonction pour appliquer le thème
+            function applyClientTheme(theme, initialLoad = false) {
+                if (logoClientSidebar) {
+                    logoClientSidebar.src = theme === 'light' ? logoPathLightClient : logoPathDarkClient;
+                }
+            }
+
+            // Logique pour toggle sidebar
+            const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn');
+            if(sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', () => {
+                    bodyClient.classList.toggle('sidebar-toggled');
+                });
+            }
+            
+            // Pour rendre les lignes de tableau cliquables
+            const clickableRows = document.querySelectorAll('.clickable-row');
+            clickableRows.forEach(row => {
+                row.addEventListener('click', () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+    
+    {% block client_scripts %}{% endblock %}
+{% endblock %}
+{% endblock %}

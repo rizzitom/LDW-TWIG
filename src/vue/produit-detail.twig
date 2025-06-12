@@ -1,0 +1,1025 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ produit.nom|default('Produit') }} - Le Design Du Web{% endblock %}
+
+{% block head %}
+    {{ parent() }} {# Include base.twig head #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        /* ============================================== */
+        /* STYLES PAGE PRODUIT                   */
+        /* ============================================== */
+
+        .product-detail-container { /* Wrapper principal */
+           /* background-color: var(--fond-secondaire); */ /* Optionnel: Si on veut un fond différent du body */
+           /* border-radius: 0.75rem; */
+           /* padding: 2rem; */
+           /* margin-bottom: 2rem; */
+           /* box-shadow: 0 4px 15px var(--ombre-couleur); */
+           /* border: 1px solid var(--bordure-couleur); */
+        }
+
+        /* --- Breadcrumb --- */
+        .breadcrumb {
+            background-color: var(--fond-secondaire); /* Thème */
+            padding: 0.75rem 1.25rem; /* Padding ajusté */
+            border-radius: 0.5rem; /* Thème */
+            margin-bottom: 2rem; /* Espace sous breadcrumb */
+            border: 1px solid var(--bordure-couleur); /* Thème */
+            font-size: 0.9rem;
+        }
+        .breadcrumb-item a {
+            color: var(--texte-secondaire); /* Thème */
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .breadcrumb-item a:hover { color: var(--violet-accent); } /* Thème */
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--texte-mute); /* Thème */
+            padding-right: 0.7rem; /* Espace flèche */
+             padding-left: 0.7rem;
+        }
+        .breadcrumb-item.active {
+            color: var(--texte-couleur); /* Thème */
+            font-weight: 500;
+        }
+        .breadcrumb-item i { margin-right: 0.3rem; opacity: 0.8;} /* Icônes breadcrumb */
+
+
+        /* --- Galerie Image --- */
+        .product-image-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+            background-color: var(--fond-tertiaire); /* Thème */
+            border-radius: 0.75rem; /* Thème */
+            padding: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--bordure-couleur);
+        }
+         /* Swiper principal */
+        .product-image-swiper {
+             border-radius: 0.5rem;
+             overflow: hidden; /* Cache coins image si besoin */
+         }
+        .product-image-main {
+            height: 450px; /* Hauteur image principale */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.3s ease;
+            cursor: zoom-in; /* Indique qu'on peut zoomer (si implémenté) */
+        }
+        .product-image-main:hover {
+             /* transform: scale(1.03); */ /* Optionnel: léger zoom au survol */
+        }
+         /* Swiper miniatures */
+        .product-image-thumbs-swiper {
+            margin-top: 1rem;
+            height: 90px; /* Hauteur ajustée */
+            padding: 5px 0; /* Espace vertical */
+        }
+        .thumb-slide {
+            width: 80px;
+            height: 80px;
+            background-size: cover; /* Cover pour remplir la miniature */
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 0.3rem; /* Rayon cohérent */
+            cursor: pointer;
+            border: 2px solid var(--bordure-couleur); /* Bordure thème */
+            transition: border-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0.6;
+        }
+        .thumb-slide:hover { opacity: 1; }
+        .thumb-slide.swiper-slide-thumb-active {
+            border-color: var(--violet-principal); /* Thème */
+            opacity: 1;
+            box-shadow: 0 0 8px rgba(var(--violet-principal-rgb), 0.5); /* Thème */
+        }
+
+        /* --- Infos Produit (Droite) --- */
+        .product-title {
+            font-size: clamp(1.8rem, 4vw, 2.4rem); /* Responsive */
+            margin-bottom: 0.75rem;
+            color: var(--texte-couleur); /* Thème */
+            font-weight: 700;
+            line-height: 1.3;
+        }
+         .product-short-desc { /* Pour le lead */
+            font-size: 1.1rem;
+            color: var(--texte-secondaire); /* Thème */
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+         }
+
+        .product-price-container {
+            background-color: var(--fond-secondaire); /* Thème */
+            border-radius: 0.5rem; /* Thème */
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--bordure-couleur); /* Thème */
+        }
+        .product-price {
+            font-size: 2.2rem; /* Prix plus grand */
+            font-weight: 700; /* Moins gras */
+            color: var(--violet-accent); /* Thème */
+        }
+        .product-price-promo {
+            font-size: 1.3rem; /* Plus petit */
+            text-decoration: line-through;
+            color: var(--texte-mute); /* Thème */
+            margin-right: 10px;
+        }
+        .product-discount-badge {
+            display: inline-block;
+            background-color: var(--danger-color); /* Rouge danger pour promo */
+            color: var(--white); /* Texte blanc */
+            padding: 0.3em 0.8em; /* Padding ajusté */
+            border-radius: 50px; /* Rond */
+            font-weight: bold;
+            margin-left: 0.75rem;
+            font-size: 0.8rem; /* Plus petit */
+            /* animation: pulse 1.5s infinite ease-in-out; */ /* Animation optionnelle */
+        }
+        /* @keyframes pulse { ... } */ /* Si animation utilisée */
+
+         /* Stock Status - Utilise styles globaux si définis, sinon styles locaux */
+         .stock-status {
+             font-size: 0.95rem; /* Taille ajustée */
+             display: flex;
+             align-items: center;
+             gap: 0.5rem;
+             margin-top: 1rem; /* Espace au dessus */
+             padding: 0.5rem 1rem; /* Padding */
+             border-radius: 0.3rem; /* Thème */
+             font-weight: 500;
+         }
+         .stock-status i { font-size: 1.1em; } /* Icône légèrement plus grande */
+         .stock-available { /* Vert */
+             color: var(--success-color);
+             background-color: rgba(var(--bs-success-rgb), 0.1);
+             border: 1px solid rgba(var(--bs-success-rgb), 0.2);
+         }
+         .stock-low { /* Orange */
+             color: var(--warning-color);
+             background-color: rgba(var(--bs-warning-rgb), 0.1);
+             border: 1px solid rgba(var(--bs-warning-rgb), 0.2);
+         }
+         .stock-out { /* Rouge */
+             color: var(--danger-color);
+             background-color: rgba(var(--bs-danger-rgb), 0.1);
+              border: 1px solid rgba(var(--bs-danger-rgb), 0.2);
+         }
+
+
+        /* Features Produit */
+        .product-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem; /* Espace réduit */
+            margin: 1.5rem 0;
+        }
+        .product-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--fond-tertiaire); /* Thème */
+            padding: 0.5rem 1rem; /* Padding ajusté */
+            border-radius: 50px; /* Rond */
+            font-size: 0.85rem; /* Plus petit */
+            color: var(--texte-secondaire); /* Thème */
+            border: 1px solid var(--bordure-couleur); /* Thème */
+        }
+        .product-feature i {
+            color: var(--violet-principal); /* Thème */
+            font-size: 1rem; /* Taille icône */
+        }
+
+        /* --- Actions Produit --- */
+         .add-to-cart-form { /* Wrapper pour formulaire ajout */
+             margin: 2rem 0;
+         }
+        .add-to-cart-form form { /* Le formulaire flex */
+            display: flex;
+            gap: 0.75rem; /* Espace entre éléments */
+            align-items: center; /* Alignement vertical */
+        }
+         /* --- Groupe Quantité (Réutilise style panier) --- */
+        .quantity-input-group {
+            display: flex;
+            align-items: center;
+            background-color: var(--fond-tertiaire); /* Thème */
+            border-radius: 50px;
+            overflow: hidden;
+            min-width: 110px; /* Largeur min */
+            border: 1px solid var(--bordure-couleur); /* Thème */
+             height: 48px; /* Hauteur alignée sur bouton */
+        }
+        .quantity-btn {
+            width: 35px; /* Largeur bouton +/- */
+            height: 100%; /* Prend hauteur groupe */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--texte-secondaire); /* Thème */
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .quantity-btn:hover {
+            background-color: var(--fond-secondaire);
+            color: var(--violet-principal);
+        }
+        .quantity-input {
+            width: 40px; /* Largeur input */
+            height: 100%;
+            text-align: center;
+            border: none;
+            border-left: 1px solid var(--bordure-couleur);
+            border-right: 1px solid var(--bordure-couleur);
+            background: none;
+            color: var(--texte-couleur); /* Thème */
+            font-weight: 500;
+            padding: 0 0.2rem;
+        }
+        .quantity-input:focus { outline: none; }
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .quantity-input[type=number] { -moz-appearance: textfield; }
+
+         /* Bouton Ajouter Panier */
+         .add-to-cart-btn {
+             height: 48px; /* Hauteur alignée */
+             font-weight: 600;
+         }
+         /* Bouton Wishlist */
+        .wishlist-btn {
+            background-color: var(--fond-tertiaire); /* Thème */
+            border: 1px solid var(--bordure-couleur); /* Thème */
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--texte-mute); /* Thème */
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            flex-shrink: 0; /* Empêche rétrécissement */
+        }
+        .wishlist-btn:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--violet-principal); /* Thème */
+            transform: scale(1.1);
+        }
+         .wishlist-btn.active i { /* Si JS ajoute classe active */
+              font-weight: 900; /* fas */
+              color: var(--link-color-special); /* Rose? */
+         }
+
+
+        /* --- Onglets Informations --- */
+        .tab-container { margin-top: 2rem; }
+        .nav-tabs { border-bottom: 1px solid var(--bordure-couleur); } /* Thème */
+        .nav-tabs .nav-link {
+            color: var(--texte-secondaire); /* Thème */
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent; /* Bordure invisible */
+            padding: 0.8rem 1.2rem; /* Padding ajusté */
+            margin-bottom: -1px; /* Compense bordure container */
+            transition: color 0.2s ease, border-color 0.2s ease;
+            font-weight: 500;
+        }
+        .nav-tabs .nav-link:hover {
+            color: var(--texte-couleur); /* Thème */
+            border-bottom-color: var(--bordure-couleur); /* Thème */
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--violet-principal); /* Thème */
+            background: none;
+            border-bottom-color: var(--violet-principal); /* Thème */
+            font-weight: 600;
+        }
+        .tab-content {
+            padding: 1.5rem 0.5rem; /* Padding contenu onglet */
+            border: 1px solid var(--bordure-couleur); /* Thème */
+            border-top: none; /* Pas de bordure haute */
+            border-radius: 0 0 0.5rem 0.5rem;
+             background-color: var(--fond-secondaire); /* Fond pour contenu */
+             min-height: 200px; /* Hauteur min */
+        }
+        .product-description {
+            white-space: pre-line; /* Conserve sauts de ligne */
+            margin-bottom: 0; /* Pas de marge basse si seul élément */
+            color: var(--texte-secondaire); /* Thème */
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        .product-specs {
+             background: none; /* Pas de fond spécifique ici */
+             padding: 0;
+             margin: 0;
+             box-shadow: none;
+         }
+        .product-specs-title { /* Plus utilisé si specs direct dans tab */
+             display: none;
+         }
+        .product-spec-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--bordure-couleur); /* Thème */
+            font-size: 0.9rem;
+        }
+        .product-spec-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .product-spec-name {
+            width: 35%; /* Largeur ajustée */
+            font-weight: 500; /* Moins gras */
+            color: var(--texte-couleur); /* Thème */
+            padding-right: 1rem;
+        }
+        .product-spec-value {
+            width: 65%;
+            color: var(--texte-secondaire); /* Thème */
+        }
+         .delivery-info p {
+             margin-bottom: 0.8rem;
+             color: var(--texte-secondaire);
+             font-size: 0.95rem;
+         }
+          .delivery-info i {
+              color: var(--violet-principal);
+              width: 20px;
+              text-align: center;
+          }
+
+        /* --- Métadonnées Produit --- */
+        .product-meta {
+            margin-top: 2rem;
+            color: var(--texte-mute); /* Thème */
+            font-size: 0.85rem;
+             border-top: 1px solid var(--bordure-couleur);
+             padding-top: 1rem;
+        }
+         .product-meta p { margin-bottom: 0.3rem; }
+         .product-meta a {
+             color: var(--texte-secondaire); /* Thème */
+             text-decoration: none;
+         }
+         .product-meta a:hover { color: var(--violet-accent); }
+
+        /* --- Produits Associés --- */
+        .related-products { margin-top: 3rem; }
+        .related-products h2 {
+             font-size: 1.6rem;
+             font-weight: 600;
+             margin-bottom: 1.5rem;
+             color: var(--texte-couleur);
+             border-bottom: 2px solid var(--violet-principal);
+             padding-bottom: 0.5rem;
+             display: inline-block;
+         }
+        /* Réutilisation .product-card (styles définis avant ou dans base.twig) */
+
+         /* --- Avis Clients --- */
+         .customer-reviews { margin-top: 3rem; }
+         .customer-reviews h2 { /* Identique à related-products h2 */
+             font-size: 1.6rem;
+             font-weight: 600;
+             margin-bottom: 1.5rem;
+             color: var(--texte-couleur);
+             border-bottom: 2px solid var(--violet-principal);
+             padding-bottom: 0.5rem;
+             display: inline-block;
+         }
+         .review-card {
+             background-color: var(--fond-secondaire); /* Thème */
+             border: 1px solid var(--bordure-couleur); /* Thème */
+             border-radius: 0.5rem; /* Thème */
+             padding: 1.25rem; /* Padding interne */
+             margin-bottom: 1.5rem;
+             box-shadow: 0 2px 5px var(--ombre-couleur); /* Thème */
+         }
+         .review-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: flex-start; /* Aligne haut */
+             margin-bottom: 1rem;
+             flex-wrap: wrap; /* Mobile */
+             gap: 0.5rem;
+         }
+         .review-user { display: flex; align-items: center; gap: 0.75rem; }
+         .review-avatar { font-size: 2rem; color: var(--texte-mute); }
+         .review-name { font-size: 1rem; font-weight: 600; margin-bottom: 0; color: var(--texte-couleur); }
+         .review-date { font-size: 0.8rem; color: var(--texte-mute); }
+         .review-rating i { color: #FFC107; } /* Jaune étoiles */
+         .review-content p {
+             margin-bottom: 0;
+             color: var(--texte-secondaire); /* Thème */
+             font-size: 0.95rem;
+             line-height: 1.6;
+         }
+         .empty-reviews {
+             text-align: center;
+             padding: 2rem;
+             background-color: var(--fond-secondaire);
+             border: 1px dashed var(--bordure-couleur);
+             border-radius: 0.5rem;
+             color: var(--texte-mute);
+         }
+          .empty-reviews .empty-icon { font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.6;}
+          .empty-reviews h3 { color: var(--texte-secondaire); font-size: 1.2rem;}
+
+         /* Formulaire Avis */
+         .review-form-container {
+             background-color: var(--fond-secondaire);
+             border: 1px solid var(--bordure-couleur);
+             border-radius: 0.75rem;
+             padding: 1.5rem;
+             margin-top: 2rem;
+         }
+          .review-form-container h3 { font-size: 1.3rem; margin-bottom: 1.5rem; font-weight: 600; }
+          .review-form-container .form-label { /* Réutilise style label */
+              color: var(--texte-gris-clair); margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 500;
+          }
+          .review-form-container .form-control { /* Réutilise style input */
+               background-color: var(--fond-tertiaire); border-color: var(--bordure-couleur); color: var(--texte-couleur);
+           }
+           .review-form-container .form-control:focus {
+               background-color: var(--fond-tertiaire); border-color: var(--violet-principal);
+               box-shadow: 0 0 0 0.2rem rgba(var(--violet-principal-rgb), 0.25); color: var(--texte-couleur);
+           }
+           /* Rating Stars */
+           .rating-selector .stars { display: inline-flex; flex-direction: row-reverse; /* Important pour le CSS trick */ }
+           .rating-selector .stars input[type="radio"] { display: none; }
+           .rating-selector .stars label {
+               color: var(--texte-mute); /* Couleur étoile vide */
+               font-size: 1.8rem;
+               padding: 0 0.2rem;
+               cursor: pointer;
+               transition: color 0.2s ease;
+           }
+           .rating-selector .stars label:hover,
+           .rating-selector .stars label:hover ~ label, /* Met en surbrillance étoiles précédentes */
+           .rating-selector .stars input[type="radio"]:checked ~ label { /* Met en surbrillance étoiles cochées et précédentes */
+               color: #FFC107; /* Jaune étoile pleine */
+           }
+           .review-form-container .btn-primary { /* Utilise btn-purple */
+                background-color: var(--violet-principal); border-color: var(--violet-principal);
+            }
+            .review-form-container .btn-primary:hover {
+                 background-color: var(--violet-secondaire); border-color: var(--violet-secondaire);
+             }
+
+
+        /* Alerte Flottante (Copier style de base.twig si besoin) */
+         .alert-floating {
+            /* ... styles copiés de base.twig ou panier.twig ... */
+             position: fixed; bottom: 20px; right: 20px; z-index: 1050;
+             min-width: 250px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+             border-radius: 0.5rem; border-left: 5px solid;
+             background-color: var(--fond-secondaire); color: var(--texte-couleur);
+             padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;
+         }
+         .alert-floating.alert-success { border-color: var(--success-color); }
+         .alert-floating.alert-success i { color: var(--success-color); }
+         .alert-floating.alert-danger { border-color: var(--danger-color); }
+         .alert-floating.alert-danger i { color: var(--danger-color); }
+
+
+        /* Responsive */
+        @media (max-width: 991.98px) {
+             .product-image-main { height: 350px; }
+         }
+        @media (max-width: 767.98px) {
+            .product-title { font-size: 1.8rem; }
+            .product-image-main { height: 280px; }
+            .product-image-thumbs-swiper { height: 80px; }
+            .thumb-slide { width: 60px; height: 60px; }
+             .add-to-cart-form form { flex-direction: column; align-items: stretch; }
+             .quantity-input-group { width: 100%; margin-bottom: 0.75rem; justify-content: center; }
+             .wishlist-btn { width: 100%; }
+             .product-spec-row { flex-direction: column; gap: 0.25rem; }
+             .product-spec-name, .product-spec-value { width: 100%; }
+             .review-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+
+    {# Messages Flash #}
+    {% if ajout_success %}
+    <div class="alert alert-success alert-floating animate__animated animate__fadeInRight" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Produit ajouté au panier !
+    </div>
+    {% endif %}
+    {% if ajout_error %}
+    <div class="alert alert-danger alert-floating animate__animated animate__fadeInRight" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> {{ app.request.get('message')|default('Erreur ajout panier') }}
+    </div>
+    {% endif %}
+
+    {# Breadcrumb #}
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php"><i class="fas fa-home"></i> Accueil</a></li>
+            <li class="breadcrumb-item"><a href="index.php?page=boutique"><i class="fas fa-store"></i> Boutique</a></li>
+            {% if produit.categorie_parente_nom %} {# Gère catégorie parente si existe #}
+                 <li class="breadcrumb-item"><a href="index.php?page=boutique&categorie={{ produit.id_categorie_parente }}">{{ produit.categorie_parente_nom }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item"><a href="index.php?page=boutique&categorie={{ produit.id_categorie }}">{{ produit.categorie_nom }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ produit.nom }}</li>
+        </ol>
+    </nav>
+
+    {# Conteneur principal du produit #}
+    <div class="product-detail-container">
+        <div class="row">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="product-image-container">
+                    <div class="swiper product-image-swiper">
+                        <div class="swiper-wrapper">
+                            {# Image principale #}
+                            <div class="swiper-slide">
+                                <div class="product-image-main" style="background-image: url('{{ produit.image_url|default('/public/images/placeholder.png') }}')" title="Image principale de {{ produit.nom }}"></div>
+                            </div>
+                            {# Images supplémentaires #}
+                            {% if produit.images_supplementaires|default([])|length > 0 %}
+                                {% for image in produit.images_supplementaires %}
+                                <div class="swiper-slide">
+                                    <div class="product-image-main" style="background-image: url('{{ image }}')" title="Image supplémentaire de {{ produit.nom }}"></div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        {# Ajouter flèches si plusieurs images #}
+                         {% if produit.images_supplementaires|default([])|length > 0 %}
+                              <div class="swiper-button-next"></div>
+                              <div class="swiper-button-prev"></div>
+                          {% endif %}
+                    </div>
+
+                    {% set total_images = 1 + produit.images_supplementaires|default([])|length %}
+                    {% if total_images > 1 %}
+                    <div class="swiper product-image-thumbs-swiper">
+                        <div class="swiper-wrapper">
+                             <div class="swiper-slide">
+                                <div class="thumb-slide" style="background-image: url('{{ produit.image_url|default('/public/images/placeholder.png') }}')" title="Miniature principale"></div>
+                            </div>
+                            {% for image in produit.images_supplementaires|default([]) %}
+                            <div class="swiper-slide">
+                                <div class="thumb-slide" style="background-image: url('{{ image }}')" title="Miniature supplémentaire"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h1 class="product-title">{{ produit.nom }}</h1>
+                 {% if produit.description_courte %}
+                 <p class="lead product-short-desc">{{ produit.description_courte }}</p>
+                 {% endif %}
+
+                <div class="product-price-container">
+                    {# Prix #}
+                    <div class="mb-2"> {# Wrapper prix/promo #}
+                        {% if produit.prix_promo is defined and produit.prix_promo > 0 and produit.prix_promo < produit.prix %}
+                            <span class="product-price-promo">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                            <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                            {% set discount = ((produit.prix - produit.prix_promo) / produit.prix * 100)|round %}
+                            <span class="product-discount-badge">-{{ discount }}%</span>
+                        {% else %}
+                            <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                        {% endif %}
+                    </div>
+                    {# Statut Stock #}
+                    <div class="stock-status">
+                        {% if produit.stock <= 0 %}
+                            <i class="fas fa-times-circle text-danger"></i> <span class="stock-out">Rupture de stock</span>
+                        {% elseif produit.stock < 5 %}
+                            <i class="fas fa-exclamation-circle text-warning"></i> <span class="stock-low">Plus que {{ produit.stock }} en stock !</span>
+                        {% else %}
+                            <i class="fas fa-check-circle text-success"></i> <span class="stock-available">En stock</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                 {# Features / Garanties #}
+                <div class="product-features">
+                    <div class="product-feature"><i class="fas fa-truck"></i> Livraison rapide</div>
+                    <div class="product-feature"><i class="fas fa-undo"></i> Retours 30 jours</div>
+                    <div class="product-feature"><i class="fas fa-shield-alt"></i> Garantie 2 ans</div>
+                </div>
+
+                {% if produit.stock > 0 %}
+                <div class="add-to-cart-form">
+                    <form action="{{ get_asset_url('index.php?page=panier&action=ajouter') }}" method="post">
+                        <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                        <div class="quantity-input-group">
+                            <button type="button" class="quantity-btn minus-btn" aria-label="Diminuer quantité"><i class="fas fa-minus"></i></button>
+                            <input type="number" name="quantite" value="1" min="1" max="{{ produit.stock }}" class="quantity-input" aria-label="Quantité">
+                            <button type="button" class="quantity-btn plus-btn" aria-label="Augmenter quantité"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <button type="submit" class="btn btn-purple btn-lg add-to-cart-btn flex-grow-1">
+                            <i class="fas fa-cart-plus me-2"></i> Ajouter au panier
+                        </button>
+                         {# <button type="button" class="btn btn-lg btn-outline-secondary wishlist-btn" title="Ajouter aux favoris">
+                            <i class="far fa-heart"></i>
+                         </button> #}
+                    </form>
+                </div>
+                {% else %}
+                    <div class="alert alert-danger mt-4"><i class="fas fa-times-circle me-2"></i> Ce produit est momentanément indisponible.</div>
+                {% endif %}
+
+                <div class="tab-container">
+                    <ul class="nav nav-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description-pane" type="button" role="tab" aria-controls="description-pane" aria-selected="true">Description</button>
+                        </li>
+                        {% if produit.caracteristiques is defined and produit.caracteristiques|length > 0 %}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs-pane" type="button" role="tab" aria-controls="specs-pane" aria-selected="false">Caractéristiques</button>
+                            </li>
+                        {% endif %}
+                         <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane" type="button" role="tab" aria-controls="reviews-pane" aria-selected="false">Avis ({% if avis|default([])|length > 0 %}{{ avis|length }}{% else %}0{% endif %})</button>
+                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery-pane" type="button" role="tab" aria-controls="delivery-pane" aria-selected="false">Livraison & Retours</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="productTabsContent">
+                        {# Onglet Description #}
+                        <div class="tab-pane fade show active" id="description-pane" role="tabpanel" aria-labelledby="description-tab">
+                            {% if produit.description %}
+                                <div class="product-description">{{ produit.description|nl2br }}</div>
+                            {% else %}
+                                <p class="text-muted">Aucune description détaillée fournie pour ce produit.</p>
+                            {% endif %}
+                        </div>
+                        {# Onglet Caractéristiques #}
+                        {% if produit.caracteristiques is defined and produit.caracteristiques|length > 0 %}
+                            <div class="tab-pane fade" id="specs-pane" role="tabpanel" aria-labelledby="specs-tab">
+                                <div class="product-specs">
+                                    {% for nom, valeur in produit.caracteristiques %}
+                                        <div class="product-spec-row">
+                                            <div class="product-spec-name">{{ nom }}</div>
+                                            <div class="product-spec-value">{{ valeur }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                         {# Onglet Avis #}
+                         <div class="tab-pane fade" id="reviews-pane" role="tabpanel" aria-labelledby="reviews-tab">
+                              {% include 'partials/avis_section.twig' with {'avis': avis, 'produit_id': produit.id} %} {# Include partiel pour avis #}
+                         </div>
+                        {# Onglet Livraison #}
+                        <div class="tab-pane fade" id="delivery-pane" role="tabpanel" aria-labelledby="delivery-tab">
+                            <div class="delivery-info">
+                                <p><i class="fas fa-truck"></i> <strong>Livraison standard:</strong> 3-5 jours ouvrables (Offerte dès 50€)</p>
+                                <p><i class="fas fa-shipping-fast"></i> <strong>Livraison express:</strong> 1-2 jours ouvrables (Option payante)</p>
+                                <p><i class="fas fa-store"></i> <strong>Retrait en magasin (Click & Collect):</strong> Gratuit (Préparation sous 24h ouvrées)</p>
+                                <p><i class="fas fa-undo"></i> <strong>Retours:</strong> Gratuits sous 30 jours pour échange ou remboursement.</p>
+                                <a href="#" class="btn btn-sm btn-outline-secondary mt-2">En savoir plus sur nos livraisons</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-meta">
+                    <p>Catégorie: <a href="index.php?page=boutique&categorie={{ produit.id_categorie }}">{{ produit.categorie_nom }}</a></p>
+                    <p>Réf: LDW-{{ produit.id }}</p> {# Exemple Ref #}
+                    {# Ajouter d'autres métadonnées si pertinent: Marque, Tags, etc. #}
+                </div>
+            </div>
+        </div>
+    </div> {# Fin product-detail-container #}
+
+
+    {% if produits_associes|default([])|length > 0 %}
+    <section class="related-products mt-5 pt-4 border-top"> {# Ajout bordure top #}
+        <h2 class="mb-4">Vous pourriez aussi aimer</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4"> {# Ajustement colonnes #}
+            {% for prod_associe in produits_associes %}
+                 <div class="col d-flex align-items-stretch">
+                     {# Utilise le même template partiel que la boutique si possible #}
+                     {% include 'partials/product_card.twig' with {'produit': prod_associe, 'delay': loop.index0 * 0.05 } %}
+                 </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }} {# Hérite scripts de base.twig #}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 1. Swiper Image Gallery
+            let thumbsSwiperInstance = null;
+            const thumbsSwiperEl = document.querySelector('.product-image-thumbs-swiper');
+            if (thumbsSwiperEl) {
+                 thumbsSwiperInstance = new Swiper(thumbsSwiperEl, {
+                    spaceBetween: 10,
+                    slidesPerView: 4, // Nombre de miniatures visibles
+                     freeMode: true, // Permet de glisser librement
+                    watchSlidesProgress: true,
+                     // Responsive breakpoints for thumbs
+                     breakpoints: {
+                        576: { slidesPerView: 5 },
+                        768: { slidesPerView: 4 },
+                        992: { slidesPerView: 5 }
+                     }
+                });
+            }
+
+            const mainSwiperEl = document.querySelector('.product-image-swiper');
+            if (mainSwiperEl) {
+                 const mainSwiperInstance = new Swiper(mainSwiperEl, {
+                    spaceBetween: 10,
+                     effect: 'fade', // Effet fondu
+                     fadeEffect: { crossFade: true },
+                    navigation: {
+                        nextEl: '.swiper-button-next', // Assurez-vous que ces boutons existent si besoin
+                        prevEl: '.swiper-button-prev',
+                    },
+                    thumbs: {
+                        swiper: thumbsSwiperInstance // Lie au swiper des miniatures
+                    }
+                });
+            }
+
+            // 2. Quantity Buttons
+            const quantityForm = document.querySelector('.add-to-cart-form form');
+            if (quantityForm) {
+                 const minusBtn = quantityForm.querySelector('.minus-btn');
+                 const plusBtn = quantityForm.querySelector('.plus-btn');
+                 const quantityInput = quantityForm.querySelector('.quantity-input');
+                 const maxStock = parseInt(quantityInput.getAttribute('max'));
+
+                 minusBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value);
+                    if (value > 1) {
+                        quantityInput.value = value - 1;
+                         checkQuantityButtons(quantityInput, minusBtn, plusBtn, maxStock); // Met à jour état boutons
+                    }
+                 });
+
+                 plusBtn.addEventListener('click', function() {
+                    let value = parseInt(quantityInput.value);
+                    if (value < maxStock) {
+                        quantityInput.value = value + 1;
+                         checkQuantityButtons(quantityInput, minusBtn, plusBtn, maxStock); // Met à jour état boutons
+                    }
+                 });
+
+                 quantityInput.addEventListener('change', function() { // Vérifie aussi si changement manuel
+                    let value = parseInt(this.value);
+                    if (isNaN(value) || value < 1) {
+                        this.value = 1;
+                    } else if (value > maxStock) {
+                        this.value = maxStock;
+                    }
+                     checkQuantityButtons(this, minusBtn, plusBtn, maxStock); // Met à jour état boutons
+                 });
+
+                 // Fonction pour désactiver +/- si min/max atteint
+                 function checkQuantityButtons(input, minus, plus, max) {
+                     const value = parseInt(input.value);
+                     minus.disabled = (value <= 1);
+                     plus.disabled = (value >= max);
+                 }
+                 // Vérifie état initial
+                 checkQuantityButtons(quantityInput, minusBtn, plusBtn, maxStock);
+            }
+
+            // 3. Wishlist Button (Visual Toggle Only)
+            const wishlistBtn = document.querySelector('.wishlist-btn');
+            if (wishlistBtn) {
+                 wishlistBtn.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('far')) { // Si coeur vide (pas favori)
+                         icon.classList.replace('far', 'fas');
+                         this.classList.add('active'); // Ajoute classe active
+                         this.title = "Retirer des favoris";
+                         // showFloatingAlert('Ajouté aux favoris !', 'info'); // Optionnel
+                    } else { // Si coeur plein (déjà favori)
+                         icon.classList.replace('fas', 'far');
+                         this.classList.remove('active');
+                         this.title = "Ajouter aux favoris";
+                    }
+                 });
+            }
+
+            // 4. Star Rating
+            const ratingSelector = document.querySelector('.rating-selector');
+             if (ratingSelector) {
+                 const stars = ratingSelector.querySelectorAll('.stars label');
+                 const radios = ratingSelector.querySelectorAll('.stars input[type="radio"]');
+
+                 // Réinitialise les étoiles au chargement
+                 function resetStars() {
+                     radios.forEach((radio, index) => {
+                         const icon = stars[index].querySelector('i');
+                         if (radio.checked) {
+                             icon.classList.remove('far'); icon.classList.add('fas');
+                         } else {
+                              icon.classList.remove('fas'); icon.classList.add('far');
+                         }
+                     });
+                 }
+
+                 stars.forEach((star, index) => {
+                     const radioInput = radios[index];
+
+                     star.addEventListener('mouseover', () => {
+                         // Highlight stars up to the one hovered
+                          stars.forEach((s, i) => {
+                               const icon = s.querySelector('i');
+                               if (i <= index) { icon.classList.remove('far'); icon.classList.add('fas'); }
+                               else { icon.classList.remove('fas'); icon.classList.add('far'); }
+                          });
+                     });
+
+                      star.addEventListener('click', () => {
+                          resetStars(); 
+                      });
+                 });
+
+                  ratingSelector.addEventListener('mouseout', resetStars);
+             }
+
+
+            // 5. Animated Add to Cart Feedback (Simple)
+            const addToCartForm = document.querySelector('.add-to-cart-form form');
+            if (addToCartForm) {
+                 addToCartForm.addEventListener('submit', function(e) {
+                    const button = this.querySelector('.add-to-cart-btn');
+                     const originalHtml = button.innerHTML;
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> Ajout...';
+
+                 });
+            }
+
+             // 6. Hide Floating Alerts
+             setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert-floating');
+                 alerts.forEach(alert => {
+                     if (!alert.classList.contains('fade-out')) { // Evite double animation
+                         alert.classList.add('fade-out', 'animate__animated', 'animate__fadeOutUp'); // Utilise fadeOutUp
+                         alert.addEventListener('animationend', () => alert.remove());
+                     }
+                 });
+             }, 4000); // Délai un peu plus long
+
+             // 7. Product Tab Animation (Optional)
+             // Le code précédent pour l'animation des onglets est conservé
+             const tabs = document.querySelectorAll('.nav-tabs .nav-link');
+             tabs.forEach(tab => {
+                 tab.addEventListener('shown.bs.tab', function(event) { // Utilise l'événement Bootstrap pour être sûr
+                     const targetId = event.target.getAttribute('data-bs-target');
+                     const targetPane = document.querySelector(targetId);
+                     if (targetPane) {
+                         // Assure que l'animation n'est appliquée qu'une fois visible
+                         targetPane.classList.add('animate__animated', 'animate__fadeIn');
+                         // Optionnel: retirer la classe après l'animation
+                          targetPane.addEventListener('animationend', () => {
+                               targetPane.classList.remove('animate__animated', 'animate__fadeIn');
+                          }, { once: true });
+                     }
+                 });
+             });
+              // Déclenche pour l'onglet actif au chargement
+              const activeTabPane = document.querySelector('.tab-pane.active');
+              if(activeTabPane) {
+                  activeTabPane.classList.add('animate__animated', 'animate__fadeIn');
+                   activeTabPane.addEventListener('animationend', () => {
+                        activeTabPane.classList.remove('animate__animated', 'animate__fadeIn');
+                   }, { once: true });
+              }
+
+        }); // Fin DOMContentLoaded
+    </script>
+{% endblock %}
+
+{% block additional_templates %}
+{#
+<div class="customer-reviews-content">
+    {% if avis|default([])|length > 0 %}
+        <div class="reviews-container">
+            {% for review in avis %}
+            <div class="review-card animate__animated animate__fadeInUp" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="review-header">
+                    <div class="review-user">
+                        <i class="fas fa-user-circle review-avatar"></i>
+                        <div>
+                            <h4 class="review-name">{{ review.nom }}</h4>
+                            <div class="review-date">{{ review.date|date("d/m/Y") }}</div>
+                        </div>
+                    </div>
+                    <div class="review-rating">
+                        {% for i in 1..5 %}<i class="{{ i <= review.note ? 'fas' : 'far' }} fa-star"></i>{% endfor %}
+                    </div>
+                </div>
+                <div class="review-content">
+                    <p>{{ review.commentaire }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-reviews">
+            <i class="far fa-comment-dots empty-icon"></i>
+            <h3>Aucun avis pour l'instant</h3>
+            <p>Soyez le premier à partager votre expérience avec ce produit !</p>
+        </div>
+    {% endif %}
+
+    <div class="review-form-container mt-4 pt-4 border-top">
+        <h3>Donnez votre avis</h3>
+        <form action="index.php?page=produit&action=avis&id={{ produit_id }}" method="post">
+            <div class="mb-3">
+                <label for="reviewNom" class="form-label">Votre nom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="reviewNom" name="nom" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Votre note <span class="text-danger">*</span></label>
+                <div class="rating-selector">
+                    <div class="stars">
+                        {# Note: Les ID doivent être uniques sur la page globale si ce partiel est réutilisé #}
+                        {% for i in 5..1 %}{# Inverse l'ordre pour le CSS trick #}
+                        <input type="radio" id="star{{ produit_id }}-{{ i }}" name="note" value="{{ i }}" required>
+                        <label for="star{{ produit_id }}-{{ i }}" title="{{ i }} étoile{{ i > 1 ? 's' : '' }}"><i class="far fa-star"></i></label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="reviewCommentaire" class="form-label">Votre avis <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="reviewCommentaire" name="commentaire" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-purple"> <i class="fas fa-paper-plane me-2"></i> Soumettre mon avis</button>
+        </form>
+    </div>
+</div>
+#}
+{# Fichier: partials/product_card.twig #}
+{#
+<div class="product-card h-100 animate__animated animate__fadeInUp" style="animation-delay: {{ delay|default(0) }}s">
+    {% if produit.prix_promo is defined and produit.prix_promo > 0 and produit.prix_promo < produit.prix %}
+        <div class="product-badge badge-promo">Promo</div>
+    {% endif %}
+     {% if produit.nouveau is defined and produit.nouveau %}
+          <div class="product-badge badge-new" style="top: {% if produit.prix_promo %}45px{% else %}10px{% endif %}; left: 10px !important; right: auto !important;">Nouveau</div>
+     {% endif %}
+
+    <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none d-block">
+        <div class="product-image" style="background-image: url('{{ produit.image_url|default('/public/images/placeholder.png') }}')"></div>
+    </a>
+
+    <div class="product-card-body">
+        <a href="index.php?page=produit&slug={{ produit.slug }}" class="text-decoration-none">
+            <h3 class="product-title">{{ produit.nom }}</h3>
+        </a>
+        {# <p class="product-description">...</p> #} {# Optionnel #}
+        <div class="product-footer mt-auto"> {# mt-auto important #}
+            <div class="product-price-container">
+                {% if produit.prix_promo is defined and produit.prix_promo > 0 and produit.prix_promo < produit.prix %}
+                    <span class="product-price-promo">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                    <span class="product-price">{{ produit.prix_promo|number_format(2, ',', ' ') }} €</span>
+                {% else %}
+                    <span class="product-price">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                {% endif %}
+            </div>
+            <div class="product-actions">
+                 <a href="index.php?page=produit&slug={{ produit.slug }}" class="product-action" title="Voir le produit">
+                    <i class="fas fa-eye"></i>
+                 </a>
+                {% if produit.stock|default(1) > 0 %} {# Vérifie stock avant d'afficher bouton ajout #}
+                <form action="{{ get_asset_url('index.php?page=panier&action=ajouter') }}" method="post" class="d-inline form-add-cart">
+                    <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                    <input type="hidden" name="quantite" value="1">
+                    <button type="submit" class="product-action" title="Ajouter au panier">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+#}
+{% endblock %}

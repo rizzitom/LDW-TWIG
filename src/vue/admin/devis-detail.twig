@@ -1,0 +1,344 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Détails de la demande de devis{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=admin&section=devis" class="btn btn-outline-light me-2">
+    <i class="fas fa-arrow-left me-2"></i> Retour aux devis
+</a>
+<button type="button" class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#repondreDevisModal">
+    <i class="fas fa-reply me-2"></i> Répondre au devis
+</button>
+{% endblock %}
+
+{% block admin_content %}
+{% if updated %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i> Le devis a été mis à jour avec succès.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Informations sur la demande -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i> Détails de la demande</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-1 text-muted">Service demandé</p>
+                        <p class="mb-3 fs-5 fw-semibold">{{ devis.service_nom }}</p>
+                        
+                        <p class="mb-1 text-muted">Date de la demande</p>
+                        <p class="mb-3">{{ devis.date_demande|date("d/m/Y à H:i") }}</p>
+                        
+                        <p class="mb-1 text-muted">Statut</p>
+                        <p class="mb-0">
+                            {% if devis.statut == 'en_attente' %}
+                                <span class="status-badge status-pending">En attente</span>
+                            {% elseif devis.statut == 'en_cours' %}
+                                <span class="status-badge status-processing">En cours</span>
+                            {% elseif devis.statut == 'termine' %}
+                                <span class="status-badge status-delivered">Terminé</span>
+                            {% elseif devis.statut == 'rejete' %}
+                                <span class="status-badge status-cancelled">Rejeté</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-1 text-muted">Tarif de base du service</p>
+                        <p class="mb-3">{{ devis.prix_base|number_format(2, ',', ' ') }} €</p>
+                        
+                        <p class="mb-1 text-muted">Montant estimé</p>
+                        {% if devis.montant_estime %}
+                            <p class="mb-3 fs-5 fw-semibold">{{ devis.montant_estime|number_format(2, ',', ' ') }} €</p>
+                        {% else %}
+                            <p class="mb-3 text-muted fst-italic">Non défini</p>
+                        {% endif %}
+                        
+                        <p class="mb-1 text-muted">Date de réponse</p>
+                        <p class="mb-0">{{ devis.date_reponse ? devis.date_reponse|date("d/m/Y à H:i") : 'En attente de réponse' }}</p>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="mb-4">
+                    <p class="mb-1 text-muted">Description de la demande</p>
+                    <div class="p-3 bg-dark rounded mt-2" style="white-space: pre-wrap;">{{ devis.description_demande }}</div>
+                </div>
+                
+                <div class="mb-0">
+                    <p class="mb-1 text-muted">Notes administratives</p>
+                    {% if devis.notes_admin %}
+                        <div class="p-3 bg-dark rounded mt-2" style="white-space: pre-wrap;">{{ devis.notes_admin }}</div>
+                    {% else %}
+                        <p class="text-muted fst-italic mt-2">Aucune note administrative</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Informations client -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i> Informations client</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-1 text-muted">Client</p>
+                <p class="mb-3 fw-semibold">{{ devis.nom }} {{ devis.prenom }}</p>
+                
+                <p class="mb-1 text-muted">Email</p>
+                <p class="mb-3">
+                    <a href="mailto:{{ devis.email }}" class="text-purple">{{ devis.email }}</a>
+                </p>
+                
+                <p class="mb-1 text-muted">Téléphone</p>
+                <p class="mb-0">
+                    {% if devis.telephone %}
+                        <a href="tel:{{ devis.telephone }}" class="text-purple">{{ devis.telephone }}</a>
+                    {% else %}
+                        <span class="text-muted">Non renseigné</span>
+                    {% endif %}
+                </p>
+                
+                <hr class="my-3">
+                
+                <div class="d-grid gap-2">
+                    <a href="javascript:window.print()" class="btn btn-outline-light">
+                        <i class="fas fa-print me-2"></i> Imprimer le devis
+                    </a>
+                    <button type="button" class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#repondreDevisModal">
+                        <i class="fas fa-reply me-2"></i> Répondre au devis
+                    </button>
+                    
+                    {% if devis.statut == 'en_attente' or devis.statut == 'en_cours' %}
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejeterDevisModal">
+                        <i class="fas fa-times me-2"></i> Rejeter le devis
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historique du devis (pour une future implémentation) -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i> Historique</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <p class="mb-0 fw-semibold">Demande reçue</p>
+                            <small class="text-muted">{{ devis.date_demande|date("d/m/Y à H:i") }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if devis.statut != 'en_attente' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker 
+                            {{ devis.statut == 'en_cours' ? 'bg-primary' : 
+                               devis.statut == 'termine' ? 'bg-success' : 
+                               devis.statut == 'rejete' ? 'bg-danger' : '' }}">
+                        </div>
+                        <div class="timeline-content">
+                            <p class="mb-0 fw-semibold">
+                                {% if devis.statut == 'en_cours' %}Traitement en cours
+                                {% elseif devis.statut == 'termine' %}Devis terminé
+                                {% elseif devis.statut == 'rejete' %}Devis rejeté
+                                {% endif %}
+                            </p>
+                            <small class="text-muted">{{ devis.date_reponse ? devis.date_reponse|date("d/m/Y à H:i") : 'Date non disponible' }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted fst-italic">L'historique complet sera disponible dans une future mise à jour</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_modals %}
+<!-- Modal de réponse au devis -->
+<div class="modal fade modal-admin" id="repondreDevisModal" tabindex="-1" aria-labelledby="repondreDevisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="repondreDevisModalLabel">Répondre à la demande de devis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form action="index.php?page=admin&section=devis-detail&id={{ devis.id }}" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="mb-3">
+                                <label for="statut" class="form-label">Statut du devis</label>
+                                <select class="form-select" id="statut" name="statut" required>
+                                    <option value="en_attente" {% if devis.statut == 'en_attente' %}selected{% endif %}>En attente</option>
+                                    <option value="en_cours" {% if devis.statut == 'en_cours' %}selected{% endif %}>En cours</option>
+                                    <option value="termine" {% if devis.statut == 'termine' %}selected{% endif %}>Terminé</option>
+                                    <option value="rejete" {% if devis.statut == 'rejete' %}selected{% endif %}>Rejeté</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="mb-3">
+                                <label for="montant_estime" class="form-label">Montant estimé (€)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="montant_estime" name="montant_estime" value="{{ devis.montant_estime }}">
+                                <small class="form-text text-muted">Laissez vide si non applicable ou indéterminé</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes_admin" class="form-label">Notes administratives (visibles uniquement par les administrateurs)</label>
+                        <textarea class="form-control" id="notes_admin" name="notes_admin" rows="5">{{ devis.notes_admin }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-purple">Enregistrer la réponse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de rejet du devis -->
+<div class="modal fade modal-admin" id="rejeterDevisModal" tabindex="-1" aria-labelledby="rejeterDevisModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejeterDevisModalLabel">Confirmer le rejet du devis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir rejeter cette demande de devis ?</p>
+                <p class="text-danger">Cette action est définitive.</p>
+                
+                <div class="mb-3">
+                    <label for="notes_rejet" class="form-label">Motif du rejet (optionnel)</label>
+                    <textarea class="form-control" id="notes_rejet" name="notes_rejet" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                <form action="index.php?page=admin&section=devis-detail&id={{ devis.id }}" method="post">
+                    <input type="hidden" name="statut" value="rejete">
+                    <input type="hidden" id="notes_rejet_hidden" name="notes_admin">
+                    <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<style>
+    /* Styles pour la timeline */
+    .timeline {
+        position: relative;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .timeline:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+        width: 2px;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 15px;
+        padding-left: 40px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        top: 0;
+        left: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--violet-principal);
+        transform: translateX(-50%);
+    }
+    
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .bg-primary {
+        background-color: var(--violet-principal) !important;
+    }
+    
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    /* Styles pour l'impression */
+    @media print {
+        .admin-sidebar, .admin-header, .admin-footer, .modal, .btn {
+            display: none !important;
+        }
+        
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        .admin-container, .card-admin, .card-body {
+            background-color: white !important;
+            color: black !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .status-badge {
+            border: 1px solid #ddd !important;
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Synchroniser les notes de rejet entre le textarea du modal et le champ caché
+        const notesRejetTextarea = document.getElementById('notes_rejet');
+        const notesRejetHidden = document.getElementById('notes_rejet_hidden');
+        
+        if (notesRejetTextarea && notesRejetHidden) {
+            notesRejetTextarea.addEventListener('input', function() {
+                notesRejetHidden.value = this.value;
+            });
+        }
+    });
+</script>
+{% endblock %}

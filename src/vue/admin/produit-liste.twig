@@ -1,0 +1,270 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Gestion des produits{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=produit&action=ajouter" class="btn btn-purple">
+    <i class="fas fa-plus me-2"></i> Ajouter un produit
+</a>
+{% endblock %}
+
+{% block head %}
+{{ parent() }}
+<style>
+    .product-table {
+        background-color: #1d1d1d;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .product-table th {
+        background-color: #6200b3;
+        color: white;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .product-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #444;
+    }
+    
+    .product-image {
+        width: 60px;
+        height: 60px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 5px;
+    }
+    
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-active {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+    }
+    
+    .status-inactive {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+    
+    .status-featured {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .price-promo {
+        text-decoration: line-through;
+        color: #dc3545;
+        margin-right: 0.5rem;
+    }
+    
+    .delete-confirmation-modal .modal-content {
+        background-color: #2b2b2c;
+        color: white;
+    }
+    
+    .delete-confirmation-modal .modal-header {
+        border-bottom-color: #444;
+    }
+    
+    .delete-confirmation-modal .modal-footer {
+        border-top-color: #444;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+    {% if success.ajout %}
+    <div class="alert alert-success" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Le produit a été ajouté avec succès.
+    </div>
+    {% endif %}
+    
+    {% if success.modif %}
+    <div class="alert alert-success" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Le produit a été modifié avec succès.
+    </div>
+    {% endif %}
+    
+    {% if success.suppression %}
+    <div class="alert alert-success" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Le produit a été supprimé avec succès.
+    </div>
+    {% endif %}
+    
+    {% if erreur.suppression %}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> Erreur lors de la suppression du produit.
+    </div>
+    {% endif %}
+    
+    <div class="table-responsive product-table">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 70px">ID</th>
+                    <th style="width: 80px">Image</th>
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Statut</th>
+                    <th style="width: 150px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in produits %}
+                <tr>
+                    <td>{{ produit.id }}</td>
+                    <td>
+                        <div class="product-image" style="background-image: url('{{ produit.image_url }}')"></div>
+                    </td>
+                    <td>{{ produit.nom }}</td>
+                    <td>{{ produit.categorie_nom }}</td>
+                    <td>
+                        {% if produit.prix_promo %}
+                        <span class="price-promo">{{ produit.prix }} €</span>
+                        <span>{{ produit.prix_promo }} €</span>
+                        {% else %}
+                        <span>{{ produit.prix }} €</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if produit.stock <= 0 %}
+                        <span class="text-danger">{{ produit.stock }}</span>
+                        {% elseif produit.stock < 5 %}
+                        <span class="text-warning">{{ produit.stock }}</span>
+                        {% else %}
+                        <span>{{ produit.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if produit.est_featured %}
+                        <span class="status-badge status-featured">En vedette</span>
+                        {% elseif produit.est_actif %}
+                        <span class="status-badge status-active">Actif</span>
+                        {% else %}
+                        <span class="status-badge status-inactive">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="product-actions">
+                            <a href="index.php?page=produit&slug={{ produit.slug }}" class="btn btn-sm btn-outline-info" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="index.php?page=produit&action=modifier&id={{ produit.id }}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" title="Supprimer" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                    data-id="{{ produit.id }}" data-name="{{ produit.nom }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if produits|length == 0 %}
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <p>Aucun produit trouvé</p>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if pagination.nombre_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination pagination-admin">
+            {% if pagination.page_courante > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="index.php?page=produit&page_num={{ pagination.page_courante - 1 }}" aria-label="Précédent">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for i in range(1, pagination.nombre_pages) %}
+            <li class="page-item {% if i == pagination.page_courante %}active{% endif %}">
+                <a class="page-link" href="index.php?page=produit&page_num={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if pagination.page_courante < pagination.nombre_pages %}
+            <li class="page-item">
+                <a class="page-link" href="index.php?page=produit&page_num={{ pagination.page_courante + 1 }}" aria-label="Suivant">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% endblock %}
+
+{% block admin_modals %}
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade modal-admin" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le produit <strong id="productName"></strong> ?</p>
+                <p class="text-danger">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                <a href="#" id="confirmDelete" class="btn btn-danger">Supprimer</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuration du modal de suppression
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const productId = button.getAttribute('data-id');
+                const productName = button.getAttribute('data-name');
+                
+                const productNameEl = document.getElementById('productName');
+                const confirmDeleteBtn = document.getElementById('confirmDelete');
+                
+                productNameEl.textContent = productName;
+                confirmDeleteBtn.href = 'index.php?page=produit&action=supprimer&id=' + productId;
+            });
+        }
+    });
+</script>
+{% endblock %}

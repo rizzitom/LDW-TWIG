@@ -1,0 +1,539 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Sécurité de mon compte{% endblock %}
+
+{% block client_actions %}
+{% if success_message %}
+    <div class="alert alert-success d-inline-flex align-items-center py-2 px-3 mb-0">
+        <i class="fas fa-check-circle me-2"></i> {{ success_message }}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block client_content %}
+    <div class="row">
+        <!-- Sécurité du compte -->
+        <div class="col-lg-6 mb-4">
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-lock me-2"></i> Sécurité de mon compte
+                </div>
+                <div class="card-body">
+                    <form action="index.php?page=securite" method="post">
+                        <div class="mb-4">
+                            <h5 class="mb-3">Changer mon mot de passe</h5>
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Mot de passe actuel</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="current_password">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">Nouveau mot de passe</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="new_password">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength-meter mt-2">
+                                    <div class="progress" style="height: 5px;">
+                                        <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted" id="passwordStrengthText">Force du mot de passe</small>
+                                </div>
+                                <small class="form-text text-muted mt-2">
+                                    Votre mot de passe doit contenir au moins 8 caractères, dont une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirmer le nouveau mot de passe</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirm_password">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordMatch" class="form-text"></div>
+                            </div>
+                            <button type="submit" name="modifier_mot_de_passe" class="btn btn-purple">
+                                <i class="fas fa-save me-2"></i> Mettre à jour le mot de passe
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <!-- Authentification à deux facteurs -->
+                    <div class="mb-3">
+                        <h5 class="mb-3">Authentification à deux facteurs</h5>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <p class="mb-1">Statut : 
+                                    {% if user.two_factor_enabled %}
+                                        <span class="badge bg-success">Activée</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Désactivée</span>
+                                    {% endif %}
+                                </p>
+                                <p class="text-muted mb-0 small">
+                                    L'authentification à deux facteurs ajoute une couche de sécurité supplémentaire à votre compte.
+                                </p>
+                            </div>
+                            {% if user.two_factor_enabled %}
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#disableTwoFactorModal">
+                                    Désactiver
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#enableTwoFactorModal">
+                                    Activer
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Historique de connexion -->
+                    <div>
+                        <h5 class="mb-3">Dernières connexions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-client">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Adresse IP</th>
+                                        <th>Appareil</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if login_history|length > 0 %}
+                                        {% for login in login_history %}
+                                            <tr>
+                                                <td>{{ login.date|date("d/m/Y H:i") }}</td>
+                                                <td>{{ login.ip_address }}</td>
+                                                <td>{{ login.device }}</td>
+                                                <td>
+                                                    {% if login.status == 'success' %}
+                                                        <span class="badge bg-success">Réussie</span>
+                                                    {% elseif login.status == 'failed' %}
+                                                        <span class="badge bg-danger">Échouée</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-3">Aucun historique de connexion disponible</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-muted small">
+                            Si vous ne reconnaissez pas une connexion, modifiez immédiatement votre mot de passe.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options de sécurité supplémentaires -->
+        <div class="col-lg-6 mb-4">
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt me-2"></i> Options de sécurité supplémentaires
+                </div>
+                <div class="card-body">
+                    <form action="index.php?page=securite" method="post">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Notifications de sécurité</h6>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="notif_new_connexion" name="notif_new_connexion" {{ user.notif_new_connexion ? 'checked' : '' }}>
+                                <label class="form-check-label" for="notif_new_connexion">
+                                    M'avertir par email lors d'une nouvelle connexion
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="notif_password_change" name="notif_password_change" {{ user.notif_password_change ? 'checked' : '' }}>
+                                <label class="form-check-label" for="notif_password_change">
+                                    M'avertir par email lors d'un changement de mot de passe
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="notif_failed_attempts" name="notif_failed_attempts" {{ user.notif_failed_attempts ? 'checked' : '' }}>
+                                <label class="form-check-label" for="notif_failed_attempts">
+                                    M'avertir par email après plusieurs tentatives de connexion échouées
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Préférences de connexion</h6>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="remember_devices" name="remember_devices" {{ user.remember_devices ? 'checked' : '' }}>
+                                <label class="form-check-label" for="remember_devices">
+                                    Se souvenir des appareils de connexion
+                                </label>
+                                <div class="form-text text-muted">
+                                    En activant cette option, vous ne recevrez pas d'alerte pour les connexions depuis des appareils déjà utilisés.
+                                </div>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="extended_session" name="extended_session" {{ user.extended_session ? 'checked' : '' }}>
+                                <label class="form-check-label" for="extended_session">
+                                    Prolonger la durée des sessions
+                                </label>
+                                <div class="form-text text-muted">
+                                    Par défaut, votre session expire après 24 heures d'inactivité. Cette option la prolonge à 7 jours.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Validation des commandes</h6>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirm_order_by_email" name="confirm_order_by_email" {{ user.confirm_order_by_email ? 'checked' : '' }}>
+                                <label class="form-check-label" for="confirm_order_by_email">
+                                    Valider les commandes par email
+                                </label>
+                                <div class="form-text text-muted">
+                                    Recevez un email de confirmation lors de chaque nouvelle commande pour vérifier qu'il s'agit bien de vous.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" name="update_security_options" class="btn btn-purple">
+                            <i class="fas fa-save me-2"></i> Enregistrer les préférences
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Section relatives aux données personnelles -->
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-user-shield me-2"></i> Données personnelles
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Télécharger mes données</h6>
+                        <p class="text-muted">
+                            Vous pouvez télécharger toutes les données personnelles que nous conservons vous concernant, 
+                            y compris vos informations de compte, l'historique de commandes et les adresses.
+                        </p>
+                        <form action="index.php?page=securite" method="post" class="mb-4">
+                            <button type="submit" name="download_data" class="btn btn-outline-primary">
+                                <i class="fas fa-download me-2"></i> Télécharger mes données
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3 text-danger">Supprimer mon compte</h6>
+                        <p class="text-muted">
+                            La suppression de votre compte est définitive et entraînera la perte de toutes vos 
+                            données, y compris l'historique des commandes et les points de fidélité.
+                        </p>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="fas fa-trash-alt me-2"></i> Supprimer mon compte
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modal de suppression de compte -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=securite" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteAccountModalLabel">Confirmer la suppression du compte</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i> 
+                            <strong>Attention :</strong> Cette action est irréversible.
+                        </div>
+                        <p>La suppression de votre compte entraînera la perte définitive de :</p>
+                        <ul>
+                            <li>Vos informations personnelles et préférences</li>
+                            <li>Votre historique de commandes</li>
+                            <li>Vos adresses enregistrées</li>
+                            <li>Vos points de fidélité accumulés</li>
+                            <li>Vos échanges avec notre service client</li>
+                        </ul>
+                        <p>Pour confirmer la suppression, veuillez saisir votre mot de passe actuel :</p>
+                        <div class="mb-3">
+                            <label for="password_delete" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password_delete" name="password_delete" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirm_delete" name="confirm_delete" required>
+                            <label class="form-check-label" for="confirm_delete">
+                                Je confirme vouloir supprimer définitivement mon compte
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="delete_account" class="btn btn-danger">Supprimer définitivement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'activation de l'authentification à deux facteurs -->
+    <div class="modal fade" id="enableTwoFactorModal" tabindex="-1" aria-labelledby="enableTwoFactorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=securite" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="enableTwoFactorModalLabel">Activer l'authentification à deux facteurs</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> 
+                            L'authentification à deux facteurs renforce la sécurité de votre compte en exigeant un code temporaire en plus de votre mot de passe.
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="mb-2">1. Scannez le code QR</h6>
+                            <p class="text-muted small">Utilisez une application d'authentification comme Google Authenticator, Microsoft Authenticator ou Authy pour scanner ce code QR.</p>
+                            <div class="text-center my-3">
+                                {% if qr_code_url %}
+                                    <img src="{{ qr_code_url }}" alt="Code QR pour l'authentification à deux facteurs" class="img-fluid qr-code">
+                                    <div class="mt-2 text-muted small">
+                                        Code de secours : <strong>{{ backup_code }}</strong>
+                                        <br>Conservez ce code en lieu sûr.
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        Le code QR n'a pas pu être généré. Veuillez réessayer.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="mb-2">2. Entrez le code à 6 chiffres</h6>
+                            <p class="text-muted small">Saisissez le code à 6 chiffres généré par votre application d'authentification.</p>
+                            <div class="d-flex justify-content-center">
+                                <div class="verification-code-container">
+                                    <input type="text" name="verification_code" id="verification_code" class="form-control verification-code-input" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="backup_code_saved" name="backup_code_saved" required>
+                            <label class="form-check-label" for="backup_code_saved">
+                                J'ai enregistré mon code de secours en lieu sûr
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="enable_two_factor" class="btn btn-success">Activer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de désactivation de l'authentification à deux facteurs -->
+    <div class="modal fade" id="disableTwoFactorModal" tabindex="-1" aria-labelledby="disableTwoFactorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php?page=securite" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="disableTwoFactorModalLabel">Désactiver l'authentification à deux facteurs</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i> 
+                            <strong>Attention :</strong> Désactiver l'authentification à deux facteurs réduira la sécurité de votre compte.
+                        </div>
+                        <p>Pour confirmer la désactivation, veuillez saisir votre mot de passe actuel :</p>
+                        <div class="mb-3">
+                            <label for="password_two_factor" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="password_two_factor" name="password_two_factor" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="disable_two_factor" class="btn btn-danger">Désactiver</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fonctionnalité d'affichage/masquage du mot de passe
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.innerHTML = '<i class="far fa-eye-slash"></i>';
+                } else {
+                    passwordInput.type = 'password';
+                    this.innerHTML = '<i class="far fa-eye"></i>';
+                }
+            });
+        });
+        
+        // Vérification de la force du mot de passe
+        const passwordInput = document.getElementById('new_password');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+        
+        if (passwordInput && passwordStrength && passwordStrengthText) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                let color = '';
+                let text = '';
+                
+                // Vérifier la longueur
+                if (password.length >= 8) strength += 25;
+                
+                // Vérifier les majuscules
+                if (/[A-Z]/.test(password)) strength += 25;
+                
+                // Vérifier les chiffres
+                if (/[0-9]/.test(password)) strength += 25;
+                
+                // Vérifier les caractères spéciaux
+                if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+                
+                // Déterminer la couleur et le texte
+                if (strength <= 25) {
+                    color = 'var(--danger-color)';
+                    text = 'Faible';
+                } else if (strength <= 50) {
+                    color = 'var(--warning-color)';
+                    text = 'Moyen';
+                } else if (strength <= 75) {
+                    color = 'var(--bs-primary)';
+                    text = 'Bon';
+                } else {
+                    color = 'var(--success-color)';
+                    text = 'Excellent';
+                }
+                
+                // Mettre à jour l'indicateur
+                passwordStrength.style.width = strength + '%';
+                passwordStrength.style.backgroundColor = color;
+                passwordStrengthText.textContent = 'Force du mot de passe : ' + text;
+            });
+        }
+        
+        // Vérification de correspondance des mots de passe
+        const newPasswordInput = document.getElementById('new_password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const passwordMatchText = document.getElementById('passwordMatch');
+        
+        if (newPasswordInput && confirmPasswordInput && passwordMatchText) {
+            function checkPasswordsMatch() {
+                if (confirmPasswordInput.value.length === 0) {
+                    passwordMatchText.textContent = '';
+                    passwordMatchText.className = 'form-text';
+                    return;
+                }
+                
+                if (newPasswordInput.value === confirmPasswordInput.value) {
+                    passwordMatchText.textContent = 'Les mots de passe correspondent';
+                    passwordMatchText.className = 'form-text text-success';
+                } else {
+                    passwordMatchText.textContent = 'Les mots de passe ne correspondent pas';
+                    passwordMatchText.className = 'form-text text-danger';
+                }
+            }
+            
+            newPasswordInput.addEventListener('input', checkPasswordsMatch);
+            confirmPasswordInput.addEventListener('input', checkPasswordsMatch);
+        }
+        
+        // Formattage du code de vérification (pour 2FA)
+        const verificationCodeInput = document.getElementById('verification_code');
+        if (verificationCodeInput) {
+            verificationCodeInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // Supprimer les caractères non numériques
+                const numericValue = value.replace(/[^0-9]/g, '');
+                
+                // Limiter à 6 chiffres
+                const truncatedValue = numericValue.substring(0, 6);
+                
+                // Mettre à jour la valeur
+                e.target.value = truncatedValue;
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block head %}
+{{ parent() }}
+<style>
+    /* Style pour les indicateurs de force de mot de passe */
+    .password-strength-meter {
+        margin-top: 10px;
+    }
+    
+    /* Style pour l'entrée de code de vérification */
+    .verification-code-container {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .verification-code-input {
+        letter-spacing: 0.5rem;
+        text-align: center;
+        font-family: monospace;
+        font-size: 1.2rem;
+        width: 180px;
+    }
+    
+    /* Style pour le QR code */
+    .qr-code {
+        max-width: 200px;
+        border: 1px solid var(--bordure-couleur);
+        padding: 10px;
+        background-color: white;
+    }
+    
+    /* Style pour la section des options de sécurité */
+    .security-option {
+        border-left: 3px solid var(--violet-principal);
+        padding-left: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .security-option h6 {
+        font-weight: 600;
+        color: var(--texte-couleur);
+    }
+</style>
+{% endblock %}

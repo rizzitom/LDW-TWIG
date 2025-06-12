@@ -1,0 +1,1056 @@
+{% extends 'base-devis.twig' %}
+
+{% block title %}Demande de devis - SEO/SEA{% endblock %}
+
+{% block head %}
+    {# {{ parent() }} #} {# Pas de parent() car base-devis.twig n'a pas de block head à hériter directement pour les styles #}
+    <style>
+        /* Styles spécifiques au formulaire SEO/SEA - Cohérent avec le design du formulaire développement web */
+        .devis-page-container {
+            max-width: 1200px; /* Slightly wider for more breathing room */
+            margin: 2rem auto;
+            padding: 0 15px;
+        }
+
+        .form-header {
+            margin-bottom: 3rem; /* More space */
+            text-align: center;
+        }
+        
+        .form-header h1 {
+            font-size: 2.8rem; /* Larger title */
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--violet-principal), var(--violet-accent), #DA70D6); /* Added another color to gradient */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: -0.5px;
+        }
+        
+        .form-header p {
+            color: var(--texte-secondaire);
+            font-size: 1.15rem; /* Slightly larger subtitle */
+            max-width: 750px;
+            margin: 0 auto;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .error-message-container {
+            margin-bottom: 2rem;
+        }
+        .error-message {
+            background-color: rgba(var(--bs-danger-rgb), 0.1);
+            color: var(--danger-color);
+            padding: 1.25rem 1.75rem; /* More padding */
+            border-radius: 10px; /* Softer radius */
+            border: 1px solid rgba(var(--bs-danger-rgb), 0.3);
+            display: flex;
+            align-items: flex-start; /* Align icon to top */
+            gap: 1rem;
+            box-shadow: 0 4px 10px rgba(var(--bs-danger-rgb), 0.1);
+        }
+        .error-message i { font-size: 1.5rem; margin-top: 0.15rem; }
+        .error-message ul {
+            margin-bottom: 0;
+            padding-left: 1.2rem;
+            list-style-type: disc;
+        }
+        .error-message p.fw-bold { font-size: 1.05rem; }
+        
+        .devis-form-wrapper {
+            display: flex;
+            gap: 3rem; /* Wider gap */
+            position: relative;
+            background: var(--fond-secondaire); /* Subtle gradient background */
+            /* background: linear-gradient(145deg, rgba(var(--fond-secondaire-rgb),0.95), rgba(var(--fond-tertiaire-rgb),0.95)); */
+            border-radius: 16px; /* More rounded */
+            padding: 2.5rem; /* More padding */
+            box-shadow: 0 12px 40px rgba(var(--ombre-couleur), 0.7); /* Deeper shadow */
+            border: 1px solid var(--bordure-couleur);
+            overflow: hidden; /* For pseudo-elements if any */
+        }
+        
+        .devis-steps-vertical {
+            width: 280px; /* Wider step bar */
+            flex-shrink: 0;
+            position: sticky;
+            top: 2.5rem; 
+            align-self: flex-start;
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            background-color: rgba(var(--fond-primaire-rgb), 0.3); /* More transparent */
+            backdrop-filter: blur(5px);
+            max-height: calc(100vh - 5rem);
+            overflow-y: auto;
+            transition: box-shadow 0.3s ease;
+        }
+        .devis-steps-vertical:hover {
+            box-shadow: 0 6px 20px rgba(var(--ombre-couleur),0.4);
+        }
+        
+        .devis-step-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0.75rem; /* More padding */
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
+            opacity: 0.55; /* Even less prominent */
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .devis-step-item:hover:not(.active) {
+            background-color: rgba(var(--texte-couleur), 0.05);
+            opacity: 0.8;
+            transform: translateX(5px);
+        }
+        
+        .devis-step-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            top: calc(50% + 22px); /* Adjusted for larger number */
+            left: calc(25px + 0.75rem); /* Center of the number */
+            width: 3px; /* Thicker line */
+            height: calc(100% - 0.5rem);
+            background-color: var(--bordure-couleur);
+            z-index: 0;
+            transition: background-color 0.4s ease, height 0.3s ease;
+        }
+        
+        .devis-step-item.active {
+            opacity: 1;
+            background-color: rgba(var(--violet-principal-rgb), 0.15); /* More prominent active bg */
+            transform: scale(1.02); /* Slight scale on active */
+        }
+        .devis-step-item.active::before {
+             background-color: var(--violet-principal);
+        }
+        
+        .devis-step-item.completed .devis-step-number {
+            background: var(--violet-principal);
+            color: white;
+            border-color: var(--violet-principal);
+        }
+        .devis-step-item.completed .devis-step-number i {
+            animation: iconPop 0.5s ease-out;
+        }
+        @keyframes iconPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .devis-step-item.completed::before {
+            background-color: var(--violet-principal);
+            height: calc(100% + 1rem); /* Extend line further for completed */
+        }
+        
+        .devis-step-item.active .devis-step-number {
+            background-color: var(--violet-principal);
+            color: white;
+            transform: scale(1.15); /* Larger scale */
+            box-shadow: 0 0 0 5px rgba(var(--violet-principal-rgb), 0.2), 0 2px 10px rgba(var(--violet-principal-rgb),0.3); /* Enhanced shadow */
+            border-color: var(--violet-accent);
+        }
+        
+        .devis-step-item.active .devis-step-label {
+            color: var(--violet-accent); /* Brighter for active */
+            font-weight: 700;
+        }
+        
+        .devis-step-number {
+            width: 50px; /* Larger step numbers */
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--fond-tertiaire);
+            border: 2px solid var(--bordure-couleur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem; /* Larger icon/number inside */
+            margin-right: 1.25rem; /* More space */
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Playful transition */
+        }
+        .devis-step-number i { font-size: 1.1rem; }
+        
+        .devis-step-label {
+            font-weight: 600;
+            color: var(--texte-couleur);
+            margin-bottom: 0.2rem;
+            transition: color 0.3s ease;
+            font-size: 1rem; /* Larger label */
+        }
+        
+        .devis-step-desc {
+            font-size: 0.85rem; /* Larger description */
+            color: var(--texte-secondaire);
+            font-style: italic;
+        }
+        
+        .devis-form-container {
+            flex-grow: 1;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-section {
+            animation: sectionEntry 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            padding: 2rem 2.5rem; /* More padding in sections */
+            background-color: transparent; /* Inherit from wrapper */
+            border-radius: 8px;
+            opacity: 0; /* Start hidden for animation */
+        }
+        .form-section:target { /* If using IDs for navigation, not just JS display */
+            animation: none; /* Prevent re-animation if targeted by URL hash */
+        }
+
+        @keyframes sectionEntry {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .form-section h3 {
+            color: var(--violet-principal);
+            margin-bottom: 2.5rem;
+            font-size: 1.8rem; /* Even larger section titles */
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+            border-bottom: 1px solid var(--bordure-couleur); /* Full width subtle underline */
+        }
+        
+        .form-section h3::after { /* Accent line below title */
+            content: '';
+            position: absolute;
+            bottom: -2px; /* Sit on top of border-bottom */
+            left: 0;
+            width: 80px; 
+            height: 4px; /* Thicker accent */
+            background: linear-gradient(90deg, var(--violet-principal), var(--violet-accent));
+            border-radius: 3px;
+            animation: titleUnderlineGrow 0.8s ease-out 0.3s forwards;
+            transform: scaleX(0);
+            transform-origin: left;
+        }
+        @keyframes titleUnderlineGrow {
+            to { transform: scaleX(1); }
+        }
+        
+        .form-section h3 i {
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: var(--violet-accent);
+            transition: transform 0.3s ease;
+        }
+        .form-section:hover h3 i {
+            transform: rotate(-5deg) scale(1.1);
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative; /* For potential floating labels or icons */
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--texte-couleur);
+            font-size: 1rem;
+            transition: color 0.2s ease;
+        }
+        .form-control:focus + label, .form-select:focus + label { /* Example for floating label, would need HTML change */
+            /* color: var(--violet-principal); */
+        }
+        
+        .form-control, .form-select {
+            width: 100%;
+            padding: 1rem 1.25rem; /* Generous padding */
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 8px; /* More rounded */
+            font-size: 1rem;
+            background-color: var(--fond-tertiaire);
+            color: var(--texte-couleur);
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-control:hover, .form-select:hover {
+            border-color: rgba(var(--violet-principal-rgb), 0.5);
+            background-color: rgba(var(--fond-tertiaire-rgb), 0.8); /* Slightly different on hover */
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--violet-principal);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(var(--violet-principal-rgb), 0.25); /* Larger focus shadow */
+            background-color: var(--fond-secondaire);
+        }
+        .form-control.is-invalid, .form-select.is-invalid { /* Style for JS validation */
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 4px rgba(var(--bs-danger-rgb), 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: var(--texte-mute);
+            opacity: 0.8;
+        }
+        
+        .form-select {
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bb86fc' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.25rem center;
+            background-size: 1.1em;
+            padding-right: 3rem; 
+        }
+        body.light-theme .form-select {
+             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238A2BE2' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        }
+
+        .checkbox-group, .radio-group {
+            display: grid;
+            gap: 1rem; /* More gap */
+        }
+        .checkbox-group { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--fond-tertiaire);
+            padding: 1rem 1.25rem; /* More padding */
+            border-radius: 8px;
+            border: 1px solid var(--bordure-couleur);
+            transition: all 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Playful transition */
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .checkbox-item::before, .radio-item::before { /* Shine effect on hover */
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(var(--violet-accent-rgb, 187, 134, 252), 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        .checkbox-item:hover::before, .radio-item:hover::before {
+            left: 100%;
+        }
+        .checkbox-item:hover, .radio-item:hover {
+            border-color: var(--violet-accent);
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 5px 15px rgba(var(--ombre-couleur),0.6);
+        }
+        .checkbox-item input[type="checkbox"], .radio-item input[type="radio"] {
+            margin-right: 0.85rem;
+            accent-color: var(--violet-principal);
+            width: 1.2em; /* Larger controls */
+            height: 1.2em;
+            cursor: pointer;
+            transform: scale(1);
+            transition: transform 0.2s ease;
+        }
+        .checkbox-item input[type="checkbox"]:checked, .radio-item input[type="radio"]:checked {
+            transform: scale(1.1);
+        }
+        .checkbox-item label, .radio-item label { margin-bottom: 0; cursor: pointer; font-size: 0.95rem;}
+        
+        .required:after {
+            content: " *";
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--texte-mute);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        
+        .terms-container {
+            background-color: rgba(var(--fond-tertiaire-rgb, 42, 42, 46), 0.8);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--bordure-couleur);
+            font-size: 0.95rem;
+            box-shadow: inset 0 0 10px rgba(var(--ombre-couleur),0.2);
+        }
+        .terms-container p { margin-bottom: 1rem; line-height: 1.6; }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+        }
+        .terms-checkbox input {
+            margin-right: 0.85rem;
+            margin-top: 0.3rem;
+            accent-color: var(--violet-principal);
+            width: 1.2em;
+            height: 1.2em;
+        }
+        .terms-checkbox label a { color: var(--violet-accent); text-decoration: none; font-weight: 500; }
+        .terms-checkbox label a:hover { text-decoration: underline; color: var(--white); }
+        
+        .devis-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--bordure-couleur);
+        }
+        
+        .btn-devis {
+            padding: 1rem 2.25rem; /* Larger, more comfortable buttons */
+            border-radius: 10px; /* More rounded corners */
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Playful transition */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.6px;
+            min-width: 180px; /* Ensure consistent button width */
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase; /* More distinctive look */
+        }
+        .btn-devis i { 
+            transition: transform 0.3s ease-in-out; 
+            font-size: 1.1rem; /* Slightly larger icons */
+        }
+        
+        /* Button with 3D effect */
+        .btn-prev {
+            background-color: var(--fond-tertiaire);
+            padding:10px;
+            border-radius: 10px;
+            color: var(--texte-couleur);
+            border: 1px solid var(--bordure-couleur);
+            transform: perspective(1px) translateZ(0);
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+            text-decoration:none;
+        }
+        .btn-prev:hover, .btn-prev:focus, .btn-prev:active {
+            background: linear-gradient(to bottom, var(--fond-secondaire), var(--fond-tertiaire));
+            border-color: var(--violet-accent);
+            color: var(--violet-principal);
+            transform: translateX(-5px) scale(1.02);
+            box-shadow: 0 6px 12px rgba(var(--ombre-couleur), 0.6);
+        }
+        .btn-prev:active {
+            transform: translateX(-2px) scale(1.01);
+            box-shadow: 0 2px 8px rgba(var(--ombre-couleur), 0.4);
+        }
+        .btn-prev i { 
+            margin-right: 0.75rem; 
+            color: var(--violet-accent);
+        }
+        .btn-prev:hover i { 
+            transform: translateX(-6px) rotate(-15deg); 
+            color: var(--violet-principal);
+        }
+        
+        /* Gradient buttons with light effect */
+        .btn-next, .btn-submit {
+            background: linear-gradient(135deg, var(--violet-principal) 0%, var(--violet-secondaire) 100%);
+            padding:10px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(var(--violet-principal-rgb), 0.35);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle border */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Better text readability */
+        }
+        
+        /* Light sweep effect */
+        .btn-next::before, .btn-submit::before { 
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.75s ease;
+            z-index: -1;
+        }
+        .btn-next:hover::before, .btn-submit:hover::before {
+            left: 150%;
+        }
+        
+        /* Hover and active states */
+        .btn-next:hover, .btn-submit:hover {
+            background: linear-gradient(135deg, var(--violet-secondaire) 0%, var(--violet-principal) 100%);
+            transform: translateY(-6px) scale(1.04);
+            box-shadow: 
+                0 10px 20px rgba(var(--violet-principal-rgb), 0.45),
+                0 0 0 1px rgba(var(--violet-principal-rgb), 0.2),
+                0 0 20px rgba(var(--violet-principal-rgb), 0.15);
+        }
+        .btn-next:active, .btn-submit:active {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 5px 10px rgba(var(--violet-principal-rgb), 0.35);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        
+        /* Icon animations */
+        .btn-next i { 
+            margin-left: 0.75rem; 
+            position: relative;
+        }
+        .btn-next:hover i { 
+            transform: translateX(8px) rotate(10deg);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .btn-submit i { 
+            margin-left: 0.85rem; 
+            position: relative;
+        }
+        .btn-submit:hover i { 
+            animation: paperPlaneSend 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; 
+        }
+        
+        /* Enhanced paper plane animation */
+        @keyframes paperPlaneSend {
+            0% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            10% { transform: translateX(5px) translateY(-3px) rotate(15deg) scale(1.1); }
+            30% { transform: translateX(15px) translateY(-10px) rotate(30deg) scale(1.2); opacity: 0.8; }
+            50% { transform: translateX(25px) translateY(-15px) rotate(40deg) scale(0.9); opacity: 0.4; }
+            70% { transform: translateX(35px) translateY(-5px) rotate(25deg) scale(0.8); opacity: 0; }
+            71% { transform: translateX(-35px) translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+            85% { transform: translateX(-15px) translateY(0) rotate(-5deg) scale(0.9); opacity: 0.3; }
+            100% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 1; }
+        }
+        
+        /* Pulsating effect for submit button on form completion */
+        @keyframes submitPulse {
+            0% { box-shadow: 0 0 0 0 rgba(var(--violet-principal-rgb), 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(var(--violet-principal-rgb), 0); }
+            100% { box-shadow: 0 0 0 0 rgba(var(--violet-principal-rgb), 0); }
+        }
+        
+        /* Apply pulse animation when all required fields are completed */
+        .btn-submit.ready {
+            animation: submitPulse 2s infinite;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .devis-form-wrapper {
+                flex-direction: column;
+                padding: 2rem 1.5rem;
+                gap: 2rem;
+            }
+            .devis-steps-vertical {
+                width: 100%;
+                position: relative;
+                top: 0;
+                margin-bottom: 2.5rem;
+                max-height: none;
+                flex-direction: row; 
+                overflow-x: auto;
+                padding: 1rem;
+                justify-content: space-around; /* Distribute steps nicely */
+                background-color: var(--fond-tertiaire); /* Solid bg for mobile clarity */
+                backdrop-filter: none;
+            }
+            .devis-step-item {
+                flex-direction: column; /* Stack number and text */
+                align-items: center;
+                text-align: center;
+                padding: 0.75rem;
+                min-width: 90px; /* Ensure items have some width */
+                margin-bottom: 0;
+            }
+            .devis-step-item:not(:last-child)::before { display: none; } /* Hide vertical line */
+            .devis-step-item:not(:last-child)::after { /* Horizontal line for mobile */
+                content: '';
+                position: absolute;
+                left: calc(100% - 10px); /* Start from right of item */
+                top: 25px; /* Align with center of number */
+                width: 20px; /* Short connector */
+                height: 2px;
+                background-color: var(--bordure-couleur);
+            }
+             .devis-step-item.active::after, .devis-step-item.completed::after {
+                background-color: var(--violet-principal);
+            }
+            .devis-step-number { margin-right: 0; margin-bottom: 0.5rem; width: 40px; height: 40px; font-size: 1rem;}
+            .devis-step-number i { font-size: 0.9rem; }
+            .devis-step-label { font-size: 0.85rem; }
+            .devis-step-desc { display: none; } /* Hide description on mobile for space */
+
+            .checkbox-group { grid-template-columns: 1fr; }
+            .form-section { padding: 1.5rem; }
+            .form-header h1 { font-size: 2.2rem; }
+            .form-header p { font-size: 1.05rem; }
+        }
+
+        @media (max-width: 576px) {
+            .devis-page-container { margin: 1rem auto; padding: 0 10px; }
+            .devis-form-wrapper { padding: 1.5rem 1rem; }
+            .form-section { padding: 1.5rem 1rem; }
+            .form-header h1 { font-size: 1.8rem; }
+            .form-header p { font-size: 1rem; }
+
+            .devis-nav-buttons {
+                flex-direction: column;
+                gap: 1.25rem;
+            }
+            .btn-devis { width: 100%; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="devis-page-container">
+        <div class="form-header">
+            <h1>Demande de devis SEO/SEA</h1>
+            <p>Optimisez votre visibilité en ligne et améliorez votre positionnement dans les moteurs de recherche. Remplissez le formulaire ci-dessous pour recevoir une proposition personnalisée.</p>
+        </div>
+
+        {% if confirmation is defined and confirmation %}
+            <div class="error-message-container">
+                <div class="error-message" style="background-color: #e6f9ed; color: #218838; border: 1px solid #b7e4c7;">
+                    <i class="fas fa-check-circle" style="color: #218838;"></i>
+                    <p style="margin:0;">{{ confirmation }}</p>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if errors is defined and errors|length > 0 %}
+            <div class="error-message-container">
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <p class="fw-bold">Merci de corriger les erreurs suivantes :</p>
+                        <ul>
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="devis-form-wrapper">
+            <div class="devis-steps-vertical">
+                <div class="devis-step-item active" data-step="1">
+                    <div class="devis-step-number">1</div>
+                    <div>
+                        <div class="devis-step-label">Informations générales</div>
+                        <div class="devis-step-desc">Présentez-vous et votre entreprise</div>
+                    </div>
+                </div>
+                <div class="devis-step-item" data-step="2">
+                    <div class="devis-step-number">2</div>
+                    <div>
+                        <div class="devis-step-label">Votre site web</div>
+                        <div class="devis-step-desc">Informations sur votre site actuel</div>
+                    </div>
+                </div>
+                <div class="devis-step-item" data-step="3">
+                    <div class="devis-step-number">3</div>
+                    <div>
+                        <div class="devis-step-label">Objectifs SEO</div>
+                        <div class="devis-step-desc">Vos attentes et objectifs</div>
+                    </div>
+                </div>
+                <div class="devis-step-item" data-step="4">
+                    <div class="devis-step-number">4</div>
+                    <div>
+                        <div class="devis-step-label">Budget et délais</div>
+                        <div class="devis-step-desc">Vos contraintes financières et temporelles</div>
+                    </div>
+                </div>
+                <div class="devis-step-item" data-step="5">
+                    <div class="devis-step-number">5</div>
+                    <div>
+                        <div class="devis-step-label">Confirmation</div>
+                        <div class="devis-step-desc">Validation de votre demande</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="devis-form-container">
+                <form action="{{ path('devis_seo') }}" method="post" id="devis-seo-form">
+                    <input type="hidden" name="form_type" value="seo">
+                    <input type="hidden" name="current_step" id="current_step" value="1">
+                    
+                    <!-- Étape 1: Informations générales -->
+                    <div class="form-section" id="step-1" style="display: block;">
+                        <h3><i class="fas fa-user-tie"></i> Informations générales</h3>
+                        
+                        <div class="form-group">
+                            <label for="nom" class="required">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required value="{{ form.nom|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prenom" class="required">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" required value="{{ form.prenom|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="required">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required value="{{ form.email|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="telephone" class="required">Téléphone</label>
+                            <input type="tel" class="form-control" id="telephone" name="telephone" required value="{{ form.telephone|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="entreprise">Nom de l'entreprise</label>
+                            <input type="text" class="form-control" id="entreprise" name="entreprise" value="{{ form.entreprise|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="poste">Poste occupé</label>
+                            <input type="text" class="form-control" id="poste" name="poste" value="{{ form.poste|default('') }}">
+                        </div>
+                        
+                        <div class="devis-nav-buttons">
+                            <a href="{{ path('devis') }}" class="btn-prev"><i class="fas fa-arrow-left"></i> Retour</a>
+                            <button type="button" class="btn-next" data-next="2">Étape suivante <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 2: Votre site web -->
+                    <div class="form-section" id="step-2" style="display: none;">
+                        <h3><i class="fas fa-globe"></i> Votre site web</h3>
+                        
+                        <div class="form-group">
+                            <label for="site_url" class="required">URL de votre site web</label>
+                            <input type="url" class="form-control" id="site_url" name="site_url" required value="{{ form.site_url|default('') }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="site_age">Âge du site (approximatif)</label>
+                            <select class="form-select" id="site_age" name="site_age">
+                                <option value="" {% if form.site_age is not defined or form.site_age == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="moins_de_6_mois" {% if form.site_age is defined and form.site_age == 'moins_de_6_mois' %}selected{% endif %}>Moins de 6 mois</option>
+                                <option value="6_mois_a_1_an" {% if form.site_age is defined and form.site_age == '6_mois_a_1_an' %}selected{% endif %}>6 mois à 1 an</option>
+                                <option value="1_a_3_ans" {% if form.site_age is defined and form.site_age == '1_a_3_ans' %}selected{% endif %}>1 à 3 ans</option>
+                                <option value="plus_de_3_ans" {% if form.site_age is defined and form.site_age == 'plus_de_3_ans' %}selected{% endif %}>Plus de 3 ans</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Avez-vous déjà fait du SEO sur ce site ?</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="seo_oui" name="seo_precedent" value="oui" {% if form.seo_precedent is defined and form.seo_precedent == 'oui' %}checked{% endif %}>
+                                    <label for="seo_oui">Oui</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="seo_non" name="seo_precedent" value="non" {% if form.seo_precedent is defined and form.seo_precedent == 'non' %}checked{% endif %}>
+                                    <label for="seo_non">Non</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="seo_ne_sais_pas" name="seo_precedent" value="ne_sais_pas" {% if form.seo_precedent is defined and form.seo_precedent == 'ne_sais_pas' %}checked{% endif %}>
+                                    <label for="seo_ne_sais_pas">Je ne sais pas</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="details_seo_precedent">Si oui, détaillez les actions précédemment menées</label>
+                            <textarea class="form-control" id="details_seo_precedent" name="details_seo_precedent" rows="4">{{ form.details_seo_precedent|default('') }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cms">CMS ou technologie utilisée (si connue)</label>
+                            <select class="form-select" id="cms" name="cms">
+                                <option value="" {% if form.cms is not defined or form.cms == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="wordpress" {% if form.cms is defined and form.cms == 'wordpress' %}selected{% endif %}>WordPress</option>
+                                <option value="woocommerce" {% if form.cms is defined and form.cms == 'woocommerce' %}selected{% endif %}>WooCommerce</option>
+                                <option value="prestashop" {% if form.cms is defined and form.cms == 'prestashop' %}selected{% endif %}>PrestaShop</option>
+                                <option value="shopify" {% if form.cms is defined and form.cms == 'shopify' %}selected{% endif %}>Shopify</option>
+                                <option value="joomla" {% if form.cms is defined and form.cms == 'joomla' %}selected{% endif %}>Joomla</option>
+                                <option value="drupal" {% if form.cms is defined and form.cms == 'drupal' %}selected{% endif %}>Drupal</option>
+                                <option value="autre" {% if form.cms is defined and form.cms == 'autre' %}selected{% endif %}>Autre</option>
+                                <option value="ne_sais_pas" {% if form.cms is defined and form.cms == 'ne_sais_pas' %}selected{% endif %}>Je ne sais pas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cms_autre">Si autre, précisez</label>
+                            <input type="text" class="form-control" id="cms_autre" name="cms_autre" value="{{ form.cms_autre|default('') }}">
+                        </div>
+                        
+                        <div class="devis-nav-buttons">
+                            <button type="button" class="btn-prev" data-prev="1"><i class="fas fa-arrow-left"></i> Étape précédente</button>
+                            <button type="button" class="btn-next" data-next="3">Étape suivante <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 3: Objectifs SEO -->
+                    <div class="form-section" id="step-3" style="display: none;">
+                        <h3><i class="fas fa-bullseye"></i> Vos objectifs SEO</h3>
+                        
+                        <div class="form-group">
+                            <label>Quels sont vos objectifs principaux ? (Plusieurs choix possibles)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_visibilite" name="objectifs[]" value="visibilite" {% if form.objectifs is defined and 'visibilite' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_visibilite">Améliorer la visibilité</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_trafic" name="objectifs[]" value="trafic" {% if form.objectifs is defined and 'trafic' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_trafic">Augmenter le trafic</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_conversion" name="objectifs[]" value="conversion" {% if form.objectifs is defined and 'conversion' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_conversion">Améliorer le taux de conversion</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_reputation" name="objectifs[]" value="reputation" {% if form.objectifs is defined and 'reputation' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_reputation">Gérer votre e-réputation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_local" name="objectifs[]" value="local" {% if form.objectifs is defined and 'local' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_local">Améliorer le référencement local</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="obj_sea" name="objectifs[]" value="sea" {% if form.objectifs is defined and 'sea' in form.objectifs %}checked{% endif %}>
+                                    <label for="obj_sea">Campagnes SEA (Google Ads)</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mots_cles" class="required">Mots-clés cibles (séparés par des virgules)</label>
+                            <textarea class="form-control" id="mots_cles" name="mots_cles" required rows="3">{{ form.mots_cles|default('') }}</textarea>
+                            <div class="form-text">Exemple: référencement naturel, agence seo paris, optimisation site web...</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="concurrents">Principaux concurrents (URLs, séparés par des virgules)</label>
+                            <textarea class="form-control" id="concurrents" name="concurrents" rows="3">{{ form.concurrents|default('') }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="zone_geo" class="required">Zone géographique ciblée</label>
+                            <select class="form-select" id="zone_geo" name="zone_geo" required>
+                                <option value="" {% if form.zone_geo is not defined or form.zone_geo == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="local" {% if form.zone_geo is defined and form.zone_geo == 'local' %}selected{% endif %}>Local (ville ou département)</option>
+                                <option value="regional" {% if form.zone_geo is defined and form.zone_geo == 'regional' %}selected{% endif %}>Régional</option>
+                                <option value="national" {% if form.zone_geo is defined and form.zone_geo == 'national' %}selected{% endif %}>National</option>
+                                <option value="international" {% if form.zone_geo is defined and form.zone_geo == 'international' %}selected{% endif %}>International</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="zone_geo_details">Précisions sur la zone géographique</label>
+                            <input type="text" class="form-control" id="zone_geo_details" name="zone_geo_details" value="{{ form.zone_geo_details|default('') }}">
+                            <div class="form-text">Ex: Paris et sa banlieue, Région PACA, France + Belgique...</div>
+                        </div>
+                        
+                        <div class="devis-nav-buttons">
+                            <button type="button" class="btn-prev" data-prev="2"><i class="fas fa-arrow-left"></i> Étape précédente</button>
+                            <button type="button" class="btn-next" data-next="4">Étape suivante <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 4: Budget et délais -->
+                    <div class="form-section" id="step-4" style="display: none;">
+                        <h3><i class="fas fa-chart-line"></i> Budget et délais</h3>
+                        
+                        <div class="form-group">
+                            <label for="budget">Budget mensuel envisagé</label>
+                            <select class="form-select" id="budget" name="budget">
+                                <option value="" {% if form.budget is not defined or form.budget == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="moins_de_500" {% if form.budget is defined and form.budget == 'moins_de_500' %}selected{% endif %}>Moins de 500€/mois</option>
+                                <option value="500_a_1000" {% if form.budget is defined and form.budget == '500_a_1000' %}selected{% endif %}>500€ à 1000€/mois</option>
+                                <option value="1000_a_2000" {% if form.budget is defined and form.budget == '1000_a_2000' %}selected{% endif %}>1000€ à 2000€/mois</option>
+                                <option value="plus_de_2000" {% if form.budget is defined and form.budget == 'plus_de_2000' %}selected{% endif %}>Plus de 2000€/mois</option>
+                                <option value="a_definir" {% if form.budget is defined and form.budget == 'a_definir' %}selected{% endif %}>À définir selon recommandations</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="delai">Délai souhaité pour débuter la prestation</label>
+                            <select class="form-select" id="delai" name="delai">
+                                <option value="" {% if form.delai is not defined or form.delai == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="immediat" {% if form.delai is defined and form.delai == 'immediat' %}selected{% endif %}>Immédiatement</option>
+                                <option value="moins_d_un_mois" {% if form.delai is defined and form.delai == 'moins_d_un_mois' %}selected{% endif %}>Moins d'un mois</option>
+                                <option value="1_a_3_mois" {% if form.delai is defined and form.delai == '1_a_3_mois' %}selected{% endif %}>1 à 3 mois</option>
+                                <option value="plus_de_3_mois" {% if form.delai is defined and form.delai == 'plus_de_3_mois' %}selected{% endif %}>Plus de 3 mois</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duree">Durée envisagée de la prestation</label>
+                            <select class="form-select" id="duree" name="duree">
+                                <option value="" {% if form.duree is not defined or form.duree == '' %}selected{% endif %}>Sélectionnez...</option>
+                                <option value="3_mois" {% if form.duree is defined and form.duree == '3_mois' %}selected{% endif %}>3 mois</option>
+                                <option value="6_mois" {% if form.duree is defined and form.duree == '6_mois' %}selected{% endif %}>6 mois</option>
+                                <option value="12_mois" {% if form.duree is defined and form.duree == '12_mois' %}selected{% endif %}>12 mois</option>
+                                <option value="long_terme" {% if form.duree is defined and form.duree == 'long_terme' %}selected{% endif %}>Long terme (plus de 12 mois)</option>
+                                <option value="a_definir" {% if form.duree is defined and form.duree == 'a_definir' %}selected{% endif %}>À définir</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="informations_complementaires">Informations complémentaires</label>
+                            <textarea class="form-control" id="informations_complementaires" name="informations_complementaires" rows="4">{{ form.informations_complementaires|default('') }}</textarea>
+                            <div class="form-text">Ajoutez toute information qui pourrait nous aider à mieux comprendre votre projet</div>
+                        </div>
+                        
+                        <div class="devis-nav-buttons">
+                            <button type="button" class="btn-prev" data-prev="3"><i class="fas fa-arrow-left"></i> Étape précédente</button>
+                            <button type="button" class="btn-next" data-next="5">Étape suivante <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 5: Confirmation -->
+                    <div class="form-section" id="step-5" style="display: none;">
+                        <h3><i class="fas fa-check-circle"></i> Confirmation de votre demande</h3>
+                        
+                        <div class="terms-container">
+                            <p>En soumettant ce formulaire, vous acceptez que nous traitions vos données afin de répondre à votre demande de devis. Vos informations resteront confidentielles et ne seront jamais partagées avec des tiers sans votre consentement explicite.</p>
+                            <p>Nous vous contacterons dans un délai maximum de 48 heures ouvrées pour discuter de votre projet et vous proposer une solution adaptée à vos besoins.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="terms-checkbox">
+                                <input type="checkbox" id="accept_terms" name="accept_terms" required {% if form.accept_terms is defined and form.accept_terms %}checked{% endif %}>
+                                <label for="accept_terms">J'accepte les <a href="{{ path('mentions_legales') }}" target="_blank">conditions générales</a> et la <a href="{{ path('politique_confidentialite') }}" target="_blank">politique de confidentialité</a> *</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="terms-checkbox">
+                                <input type="checkbox" id="newsletter" name="newsletter" {% if form.newsletter is defined and form.newsletter %}checked{% endif %}>
+                                <label for="newsletter">Je souhaite recevoir des informations sur les services et actualités de LDW</label>
+                            </div>
+                        </div>
+                        
+                        <div class="devis-nav-buttons">
+                            <button type="button" class="btn-prev" data-prev="4"><i class="fas fa-arrow-left"></i> Étape précédente</button>
+                            <button type="submit" class="btn-submit">Envoyer ma demande <i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion de la navigation entre les étapes
+            const form = document.getElementById('devis-seo-form');
+            const stepItems = document.querySelectorAll('.devis-step-item');
+            const formSections = document.querySelectorAll('.form-section');
+            const currentStepInput = document.getElementById('current_step');
+            const prevButtons = document.querySelectorAll('.btn-prev[data-prev]');
+            const nextButtons = document.querySelectorAll('.btn-next[data-next]');
+            
+            // Fonction pour afficher une étape spécifique
+            function showStep(stepNumber) {
+                // Masquer toutes les sections
+                formSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Réinitialiser toutes les étapes
+                stepItems.forEach(item => {
+                    item.classList.remove('active');
+                    item.classList.remove('completed');
+                });
+                
+                // Afficher la section correspondante
+                document.getElementById('step-' + stepNumber).style.display = 'block';
+                
+                // Mettre à jour l'indicateur d'étape active
+                const activeStepItem = document.querySelector('.devis-step-item[data-step="' + stepNumber + '"]');
+                activeStepItem.classList.add('active');
+                
+                // Marquer les étapes précédentes comme complétées
+                stepItems.forEach(item => {
+                    const itemStep = parseInt(item.dataset.step);
+                    if (itemStep < stepNumber) {
+                        item.classList.add('completed');
+                        // Ajouter une icône de check pour les étapes complétées
+                        const numberDiv = item.querySelector('.devis-step-number');
+                        if (numberDiv.innerHTML === itemStep.toString()) {
+                            numberDiv.innerHTML = '<i class="fas fa-check"></i>';
+                        }
+                    } else if (itemStep > stepNumber) {
+                        // Restaurer le numéro pour les étapes futures
+                        const numberDiv = item.querySelector('.devis-step-number');
+                        if (numberDiv.innerHTML === '<i class="fas fa-check"></i>') {
+                            numberDiv.innerHTML = itemStep.toString();
+                        }
+                    }
+                });
+                
+                // Mettre à jour l'input caché
+                currentStepInput.value = stepNumber;
+            }
+            
+            // Événements pour les boutons suivant
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const nextStep = this.dataset.next;
+                    showStep(nextStep);
+                    // Faire défiler vers le haut
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+            
+            // Événements pour les boutons précédent
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const prevStep = this.dataset.prev;
+                    showStep(prevStep);
+                    // Faire défiler vers le haut
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+            
+            // Permettre de cliquer directement sur les étapes
+            stepItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const clickedStep = this.dataset.step;
+                    showStep(clickedStep);
+                });
+            });
+            
+            // Afficher l'étape initiale (ou celle définie par les erreurs)
+            const initialStep = currentStepInput.value || 1;
+            showStep(initialStep);
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,640 @@
+{% extends 'base.twig' %}
+
+{% block title %}Demande de devis - PC sur Mesure{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style>
+        /* ============================================== */
+        /* STYLES FORMULAIRE DEVIS                 */
+        /* ============================================== */
+        
+        .devis-form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px var(--ombre-couleur);
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .form-section h3 {
+            color: var(--violet-principal);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--texte-couleur);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--fond-tertiaire);
+            color: var(--texte-couleur);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--violet-principal);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: var(--texte-mute);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            width: calc(50% - 0.5rem);
+        }
+        
+        .checkbox-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-submit {
+            background-color: var(--violet-principal);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .form-submit:hover {
+            background-color: var(--violet-secondaire);
+            transform: translateY(-2px);
+        }
+        
+        .form-submit:active {
+            transform: translateY(0);
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e32;
+            font-weight: bold;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--texte-secondaire);
+            margin-top: 0.5rem;
+        }
+        
+        .terms-container {
+            background-color: var(--fond-tertiaire);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--bordure-couleur);
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 0.5rem;
+        }
+        
+        .terms-checkbox input {
+            margin-right: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        
+        .range-container {
+            padding: 0.5rem 0;
+        }
+        
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--texte-secondaire);
+        }
+        
+        .component-card {
+            background-color: var(--fond-tertiaire);
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .component-card h4 {
+            color: var(--violet-accent);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .component-card h4 i {
+            margin-right: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .checkbox-item {
+                width: 100%;
+            }
+            
+            .devis-form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header text-center mb-4">
+        <h1>Demande de devis - PC sur Mesure</h1>
+        <p class="lead">Configurez votre PC idéal et obtenez un devis personnalisé</p>
+    </div>
+    
+    <div class="devis-form-container">
+        <form id="devis-form" action="index.php?page=devis&action=envoyer" method="post">
+            <input type="hidden" name="type_service" value="montage">
+            
+            <!-- Section 1: Informations personnelles -->
+            <div class="form-section">
+                <h3><i class="fas fa-user me-2"></i>Vos informations</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nom" class="required">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="prenom" class="required">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email" class="required">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" class="form-control" id="telephone" name="telephone">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 2: Type d'utilisation -->
+            <div class="form-section">
+                <h3><i class="fas fa-desktop me-2"></i>Utilisation prévue</h3>
+                
+                <div class="form-group">
+                    <label for="type_utilisation" class="required">Utilisation principale</label>
+                    <select class="form-control" id="type_utilisation" name="type_utilisation" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="gaming">Gaming</option>
+                        <option value="creation_contenu">Création de contenu (vidéo, 3D, etc.)</option>
+                        <option value="bureautique">Bureautique / Usage professionnel</option>
+                        <option value="streaming">Streaming</option>
+                        <option value="developpement">Développement logiciel</option>
+                        <option value="multimedia">Multimédia</option>
+                        <option value="autre">Autre (précisez)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="precision_utilisation">Précisions sur l'utilisation</label>
+                    <textarea class="form-control" id="precision_utilisation" name="precision_utilisation" rows="3" placeholder="Décrivez plus en détail votre utilisation, logiciels spécifiques, jeux, etc."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Niveau de performance souhaité</label>
+                    <div class="range-container">
+                        <input type="range" class="form-range w-100" id="niveau_performance" name="niveau_performance" min="1" max="5" value="3">
+                        <div class="range-labels">
+                            <span>Basique</span>
+                            <span>Intermédiaire</span>
+                            <span>Haut de gamme</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget" class="required">Budget approximatif (en €)</label>
+                    <select class="form-control" id="budget" name="budget" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="moins_800">Moins de 800 €</option>
+                        <option value="800_1200">Entre 800 € et 1 200 €</option>
+                        <option value="1200_1800">Entre 1 200 € et 1 800 €</option>
+                        <option value="1800_2500">Entre 1 800 € et 2 500 €</option>
+                        <option value="plus_2500">Plus de 2 500 €</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Section 3: Composants -->
+            <div class="form-section">
+                <h3><i class="fas fa-microchip me-2"></i>Préférences de composants</h3>
+                <p class="mb-4">Indiquez vos préférences pour chaque composant. Si vous n'avez pas de préférence ou ne savez pas, laissez le champ vide pour que nous vous proposions les meilleures options.</p>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-microchip"></i>Processeur (CPU)</h4>
+                    <div class="form-group">
+                        <label>Marque préférée</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="cpu_intel" name="cpu_marque" value="intel">
+                                <label for="cpu_intel">Intel</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="cpu_amd" name="cpu_marque" value="amd">
+                                <label for="cpu_amd">AMD</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="cpu_indifferent" name="cpu_marque" value="indifferent">
+                                <label for="cpu_indifferent">Indifférent / Meilleur rapport qualité-prix</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label for="cpu_modele">Modèle spécifique (si vous avez une préférence)</label>
+                        <input type="text" class="form-control" id="cpu_modele" name="cpu_modele" placeholder="Ex: Intel Core i7-12700K, AMD Ryzen 7 5800X, etc.">
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-tv"></i>Carte graphique (GPU)</h4>
+                    <div class="form-group">
+                        <label>Marque préférée</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="gpu_nvidia" name="gpu_marque" value="nvidia">
+                                <label for="gpu_nvidia">NVIDIA</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="gpu_amd" name="gpu_marque" value="amd">
+                                <label for="gpu_amd">AMD</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="gpu_indifferent" name="gpu_marque" value="indifferent">
+                                <label for="gpu_indifferent">Indifférent / Meilleur rapport qualité-prix</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label for="gpu_modele">Modèle spécifique (si vous avez une préférence)</label>
+                        <input type="text" class="form-control" id="gpu_modele" name="gpu_modele" placeholder="Ex: NVIDIA RTX 4070, AMD RX 7700 XT, etc.">
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-memory"></i>Mémoire (RAM)</h4>
+                    <div class="form-group">
+                        <label for="ram_capacite">Capacité souhaitée</label>
+                        <select class="form-control" id="ram_capacite" name="ram_capacite">
+                            <option value="">Sélectionnez une option</option>
+                            <option value="8">8 Go</option>
+                            <option value="16">16 Go</option>
+                            <option value="32">32 Go</option>
+                            <option value="64">64 Go</option>
+                            <option value="128">128 Go ou plus</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label for="ram_frequence">Fréquence minimale souhaitée</label>
+                        <select class="form-control" id="ram_frequence" name="ram_frequence">
+                            <option value="">Sélectionnez une option</option>
+                            <option value="3200">3200 MHz</option>
+                            <option value="3600">3600 MHz</option>
+                            <option value="4000">4000 MHz</option>
+                            <option value="4800">4800 MHz ou plus</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-hdd"></i>Stockage</h4>
+                    <div class="form-group">
+                        <label>Type de stockage principal</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="stockage_ssd_nvme" name="stockage_type" value="ssd_nvme">
+                                <label for="stockage_ssd_nvme">SSD NVMe (plus rapide)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="stockage_ssd_sata" name="stockage_type" value="ssd_sata">
+                                <label for="stockage_ssd_sata">SSD SATA</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="stockage_hdd" name="stockage_type" value="hdd">
+                                <label for="stockage_hdd">Disque dur HDD (plus économique)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="stockage_hybride" name="stockage_type" value="hybride">
+                                <label for="stockage_hybride">Solution hybride (SSD + HDD)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label for="stockage_capacite">Capacité totale souhaitée</label>
+                        <select class="form-control" id="stockage_capacite" name="stockage_capacite">
+                            <option value="">Sélectionnez une option</option>
+                            <option value="500">500 Go</option>
+                            <option value="1000">1 To</option>
+                            <option value="2000">2 To</option>
+                            <option value="4000">4 To</option>
+                            <option value="plus_4000">Plus de 4 To</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-fan"></i>Refroidissement</h4>
+                    <div class="form-group mb-0">
+                        <label>Type de refroidissement préféré</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="refroidissement_air" name="refroidissement_type" value="air">
+                                <label for="refroidissement_air">Refroidissement par air</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="refroidissement_liquide" name="refroidissement_type" value="liquide">
+                                <label for="refroidissement_liquide">Refroidissement liquide (AIO)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="refroidissement_custom" name="refroidissement_type" value="custom">
+                                <label for="refroidissement_custom">Watercooling personnalisé</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="refroidissement_indifferent" name="refroidissement_type" value="indifferent">
+                                <label for="refroidissement_indifferent">Indifférent / Meilleure option</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4><i class="fas fa-box"></i>Boîtier</h4>
+                    <div class="form-group">
+                        <label>Format préféré</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="boitier_tour" name="boitier_format" value="tour">
+                                <label for="boitier_tour">Tour standard (ATX)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="boitier_mini" name="boitier_format" value="mini">
+                                <label for="boitier_mini">Mini-tour (Micro-ATX)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="boitier_compact" name="boitier_format" value="compact">
+                                <label for="boitier_compact">Compact (Mini-ITX)</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="boitier_indifferent" name="boitier_format" value="indifferent">
+                                <label for="boitier_indifferent">Indifférent</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label for="boitier_preference">Préférences esthétiques (couleur, RGB, etc.)</label>
+                        <textarea class="form-control" id="boitier_preference" name="boitier_preference" rows="2" placeholder="Ex: Boîtier noir avec éclairage RGB, design minimaliste, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 4: Périphériques et accessoires -->
+            <div class="form-section">
+                <h3><i class="fas fa-keyboard me-2"></i>Périphériques et accessoires</h3>
+                
+                <div class="form-group">
+                    <label>Avez-vous besoin de périphériques supplémentaires ?</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_ecran" name="peripheriques[]" value="ecran">
+                            <label for="periph_ecran">Écran</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_clavier" name="peripheriques[]" value="clavier">
+                            <label for="periph_clavier">Clavier</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_souris" name="peripheriques[]" value="souris">
+                            <label for="periph_souris">Souris</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_casque" name="peripheriques[]" value="casque">
+                            <label for="periph_casque">Casque/Écouteurs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_webcam" name="peripheriques[]" value="webcam">
+                            <label for="periph_webcam">Webcam</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="periph_micro" name="peripheriques[]" value="micro">
+                            <label for="periph_micro">Microphone</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="periph_details">Précisions sur les périphériques</label>
+                    <textarea class="form-control" id="periph_details" name="periph_details" rows="3" placeholder="Précisez vos attentes pour chaque périphérique (taille d'écran, type de clavier, etc.)"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Système d'exploitation</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="os_windows" name="os_preference" value="windows">
+                            <label for="os_windows">Windows</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="os_linux" name="os_preference" value="linux">
+                            <label for="os_linux">Linux</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="os_dual" name="os_preference" value="dual">
+                            <label for="os_dual">Dual-boot (Windows + Linux)</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="os_sans" name="os_preference" value="sans">
+                            <label for="os_sans">Sans OS</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 5: Informations complémentaires -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle me-2"></i>Informations complémentaires</h3>
+                
+                <div class="form-group">
+                    <label for="delai_livraison">Délai souhaité</label>
+                    <select class="form-control" id="delai_livraison" name="delai_livraison">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="urgent">Urgent (moins de 2 semaines)</option>
+                        <option value="normal">Normal (2 à 4 semaines)</option>
+                        <option value="flexible">Flexible (plus d'un mois)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="commentaires">Autres informations ou questions</label>
+                    <textarea class="form-control" id="commentaires" name="commentaires" rows="3" placeholder="Toute autre information pertinente pour votre configuration..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Comment avez-vous connu LDW ?</label>
+                    <select class="form-control" id="source" name="source">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="recherche">Moteur de recherche</option>
+                        <option value="reseaux_sociaux">Réseaux sociaux</option>
+                        <option value="recommandation">Recommandation</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Section 6: Conditions générales -->
+            <div class="form-section">
+                <div class="terms-container">
+                    <h3 class="mb-2"><i class="fas fa-file-contract me-2"></i>Conditions générales</h3>
+                    <p>En soumettant ce formulaire, vous acceptez que les informations saisies soient utilisées pour vous recontacter dans le cadre de votre demande de devis.</p>
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="conditions" name="conditions" required>
+                        <label for="conditions" class="required">J'accepte les <a href="index.php?page=cgv" target="_blank">conditions générales de vente</a> et la <a href="index.php?page=politique-de-confidentialite" target="_blank">politique de confidentialité</a>.</label>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="form-submit">
+                        <i class="fas fa-paper-plane"></i> Envoyer ma demande de devis
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validation du formulaire
+            const form = document.getElementById('devis-form');
+            
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                
+                // Validation des champs requis
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                // Validation de l'email
+                const emailField = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailField.value && !emailRegex.test(emailField.value)) {
+                    isValid = false;
+                    emailField.classList.add('is-invalid');
+                }
+                
+                // Empêcher l'envoi si le formulaire n'est pas valide
+                if (!isValid) {
+                    event.preventDefault();
+                    alert('Veuillez remplir correctement tous les champs obligatoires.');
+                }
+            });
+            
+            // Réinitialiser la validation lors de la saisie
+            form.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
+            
+            // Afficher la valeur du curseur de performance
+            const performanceSlider = document.getElementById('niveau_performance');
+            if (performanceSlider) {
+                performanceSlider.addEventListener('input', function() {
+                    // Vous pouvez ajouter du code ici pour afficher la valeur actuelle si nécessaire
+                });
+            }
+        });
+    </script>
+{% endblock %}

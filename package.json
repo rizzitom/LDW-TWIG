@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/plugin-transform-runtime": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/runtime": "^7.27.1",
+    "@popperjs/core": "^2.11.8",
+    "babel-loader": "^10.0.0",
+    "bootstrap": "^5.3.3",
+    "cloudinary": "^2.6.0",
+    "css-loader": "^7.1.2",
+    "formik": "^2.4.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.3",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1",
+    "yup": "^1.6.1"
+  },
+  "name": "lddw-site-e-commerce",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

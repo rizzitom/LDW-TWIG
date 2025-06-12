@@ -1,0 +1,332 @@
+{% extends 'base.twig' %}
+
+{% block title %}Inscription - Le Design Du Web{% endblock %}
+
+{% block head %}
+{# Réutilisation des styles de connexion si possible, ou ajout/adaptation ici #}
+<style>
+    .login-container { /* Réutilisation classe de connexion.twig */
+        max-width: 600px; /* Un peu plus large pour l'inscription */
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .login-card { /* Réutilisation classe de connexion.twig */
+        background-color: var(--fond-noir-leger);
+        border: 1px solid var(--bordure-sombre);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        color: var(--texte-blanc);
+    }
+
+    .login-card .card-body {
+        padding: 0; /* Padding déjà sur .login-card */
+    }
+
+    /* Styles Formulaires (idem connexion.twig) */
+    .form-label {
+        color: var(--texte-gris-clair);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .form-control {
+        background-color: var(--fond-noir);
+        border-color: var(--bordure-sombre);
+        color: var(--texte-blanc);
+        padding: 0.75rem 1rem;
+    }
+    .form-control::placeholder { color: var(--texte-gris-moyen); }
+    .form-control:focus {
+        background-color: var(--fond-noir);
+        border-color: var(--violet-principal);
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+        color: var(--texte-blanc);
+    }
+    .input-group .btn { /* Password toggle */
+        border-color: var(--bordure-sombre);
+        background-color: var(--fond-noir);
+        color: var(--texte-gris-clair);
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .input-group .btn:hover {
+        background-color: var(--fond-noir-leger);
+        color: var(--violet-accent);
+    }
+     .input-group .btn:focus {
+         box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+         border-color: var(--violet-principal);
+     }
+     .input-group > .form-control { /* Ajustement BS5 */
+         border-top-right-radius: 0;
+         border-bottom-right-radius: 0;
+     }
+      .input-group > .btn { /* Ajustement BS5 */
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          border-left: 0;
+      }
+
+    /* Bouton principal */
+    .btn-submit-register {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* Liens */
+    .login-link {
+        color: var(--violet-accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s ease;
+    }
+    .login-link:hover {
+        color: var(--texte-blanc);
+        text-decoration: underline;
+    }
+
+    /* Alertes */
+    .alert {
+        border-left-width: 4px;
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+    }
+    .alert-danger { /* Style pour thème sombre */
+        background-color: rgba(220, 53, 69, 0.15);
+        border-color: rgba(220, 53, 69, 0.3);
+        color: #f8d7da;
+        border-left-color: #dc3545;
+    }
+    .alert-success { /* Style pour thème sombre */
+        background-color: rgba(25, 135, 84, 0.15);
+        border-color: rgba(25, 135, 84, 0.3);
+        color: #d1e7dd;
+        border-left-color: #198754;
+    }
+     .alert i { /* Icône dans l'alerte */
+         margin-right: 0.5rem;
+     }
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+<form action="index.php?page=inscrire" method="post" enctype="application/x-www-form-urlencoded">
+    <div class="container login-container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <h1 class="text-center mb-4 fw-bold">Créer votre compte LDW</h1>
+
+                {# Affichage des messages succès/erreur #}
+                {% if form.message is defined and form.message is not empty %}
+                    <div class="alert {% if form.valide %}alert-success{% else %}alert-danger{% endif %} text-center mb-4" role="alert">
+                       {% if form.valide %}
+                           <i class="fas fa-check-circle"></i>
+                       {% else %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                       {% endif %}
+                       {{ form.message }}
+                    </div>
+                {% endif %}
+
+                {# Si l'inscription a réussi, on pourrait rediriger ou afficher un message simple ici #}
+                {# Le code précédent affichait beaucoup d'infos, peut-être trop pour cette page #}
+                {% if form.valide is defined and form.valide == true %}
+                    {# Optionnel: Afficher un message de succès persistant ou rediriger #}
+                    {# Exemple simple:
+                    <div class="text-center mb-4">
+                        <h2 class="text-success">Inscription réussie !</h2>
+                        <p>Bienvenue chez Le Design Du Web, {{ form.prenom }}. Vous pouvez maintenant vous connecter.</p>
+                        <a href="?page=connexion" class="btn btn-purple">Se Connecter</a>
+                    </div>
+                    #}
+                    {# On cache le formulaire si succès ? Dépend de votre logique #}
+                {% else %}
+                    {# Afficher le formulaire si pas encore soumis ou si erreur #}
+                    <div class="card login-card">
+                        <div class="card-body">
+                            {# Photo de profil #}
+                            <div class="mb-3 text-center">
+                                <label for="inputProfilePicture" class="form-label">Photo de profil (optionnel)</label>
+                                <input type="file" id="inputProfilePicture" name="inputProfilePicture" class="form-control form-control-lg" accept="image/*" style="background: var(--bg-color-tertiary); color: var(--text-color); border: 1.5px solid var(--primary);">
+                                <small class="form-text text-muted">Formats acceptés : JPG, PNG, GIF. Max 2 Mo.</small>
+                            </div>
+                            {# Nom et Prénom #}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="inputNom" class="form-label">Nom <span class="text-danger">*</span></label>
+                                    <input type="text" id="inputNom" name="inputNom" class="form-control form-control-lg" required placeholder="Votre nom" value="{{ form.inputNom|default('') }}">
+                                </div>
+                                {# Prénom #}
+                                <div class="col-md-6 mb-3">
+                                    <label for="inputPrenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+                                    <input type="text" id="inputPrenom" name="inputPrenom" class="form-control form-control-lg" required placeholder="Votre prénom" value="{{ form.inputPrenom|default('') }}">
+                                </div>
+                            </div>
+
+                            {# Nom d'utilisateur #}
+                            <div class="mb-3">
+                                <label for="inputUsername" class="form-label">Nom d'utilisateur <span class="text-danger">*</span></label>
+                                <input type="text" id="inputUsername" name="inputUsername" class="form-control form-control-lg" required placeholder="Choisissez un pseudo" value="{{ form.inputUsername|default('') }}">
+                            </div>
+
+                            {# Email #}
+                            <div class="mb-3">
+                                <label for="inputEmail" class="form-label">Votre email <span class="text-danger">*</span></label>
+                                <input type="email" id="inputEmail" name="inputEmail" class="form-control form-control-lg" required placeholder="adresse@email.com" value="{{ form.inputEmail|default('') }}">
+                            </div>
+
+                            {# Adresse (optionnel) #}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="inputAdresse" class="form-label">Adresse</label>
+                                    <input type="text" id="inputAdresse" name="inputAdresse" class="form-control form-control-lg" placeholder="Votre adresse" value="{{ form.inputAdresse|default('') }}">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="inputCodePostal" class="form-label">Code postal</label>
+                                    <input type="text" id="inputCodePostal" name="inputCodePostal" class="form-control form-control-lg" placeholder="Code postal" value="{{ form.inputCodePostal|default('') }}">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="inputVille" class="form-label">Ville</label>
+                                    <input type="text" id="inputVille" name="inputVille" class="form-control form-control-lg" placeholder="Ville" value="{{ form.inputVille|default('') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="inputTelephone" class="form-label">Téléphone</label>
+                                <input type="text" id="inputTelephone" name="inputTelephone" class="form-control form-control-lg" placeholder="Votre téléphone" value="{{ form.inputTelephone|default('') }}">
+                            </div>
+
+                            {# Mot de passe #}
+                            <div class="mb-3">
+                                <label for="inputPassword" class="form-label">Votre mot de passe <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" id="inputPassword" name="inputPassword" class="form-control form-control-lg" required placeholder="Minimum 12 caractères, 1 majuscule, 3 minuscules, 4 chiffres, 1 spécial" minlength="12">
+                                    <button class="btn" type="button" id="togglePasswordBtn" title="Afficher/Masquer">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="progress mt-2" style="height: 6px; background: var(--bg-color-tertiary);">
+                                    <div id="passwordStrengthBar" class="progress-bar" style="width: 0%; background: var(--primary); transition: width 0.3s;"></div>
+                                </div>
+                                <small id="passwordHelp" class="form-text text-muted">Utilisez un mot de passe fort pour sécuriser votre compte.</small>
+                            </div>
+
+                            {# Confirmation Mot de passe #}
+                            <div class="mb-4"> {# Plus de marge avant bouton #}
+                                <label for="inputPassword2" class="form-label">Confirmez le mot de passe <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" id="inputPassword2" name="inputPassword2" class="form-control form-control-lg" required placeholder="Retapez votre mot de passe" minlength="8">
+                                    <button class="btn" type="button" id="toggleConfirmPasswordBtn" title="Afficher/Masquer">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {# Role caché - reste inchangé #}
+                            <input type="hidden" name="role" value="2">
+
+                            {# Bouton Inscription #}
+                            <button type="submit" name="btInscrire" class="btn btn-purple w-100 btn-submit-register">
+                                <i class="fas fa-user-plus me-2"></i> Créer mon compte
+                            </button>
+
+                            {# Lien Connexion #}
+                             <div class="text-center mt-4">
+                                <a href="?page=connexion" class="login-link">Déjà inscrit ? Connectez-vous ici</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %} {# Fin condition form.valide #}
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+{# Suppression des includes jQuery/Popper/Bootstrap 4 #}
+{# Suppression de la ligne PHP invalide #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function setupPasswordToggle(inputId, buttonId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleButton = document.getElementById(buttonId);
+
+        if (!passwordInput || !toggleButton) return; // Sécurité si éléments non trouvés
+
+        const toggleIcon = toggleButton.querySelector('i');
+
+        toggleButton.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleIcon.classList.toggle('fa-eye');
+            toggleIcon.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Appliquer aux deux champs mot de passe
+    setupPasswordToggle('inputPassword', 'togglePasswordBtn');
+    setupPasswordToggle('inputPassword2', 'toggleConfirmPasswordBtn');
+
+    // Password strength meter
+    const passwordInput = document.getElementById('inputPassword');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+    const passwordHelp = document.getElementById('passwordHelp');
+    if (passwordInput && strengthBar) {
+        passwordInput.addEventListener('input', function() {
+            const val = passwordInput.value;
+            let score = 0;
+            if (val.length >= 12) score += 1;
+            if (/[A-Z]/.test(val)) score += 1;
+            if ((val.match(/[a-z]/g) || []).length >= 3) score += 1;
+            if ((val.match(/[0-9]/g) || []).length >= 4) score += 1;
+            if (/[!@#$%^&*(),.?":{}|<>_\-+=;\/\\[\]`~]/.test(val)) score += 1;
+            let percent = (score / 5) * 100;
+            strengthBar.style.width = percent + '%';
+            if (percent < 40) {
+                strengthBar.style.background = 'var(--danger)';
+                passwordHelp.textContent = 'Mot de passe trop faible';
+            } else if (percent < 80) {
+                strengthBar.style.background = 'var(--warning)';
+                passwordHelp.textContent = 'Mot de passe moyen';
+            } else {
+                strengthBar.style.background = 'var(--success)';
+                passwordHelp.textContent = 'Mot de passe fort';
+            }
+        });
+    }
+
+    // Optionnel: Ajouter validation JS pour vérifier que les mots de passe correspondent avant envoi
+    const registrationForm = document.querySelector('form[action="index.php?page=inscrire"]');
+    if(registrationForm) {
+        registrationForm.addEventListener('submit', function(event) {
+            const pwd1 = document.getElementById('inputPassword').value;
+            const pwd2 = document.getElementById('inputPassword2').value;
+            if (pwd1 !== pwd2) {
+                alert('Les mots de passe ne correspondent pas !');
+                event.preventDefault(); // Empêche l'envoi du formulaire
+                 // Mettre en évidence les champs ou afficher message d'erreur plus propre
+                 document.getElementById('inputPassword2').focus();
+                 document.getElementById('inputPassword2').classList.add('is-invalid'); // Utilise style Bootstrap
+            } else {
+                 document.getElementById('inputPassword2').classList.remove('is-invalid');
+            }
+            // Ajouter d'autres validations si besoin (longueur, complexité...)
+        });
+         // Retirer l'erreur visuelle si l'utilisateur corrige
+         document.getElementById('inputPassword2').addEventListener('input', function() {
+              this.classList.remove('is-invalid');
+         });
+         document.getElementById('inputPassword').addEventListener('input', function() {
+              document.getElementById('inputPassword2').classList.remove('is-invalid');
+         });
+    }
+
+});
+</script>
+{% endblock %}

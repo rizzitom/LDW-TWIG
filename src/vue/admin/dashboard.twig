@@ -1,0 +1,650 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Tableau de bord{% endblock %}
+
+{% block head %}
+    {{ parent() }} {# Inclut le contenu du bloc head de base-admin.twig #}
+    <style>
+        /* ============================================== */
+        /* STYLES DASHBOARD ADMIN                */
+        /* ============================================== */
+
+        /* --- Cartes Statistiques --- */
+        .stat-card {
+            background-color: var(--fond-secondaire);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--bordure-couleur);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px var(--ombre-couleur);
+            color: var(--texte-couleur);
+            height: 100%; /* Ensure cards in a row have same height */
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--ombre-couleur);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--violet-accent); /* Valeur en accent */
+            line-height: 1.2;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--texte-secondaire);
+            margin-bottom: 1rem;
+            flex-grow: 1; /* Pushes progress bar down */
+        }
+        .stat-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2.5rem;
+            color: var(--violet-principal);
+            opacity: 0.15;
+            transform: rotate(-15deg);
+        }
+        .progress-bar-admin {
+            height: 6px;
+            background-color: var(--fond-tertiaire);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: auto; /* Pushes to bottom if label grows */
+        }
+        .progress-value {
+            height: 100%;
+            background-color: var(--violet-principal);
+            border-radius: 3px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- Conteneurs Graphiques --- */
+        .chart-container {
+            background-color: var(--fond-secondaire);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--bordure-couleur);
+            box-shadow: 0 4px 10px var(--ombre-couleur);
+            height: 400px; /* Hauteur fixe pour les graphiques */
+            position: relative; /* Pour Chart.js responsive */
+        }
+        .chart-container h5 {
+            font-weight: 600;
+            color: var(--texte-couleur);
+            font-size: 1.1rem;
+        }
+        #salesChart, #categoriesChart {
+            max-height: 320px; /* Limite hauteur canvas */
+        }
+
+
+        /* --- Cartes Admin (Tableaux) --- */
+        .card-admin {
+            background-color: var(--fond-secondaire);
+            border-radius: 0.75rem;
+            border: 1px solid var(--bordure-couleur);
+            box-shadow: 0 4px 10px var(--ombre-couleur);
+            overflow: hidden; /* Pour que le table-responsive n'affecte pas le radius */
+        }
+        .card-header {
+            background-color: var(--fond-tertiaire);
+            border-bottom: 1px solid var(--bordure-couleur);
+            padding: 1rem 1.5rem;
+        }
+         .card-header h5 {
+             font-weight: 600;
+             color: var(--texte-couleur);
+             font-size: 1.1rem;
+         }
+        .card-body {
+             padding: 1.5rem; /* Ajouter padding si pas p-0 */
+        }
+        .card-body.p-0 .table-responsive { /* Gère le cas p-0 */
+            border-radius: 0 0 0.75rem 0.75rem;
+            overflow: hidden;
+        }
+
+        /* --- Tableaux Admin --- */
+        .table {
+            /* surcharge potentielle de table-dark */
+            --bs-table-bg: var(--fond-secondaire);
+            --bs-table-border-color: var(--bordure-couleur);
+            --bs-table-color: var(--texte-couleur);
+            --bs-table-striped-bg: var(--fond-tertiaire); /* Si utilise table-striped */
+            --bs-table-hover-bg: var(--fond-tertiaire); /* Hover plus subtil */
+            --bs-table-hover-color: var(--texte-couleur);
+            margin-bottom: 0; /* Retiré car géré par card-body p-0 */
+        }
+        .table thead th {
+             font-weight: 600;
+             color: var(--texte-secondaire);
+             border-bottom-width: 1px; /* Ligne plus fine */
+             font-size: 0.9rem;
+             text-transform: uppercase;
+             letter-spacing: 0.5px;
+        }
+        .table tbody td {
+             vertical-align: middle;
+             font-size: 0.95rem;
+        }
+        .table-hover tbody tr.hoverable-row:hover { /* Style pour lignes cliquables */
+            background-color: var(--fond-tertiaire);
+            cursor: pointer;
+        }
+        .table .text-danger { color: var(--danger-color) !important; }
+        .table .text-warning { color: var(--warning-color) !important; }
+        .table .text-muted { color: var(--texte-mute) !important; }
+
+
+        /* --- Badges Statut --- */
+        .status-badge {
+            display: inline-block;
+            padding: 0.3em 0.6em;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 50px; /* Badge pilule */
+            text-align: center;
+            min-width: 80px; /* Largeur minimale */
+        }
+        /* Couleurs spécifiques par statut */
+        .status-pending { /* En attente */
+            background-color: rgba(var(--bs-warning-rgb), 0.15);
+            color: var(--warning-color);
+        }
+        .status-processing { /* Validée, En cours, En préparation */
+            background-color: rgba(var(--bs-primary-rgb), 0.15);
+            color: var(--violet-principal);
+        }
+        .status-shipped { /* Expédiée */
+             background-color: rgba(var(--violet-principal-rgb), 0.2); /* Plus clair */
+             color: var(--violet-accent);
+        }
+        .status-delivered { /* Livrée, Terminé */
+            background-color: rgba(var(--bs-success-rgb), 0.15);
+            color: var(--success-color);
+        }
+        .status-cancelled { /* Annulée, Rejeté */
+            background-color: rgba(var(--bs-danger-rgb), 0.15);
+            color: var(--danger-color);
+        }
+
+        /* --- Boutons Admin --- */
+        /* Utilise btn-outline-secondary pour un look neutre adaptable */
+        .btn-outline-light { /* Surcharge pour admin si besoin */
+            border-color: var(--bordure-couleur);
+            color: var(--texte-secondaire);
+        }
+        .btn-outline-light:hover {
+             background-color: var(--fond-tertiaire);
+             border-color: var(--bordure-couleur);
+             color: var(--texte-couleur);
+        }
+
+    </style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.ca_total|default(0)|number_format(2, ',', ' ') }} €</div>
+            <div class="stat-label">Chiffre d'affaires total</div>
+            <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.ca_mois|default(0)|number_format(2, ',', ' ') }} €</div>
+            <div class="stat-label">CA {{ "now"|date("F Y") }}</div> {# Mois/Année en cours #}
+            <div class="progress-bar-admin" title="Objectif mensuel (exemple)">
+                {% set progress_ca = (stats.ca_objectif_mois|default(1) > 0) ? ((stats.ca_mois|default(0) / stats.ca_objectif_mois|default(1)) * 100)|round(0, 'floor') : 0 %}
+                {% set progress_ca_capped = progress_ca > 100 ? 100 : (progress_ca < 0 ? 0 : progress_ca) %}
+                <div class="progress-value" style="width: {{ progress_ca_capped }}%"></div> {# Plafonne à 100% #}
+            </div>
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_commandes|default(0) }}</div>
+            <div class="stat-label">Commandes totales</div>
+            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.commandes_en_cours|default(0) }}</div>
+            <div class="stat-label">Commandes en cours</div>
+            <div class="progress-bar-admin">
+                 {# Exemple: Progression basée sur un seuil ou juste visuel #}
+                {% set progress_cmd = (stats.total_commandes|default(0) > 0) ? ((stats.commandes_en_cours|default(0) / stats.total_commandes) * 100)|round(0) : 0 %}
+                {% set progress_cmd_capped = progress_cmd > 100 ? 100 : (progress_cmd < 0 ? 0 : progress_cmd) %}
+                <div class="progress-value" style="width: {{ progress_cmd_capped }}%; background-color: var(--warning-color);"></div> {# Barre en orange #}
+            </div>
+            <div class="stat-icon"><i class="fas fa-truck-loading"></i></div> {# Icône changée #}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_clients|default(0) }}</div>
+            <div class="stat-label">Clients inscrits</div>
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.nouveaux_clients|default(0) }}</div>
+            <div class="stat-label">Nouveaux clients ce mois</div>
+             <div class="progress-bar-admin">
+                 {# Progression relative aux inscrits du mois précédent ou objectif ? #}
+                 {% set progress_cli = (stats.total_clients|default(1) > 0) ? ((stats.nouveaux_clients|default(0) / (stats.total_clients|default(1))) * 50)|round(0) : 0 %} {# Exemple arbitraire #}
+                {% set progress_cli_capped = progress_cli > 100 ? 100 : (progress_cli < 0 ? 0 : progress_cli) %}
+                <div class="progress-value" style="width: {{ progress_cli_capped }}%; background-color: var(--success-color);"></div> {# Barre en vert #}
+            </div>
+            <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.produits_actifs|default(0) }}</div>
+            <div class="stat-label">Produits actifs</div>
+            <div class="stat-icon"><i class="fas fa-boxes"></i></div> {# Icône changée #}
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.devis_attente|default(0) }}</div>
+            <div class="stat-label">Devis en attente</div>
+             <div class="progress-bar-admin">
+                 {# Progression relative au total devis ou seuil ? #}
+                 {% set progress_devis = (stats.devis_attente|default(0) > 5) ? 100 : ((stats.devis_attente|default(0) / 5) * 100) %} {# Exemple seuil 5 #}
+                 {% set progress_devis_capped = progress_devis > 100 ? 100 : (progress_devis < 0 ? 0 : progress_devis) %}
+                 <div class="progress-value" style="width: {{ progress_devis_capped }}%; background-color: var(--danger-color);"></div> {# Barre en rouge si > 5 #}
+             </div>
+            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div> {# Icône changée #}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-8 mb-4">
+        <div class="chart-container">
+            <h5 class="mb-3">Évolution du CA (12 derniers mois)</h5> {# mb-3 pour espace sous titre #}
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+    <div class="col-xl-4 mb-4">
+        <div class="chart-container">
+            <h5 class="mb-3">Ventes par Catégorie (Montant)</h5>
+            <canvas id="categoriesChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card-admin">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Produits en stock faible</h5>
+                <a href="index.php?page=produit" class="btn btn-sm btn-outline-secondary"> {# Bouton thème adapté #}
+                    <i class="fas fa-box me-1"></i> Gérer les produits
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0"> {# Retrait table-dark pour utiliser variables #}
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Produit</th>
+                                <th class="text-end">Prix</th>
+                                <th class="text-center">Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if low_stock|default([])|length > 0 %}
+                                {% for product in low_stock %}
+                                <tr class="hoverable-row" onclick="window.location='index.php?page=produit&action=modifier&id={{ product.id }}'" title="Modifier {{ product.nom }}">
+                                    <td>{{ product.id }}</td>
+                                    <td>{{ product.nom }}</td>
+                                    <td class="text-end">{{ product.prix|number_format(2, ',', ' ') }} €</td>
+                                    <td class="text-center fw-bold {% if product.stock <= 0 %}text-danger{% else %}text-warning{% endif %}">
+                                        {{ product.stock }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">Aucun produit en stock faible</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card-admin">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Commandes récentes</h5>
+                 <a href="index.php?page=admin&section=commandes" class="btn btn-sm btn-outline-secondary"> {# Bouton thème adapté #}
+                    <i class="fas fa-list-ul me-1"></i> Toutes les commandes
+                 </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0"> {# Retrait table-dark #}
+                        <thead>
+                            <tr>
+                                <th>Réf.</th>
+                                <th>Client</th>
+                                <th class="text-end">Montant</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                             {% if recent_orders|default([])|length > 0 %}
+                                {% for order in recent_orders %}
+                                <tr class="hoverable-row" onclick="window.location='index.php?page=admin&section=commande-detail&id={{ order.id }}'" title="Voir commande {{ order.reference }}">
+                                    <td>#{{ order.reference|default(order.id) }}</td>
+                                    <td>{{ order.nom }} {{ order.prenom }}</td>
+                                    <td class="text-end">{{ order.montant_total|number_format(2, ',', ' ') }} €</td>
+                                    <td class="text-center"> {# Centrer badge #}
+                                        {% set status_class = 'status-pending' %} {# Défaut #}
+                                        {% set status_text = 'En attente' %}
+                                        {% if order.statut == 'validee' %}{% set status_class = 'status-processing' %}{% set status_text = 'Validée' %}
+                                        {% elseif order.statut == 'en_preparation' %}{% set status_class = 'status-processing' %}{% set status_text = 'En prépa.' %} {# Texte court #}
+                                        {% elseif order.statut == 'expediee' %}{% set status_class = 'status-shipped' %}{% set status_text = 'Expédiée' %}
+                                        {% elseif order.statut == 'livree' %}{% set status_class = 'status-delivered' %}{% set status_text = 'Livrée' %}
+                                        {% elseif order.statut == 'annulee' %}{% set status_class = 'status-cancelled' %}{% set status_text = 'Annulée' %}
+                                        {% endif %}
+                                        <span class="status-badge {{ status_class }}">{{ status_text }}</span>
+                                    </td>
+                                    <td>{{ order.date_commande|date("d/m/y H:i") }}</td> {# Format date court #}
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3 text-muted">Aucune commande récente</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card-admin">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Demandes de devis récentes</h5>
+                <a href="index.php?page=admin&section=devis" class="btn btn-sm btn-outline-secondary"> {# Bouton thème adapté #}
+                    <i class="fas fa-list-ul me-1"></i> Tous les devis
+                 </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0"> {# Retrait table-dark #}
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Service</th>
+                                <th>Client</th>
+                                <th>Date demande</th>
+                                <th>Statut</th>
+                                <th class="text-end">Montant estimé</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_quotes|default([])|length > 0 %}
+                                {% for quote in recent_quotes %}
+                                <tr class="hoverable-row" onclick="window.location='index.php?page=admin&section=devis-detail&id={{ quote.id }}'" title="Voir devis #{{ quote.id }}">
+                                    <td>#{{ quote.id }}</td>
+                                    <td>{{ quote.service_nom }}</td>
+                                    <td>{{ quote.nom }} {{ quote.prenom }}</td>
+                                    <td>{{ quote.date_demande|date("d/m/y H:i") }}</td>
+                                    <td class="text-center">
+                                        {% set status_class = 'status-pending' %} {# Défaut #}
+                                        {% set status_text = 'En attente' %}
+                                        {% if quote.statut == 'en_cours' %}{% set status_class = 'status-processing' %}{% set status_text = 'En cours' %}
+                                        {% elseif quote.statut == 'termine' %}{% set status_class = 'status-delivered' %}{% set status_text = 'Terminé' %}
+                                        {% elseif quote.statut == 'rejete' %}{% set status_class = 'status-cancelled' %}{% set status_text = 'Rejeté' %}
+                                        {% endif %}
+                                        <span class="status-badge {{ status_class }}">{{ status_text }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if quote.montant_estime %}
+                                            {{ quote.montant_estime|number_format(2, ',', ' ') }} €
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-3 text-muted">Aucune demande de devis récente</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+    {{ parent() }} {# Inclut les scripts de base-admin.twig (important si Chart.js y est chargé) #}
+    {# Supposer que Chart.js est déjà chargé par base-admin.twig #}
+    {# <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> #}
+    <script>
+        // Fonction pour récupérer une variable CSS
+        function getCssVariable(variableName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+        }
+        // Fonction pour convertir HEX/RGB en RGBA
+         function colorToRgba(color, alpha = 1) {
+            if (!color) return `rgba(0,0,0,${alpha})`; // Fallback
+             if (color.startsWith('rgba')) return color; // Déjà RGBA
+             if (color.startsWith('rgb')) { // Convertit rgb en rgba
+                 return color.replace('rgb', 'rgba').replace(')', `, ${alpha})`);
+             }
+             if (color.startsWith('#')) { // Convertit HEX en rgba
+                let hex = color.slice(1);
+                if (hex.length === 3) {
+                    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+                }
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+             return color; // Retourne tel quel si inconnu
+         }
+
+
+        function initCharts() {
+            // Récupérer les couleurs du thème ACTUEL
+            const primaryColor = getCssVariable('--violet-principal');
+            const accentColor = getCssVariable('--violet-accent');
+            const secondaryColor = getCssVariable('--violet-secondaire'); // Pourrait être utilisé pour doughnut
+            const textColor = getCssVariable('--texte-secondaire'); // Pour labels/ticks
+            const gridColor = getCssVariable('--bordure-couleur'); // Pour grilles
+            const chartBgColor = getCssVariable('--fond-secondaire'); // Pour fond tooltip
+            const tooltipTextColor = getCssVariable('--texte-couleur');
+
+            // --- Graphique des ventes mensuelles ---
+            const salesChartCtx = document.getElementById('salesChart');
+            if (salesChartCtx && typeof Chart !== 'undefined') { // Vérifie existence et Chart.js chargé
+                 // Détruire ancien graphique s'il existe (utile si rechargement AJAX ou changement thème)
+                 let existingSalesChart = Chart.getChart(salesChartCtx);
+                 if (existingSalesChart) { existingSalesChart.destroy(); }
+
+                const salesChart = new Chart(salesChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ sales_data.monthly.labels|json_encode|raw|default('[]') }},
+                        datasets: [{
+                            label: 'Chiffre d\'affaires',
+                            data: {{ sales_data.monthly.values|json_encode|raw|default('[]') }},
+                            backgroundColor: colorToRgba(primaryColor, 0.2), // Utilise couleur thème avec alpha
+                            borderColor: primaryColor, // Utilise couleur thème
+                            borderWidth: 2,
+                            pointBackgroundColor: primaryColor,
+                            pointBorderColor: getCssVariable('--fond-secondaire'), // Fond du graphique pour bordure point
+                            pointHoverBackgroundColor: getCssVariable('--fond-secondaire'),
+                            pointHoverBorderColor: primaryColor,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.3 // Courbe adoucie
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: gridColor },
+                                ticks: {
+                                    color: textColor,
+                                    callback: function(value) {
+                                        // Format monétaire €
+                                        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { color: gridColor },
+                                ticks: { color: textColor }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: chartBgColor,
+                                titleColor: accentColor, // Titre tooltip en accent
+                                bodyColor: tooltipTextColor,
+                                borderColor: gridColor,
+                                borderWidth: 1,
+                                padding: 10,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else if (!salesChartCtx) {
+                 console.warn("Element canvas 'salesChart' non trouvé.");
+            } else if (typeof Chart === 'undefined') {
+                 console.warn("Chart.js n'est pas chargé.");
+            }
+
+            // --- Graphique des ventes par catégorie ---
+            const categoriesChartCtx = document.getElementById('categoriesChart');
+            if (categoriesChartCtx && typeof Chart !== 'undefined') {
+                 let existingCategoriesChart = Chart.getChart(categoriesChartCtx);
+                 if (existingCategoriesChart) { existingCategoriesChart.destroy(); }
+
+                // Palette de couleurs dérivée du thème
+                 const categoryColors = [
+                     primaryColor,
+                     accentColor,
+                     secondaryColor,
+                     colorToRgba(primaryColor, 0.7),
+                     colorToRgba(accentColor, 0.7),
+                     colorToRgba(secondaryColor, 0.7)
+                     // Ajoutez plus de couleurs si nécessaire
+                 ];
+
+                const categoriesChart = new Chart(categoriesChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: {{ sales_data.categories.labels|json_encode|raw|default('[]') }},
+                        datasets: [{
+                            data: {{ sales_data.categories.values|json_encode|raw|default('[]') }},
+                            backgroundColor: categoryColors,
+                            borderColor: getCssVariable('--fond-secondaire'), // Bordure couleur fond
+                            borderWidth: 3, // Augmente bordure pour effet visuel
+                            hoverOffset: 8 // Décalage au survol
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right', // Légende à droite
+                                labels: {
+                                    color: textColor,
+                                    padding: 15, // Espace légende
+                                    boxWidth: 12,
+                                    usePointStyle: true, // Utilise cercles
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                 backgroundColor: chartBgColor,
+                                 titleColor: accentColor,
+                                 bodyColor: tooltipTextColor,
+                                 borderColor: gridColor,
+                                 borderWidth: 1,
+                                 padding: 10,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.parsed);
+                                        // Optionnel: Ajouter pourcentage
+                                        // const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        // const percentage = ((context.parsed / total) * 100).toFixed(1) + '%';
+                                        // label += ` (${percentage})`;
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                         cutout: '65%' // Fait un doughnut plus fin
+                    }
+                });
+            } else if (!categoriesChartCtx) {
+                 console.warn("Element canvas 'categoriesChart' non trouvé.");
+            } else if (typeof Chart === 'undefined') {
+                 console.warn("Chart.js n'est pas chargé.");
+            }
+        }
+
+        // Initialise les graphiques au chargement
+        initCharts();
+
+        // Optionnel: Réinitialiser les graphiques si le thème change (si le changement de thème ne recharge pas la page)
+        // Supposer qu'il y a un event 'themeChanged' déclenché par le script de base.twig
+        // document.body.addEventListener('themeChanged', initCharts);
+
+    </script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% macro produitCard(produit, source) %}
+{# Template for displaying a product card with "Add to Cart" button
+   Parameters:
+   - produit: Product data (id, nom, prix, image, description)
+   - source: Source page (boutique, accueil, etc.) for redirect after adding to cart
+#}
+<div class="card product-card h-100">
+    {% if produit.image %}
+        <div class="card-img-container">
+            <img src="{{ produit.image }}" class="card-img-top" alt="{{ produit.nom }}">
+        </div>
+    {% else %}
+        <div class="card-img-container bg-light d-flex align-items-center justify-content-center">
+            <i class="fas fa-image text-muted" style="font-size: 3rem;"></i>
+        </div>
+    {% endif %}
+    
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ produit.nom }}</h5>
+        
+        {% if produit.description %}
+            <p class="card-text flex-grow-1">{{ produit.description|striptags|length > 100 ? produit.description|striptags|slice(0, 100) ~ '...' : produit.description|striptags }}</p>
+        {% else %}
+            <p class="card-text flex-grow-1 text-muted">Aucune description disponible</p>
+        {% endif %}
+        
+        <div class="mt-auto">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="font-weight-bold">{{ produit.prix|number_format(2, ',', ' ') }} €</span>
+                <div>
+                    <!-- Affichage conditionnel de la disponibilité -->
+                    {% if produit.stock is defined and produit.stock <= 0 %}
+                        <span class="badge badge-danger">Rupture de stock</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="btn-group mt-3 w-100">
+                <a href="index.php?page=produit&id={{ produit.id }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-eye"></i> Détails
+                </a>
+                
+                {% if produit.stock is not defined or produit.stock > 0 %}
+                    <!-- Bouton d'ajout au panier -->
+                    <button class="btn btn-primary btn-sm btn-ajouter-panier" data-id-produit="{{ produit.id }}" data-source="{{ source }}">
+                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                    </button>
+                {% else %}
+                    <!-- Bouton désactivé si produit en rupture de stock -->
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro produitListFeatured(produits, source) %}
+{# Template for displaying a list of featured products
+   Parameters:
+   - produits: Array of product data
+   - source: Source page (accueil) for redirect after adding to cart
+#}
+
+{% from _self import produitCard %}
+
+<div class="container">
+    <h2 class="text-center mb-4">Produits en vedette</h2>
+    
+    {% if produits is empty %}
+        <div class="alert alert-info">
+            Aucun produit en vedette actuellement.
+        </div>
+    {% else %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for produit in produits %}
+                <div class="col mb-4">
+                    {{ produitCard(produit, source) }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro produitQuickView(produit) %}
+{# Template for displaying a product quick view modal #}
+<div class="modal fade" id="quickViewModal{{ produit.id }}" tabindex="-1" aria-labelledby="quickViewModalLabel{{ produit.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickViewModalLabel{{ produit.id }}">{{ produit.nom }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {% if produit.image %}
+                            <img src="{{ produit.image }}" class="img-fluid" alt="{{ produit.nom }}">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                                <i class="fas fa-image text-muted" style="font-size: 5rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h4>{{ produit.nom }}</h4>
+                        <p class="text-muted">Réf: {{ produit.reference }}</p>
+                        <p class="font-weight-bold h4 text-primary mb-4">{{ produit.prix|number_format(2, ',', ' ') }} €</p>
+                        
+                        {% if produit.description %}
+                            <p>{{ produit.description|striptags }}</p>
+                        {% else %}
+                            <p class="text-muted">Aucune description disponible</p>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            {% if produit.stock is defined and produit.stock <= 0 %}
+                                <div class="alert alert-danger">Produit en rupture de stock</div>
+                            {% else %}
+                                <form class="d-flex align-items-center">
+                                    <div class="form-group mb-0 mr-3">
+                                        <label for="quickViewQuantity{{ produit.id }}">Quantité</label>
+                                        <input type="number" class="form-control" id="quickViewQuantity{{ produit.id }}" value="1" min="1" max="99" style="width: 70px;">
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary btn-ajouter-panier" data-id-produit="{{ produit.id }}" data-source="quickview">
+                                        <i class="fas fa-cart-plus"></i> Ajouter au panier
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <a href="index.php?page=produit&id={{ produit.id }}" class="btn btn-primary">Voir les détails</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

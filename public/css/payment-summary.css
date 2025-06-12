@@ -1,0 +1,211 @@
+/* Styles for the payment order summary page */
+
+.payment-order-summary {
+    background-color: var(--fond-tertiaire);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 20px;
+}
+
+.payment-order-summary h4 {
+    border-bottom: 1px solid var(--violet-principal);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--texte-blanc);
+}
+
+.order-summary-details {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bordure-couleur);
+}
+
+.order-summary-address h5,
+.order-summary-delivery h5,
+.order-summary-products h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--texte-blanc);
+}
+
+.order-summary-address p {
+    color: var(--texte-gris-clair);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.selected-delivery-method {
+    display: flex;
+    align-items: center;
+    background-color: rgba(var(--violet-principal-rgb), 0.1);
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    color: var(--texte-blanc);
+    font-size: 0.9rem;
+}
+
+.products-list {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding-right: 5px;
+}
+
+.product-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--bordure-couleur);
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    font-size: 0.9rem;
+    color: var(--texte-blanc);
+}
+
+.product-name .text-muted {
+    color: var(--texte-gris-clair) !important;
+    font-size: 0.85rem;
+}
+
+.product-price {
+    font-size: 0.9rem;
+    color: var(--violet-principal);
+    font-weight: 500;
+}
+
+.order-summary-totals {
+    padding-top: 0.5rem;
+}
+
+.total-line {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--texte-gris-clair);
+}
+
+.total-line:last-child {
+    font-size: 1.1rem;
+    color: var(--texte-blanc);
+    margin-top: 0.5rem;
+}
+
+.order-total {
+    color: var(--violet-principal);
+}
+
+/* Amélioration des styles pour les points de retrait/relais */
+.delivery-points-results {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.relay-item,
+.poste-item,
+.pickup-item {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.relay-item.selected,
+.poste-item.selected,
+.pickup-item.selected {
+    border-color: var(--violet-principal);
+    background-color: rgba(var(--violet-principal-rgb), 0.1);
+    transform: scale(1.02);
+}
+
+.relay-item:hover,
+.poste-item:hover,
+.pickup-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Container des adresses sauvegardées */
+.saved-addresses-list {
+    background-color: var(--fond-noir);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.saved-addresses-list .form-check-label strong {
+    color: var(--texte-blanc);
+}
+
+.saved-addresses-list .form-check {
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.saved-addresses-list .form-check:hover {
+    background-color: rgba(var(--violet-principal-rgb), 0.05);
+}
+
+.saved-addresses-list .form-check-input:checked + .form-check-label {
+    font-weight: 500;
+}
+
+.saved-addresses-list .form-check-input:checked ~ .form-check-label .text-muted {
+    color: rgba(var(--violet-principal-rgb), 0.6) !important;
+}
+
+/* Styles pour les écrans de petite taille */
+@media (max-width: 991.98px) {
+    .payment-order-summary {
+        position: relative;
+        top: 0;
+        margin-top: 1.5rem;
+    }
+}
+
+/* Styles pour le thème clair */
+body.light-theme .payment-order-summary {
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .payment-order-summary h4 {
+    color: #333;
+}
+
+body.light-theme .order-summary-address h5,
+body.light-theme .order-summary-delivery h5,
+body.light-theme .order-summary-products h5 {
+    color: #333;
+}
+
+body.light-theme .order-summary-address p {
+    color: #666;
+}
+
+body.light-theme .selected-delivery-method {
+    background-color: rgba(var(--violet-principal-rgb), 0.1);
+    color: #333;
+}
+
+body.light-theme .product-name {
+    color: #333;
+}
+
+body.light-theme .total-line {
+    color: #666;
+}
+
+body.light-theme .total-line:last-child {
+    color: #333;
+}
+
+body.light-theme .saved-addresses-list {
+    background-color: #f1f3f5;
+}
+
+body.light-theme .saved-addresses-list .form-check-label strong {
+    color: #333;
+}

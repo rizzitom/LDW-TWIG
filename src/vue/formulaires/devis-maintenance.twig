@@ -1,0 +1,495 @@
+{% extends 'base.twig' %}
+
+{% block title %}Demande de devis - Maintenance Informatique{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style>
+        /* ============================================== */
+        /* STYLES FORMULAIRE DEVIS                 */
+        /* ============================================== */
+        
+        .devis-form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px var(--ombre-couleur);
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .form-section h3 {
+            color: var(--violet-principal);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--texte-couleur);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--fond-tertiaire);
+            color: var(--texte-couleur);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--violet-principal);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: var(--texte-mute);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            width: calc(50% - 0.5rem);
+        }
+        
+        .checkbox-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-submit {
+            background-color: var(--violet-principal);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .form-submit:hover {
+            background-color: var(--violet-secondaire);
+            transform: translateY(-2px);
+        }
+        
+        .form-submit:active {
+            transform: translateY(0);
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e32;
+            font-weight: bold;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--texte-secondaire);
+            margin-top: 0.5rem;
+        }
+        
+        .terms-container {
+            background-color: var(--fond-tertiaire);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--bordure-couleur);
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 0.5rem;
+        }
+        
+        .terms-checkbox input {
+            margin-right: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .checkbox-item {
+                width: 100%;
+            }
+            
+            .devis-form-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="page-header text-center mb-4">
+        <h1>Demande de devis - Maintenance Informatique</h1>
+        <p class="lead">Décrivez vos besoins en maintenance pour obtenir un devis personnalisé</p>
+    </div>
+    
+    <div class="devis-form-container">
+        <form id="devis-form" action="index.php?page=devis&action=envoyer" method="post">
+            <input type="hidden" name="type_service" value="maintenance">
+            
+            <!-- Section 1: Informations personnelles -->
+            <div class="form-section">
+                <h3><i class="fas fa-user me-2"></i>Vos informations</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nom" class="required">Nom</label>
+                            <input type="text" class="form-control" id="nom" name="nom" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="prenom" class="required">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email" class="required">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" class="form-control" id="telephone" name="telephone">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="type_client" class="required">Vous êtes</label>
+                    <select class="form-control" id="type_client" name="type_client" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="particulier">Particulier</option>
+                        <option value="entreprise">Entreprise</option>
+                        <option value="association">Association</option>
+                        <option value="administration">Administration</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="societe">Nom de l'entreprise (si applicable)</label>
+                    <input type="text" class="form-control" id="societe" name="societe">
+                </div>
+            </div>
+            
+            <!-- Section 2: Informations sur les besoins de maintenance -->
+            <div class="form-section">
+                <h3><i class="fas fa-tools me-2"></i>Vos besoins en maintenance</h3>
+                
+                <div class="form-group">
+                    <label for="type_maintenance" class="required">Type de maintenance souhaitée</label>
+                    <select class="form-control" id="type_maintenance" name="type_maintenance" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="depannage_ponctuel">Dépannage ponctuel</option>
+                        <option value="maintenance_preventive">Maintenance préventive régulière</option>
+                        <option value="contrat_maintenance">Contrat de maintenance</option>
+                        <option value="assistance_distance">Assistance à distance</option>
+                        <option value="formation">Formation et conseils</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="frequence" class="required">Fréquence d'intervention souhaitée</label>
+                    <select class="form-control" id="frequence" name="frequence" required>
+                        <option value="">Sélectionnez une option</option>
+                        <option value="ponctuelle">Intervention ponctuelle</option>
+                        <option value="mensuelle">Mensuelle</option>
+                        <option value="trimestrielle">Trimestrielle</option>
+                        <option value="semestrielle">Semestrielle</option>
+                        <option value="annuelle">Annuelle</option>
+                        <option value="sur_demande">Sur demande</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type d'équipement concerné</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_pc" name="equipements[]" value="pc">
+                            <label for="equip_pc">PC / Ordinateurs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_serveur" name="equipements[]" value="serveur">
+                            <label for="equip_serveur">Serveurs</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_reseau" name="equipements[]" value="reseau">
+                            <label for="equip_reseau">Équipements réseau</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_imprimante" name="equipements[]" value="imprimante">
+                            <label for="equip_imprimante">Imprimantes/Scanners</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_mobile" name="equipements[]" value="mobile">
+                            <label for="equip_mobile">Appareils mobiles</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="equip_logiciel" name="equipements[]" value="logiciel">
+                            <label for="equip_logiciel">Logiciels</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nb_postes">Nombre d'équipements concernés</label>
+                    <select class="form-control" id="nb_postes" name="nb_postes">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="1">1 équipement</option>
+                        <option value="2-5">2 à 5 équipements</option>
+                        <option value="6-10">6 à 10 équipements</option>
+                        <option value="11-20">11 à 20 équipements</option>
+                        <option value="plus_20">Plus de 20 équipements</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description_probleme" class="required">Description du problème ou des besoins</label>
+                    <textarea class="form-control" id="description_probleme" name="description_probleme" rows="5" required placeholder="Décrivez en détail le problème rencontré ou vos besoins en maintenance..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Section 3: Informations techniques -->
+            <div class="form-section">
+                <h3><i class="fas fa-cogs me-2"></i>Détails techniques</h3>
+                
+                <div class="form-group">
+                    <label>Système(s) d'exploitation utilisé(s)</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_windows" name="os[]" value="windows">
+                            <label for="os_windows">Windows</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_mac" name="os[]" value="mac">
+                            <label for="os_mac">macOS</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_linux" name="os[]" value="linux">
+                            <label for="os_linux">Linux</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_android" name="os[]" value="android">
+                            <label for="os_android">Android</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_ios" name="os[]" value="ios">
+                            <label for="os_ios">iOS</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="os_autre" name="os[]" value="autre">
+                            <label for="os_autre">Autre</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Avez-vous déjà fait appel à un service de maintenance ?</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="maintenance_oui" name="maintenance_anterieure" value="oui">
+                            <label for="maintenance_oui">Oui</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="maintenance_non" name="maintenance_anterieure" value="non">
+                            <label for="maintenance_non">Non</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Niveau d'urgence</label>
+                    <select class="form-control" id="urgence" name="urgence">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="faible">Faible - Pas d'urgence</option>
+                        <option value="moyenne">Moyenne - Dans les prochains jours</option>
+                        <option value="haute">Haute - Dès que possible</option>
+                        <option value="critique">Critique - Système à l'arrêt</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="details_techniques">Informations techniques complémentaires</label>
+                    <textarea class="form-control" id="details_techniques" name="details_techniques" rows="3" placeholder="Marque et modèle des équipements, versions logicielles, configurations spécifiques..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Section 4: Préférences d'intervention -->
+            <div class="form-section">
+                <h3><i class="fas fa-calendar-alt me-2"></i>Préférences d'intervention</h3>
+                
+                <div class="form-group">
+                    <label>Mode d'intervention préféré</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="mode_distance" name="mode_intervention" value="distance">
+                            <label for="mode_distance">À distance</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="mode_surplace" name="mode_intervention" value="sur_place">
+                            <label for="mode_surplace">Sur place</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="mode_indifferent" name="mode_intervention" value="indifferent">
+                            <label for="mode_indifferent">Indifférent</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="disponibilite">Disponibilités pour l'intervention</label>
+                    <textarea class="form-control" id="disponibilite" name="disponibilite" rows="2" placeholder="Jours et heures de disponibilité préférés..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adresse_intervention">Adresse d'intervention (si sur place)</label>
+                    <textarea class="form-control" id="adresse_intervention" name="adresse_intervention" rows="3" placeholder="Adresse complète où l'intervention doit avoir lieu..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Section 5: Informations complémentaires -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle me-2"></i>Informations complémentaires</h3>
+                
+                <div class="form-group">
+                    <label for="commentaires">Autres informations ou questions</label>
+                    <textarea class="form-control" id="commentaires" name="commentaires" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Comment avez-vous connu LDW ?</label>
+                    <select class="form-control" id="source" name="source">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="recherche">Moteur de recherche</option>
+                        <option value="reseaux_sociaux">Réseaux sociaux</option>
+                        <option value="recommandation">Recommandation</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Section 6: Conditions générales -->
+            <div class="form-section">
+                <div class="terms-container">
+                    <h3 class="mb-2"><i class="fas fa-file-contract me-2"></i>Conditions générales</h3>
+                    <p>En soumettant ce formulaire, vous acceptez que les informations saisies soient utilisées pour vous recontacter dans le cadre de votre demande de devis.</p>
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="conditions" name="conditions" required>
+                        <label for="conditions" class="required">J'accepte les <a href="index.php?page=cgv" target="_blank">conditions générales de vente</a> et la <a href="index.php?page=politique-de-confidentialite" target="_blank">politique de confidentialité</a>.</label>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="form-submit">
+                        <i class="fas fa-paper-plane"></i> Envoyer ma demande de devis
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validation du formulaire
+            const form = document.getElementById('devis-form');
+            
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                
+                // Validation des champs requis
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                // Validation de l'email
+                const emailField = document.getElementById('email');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailField.value && !emailRegex.test(emailField.value)) {
+                    isValid = false;
+                    emailField.classList.add('is-invalid');
+                }
+                
+                // Empêcher l'envoi si le formulaire n'est pas valide
+                if (!isValid) {
+                    event.preventDefault();
+                    alert('Veuillez remplir correctement tous les champs obligatoires.');
+                }
+            });
+            
+            // Réinitialiser la validation lors de la saisie
+            form.querySelectorAll('input, textarea, select').forEach(field => {
+                field.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
+        });
+    </script>
+{% endblock %}

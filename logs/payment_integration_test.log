@@ -1,0 +1,57 @@
+2025-04-18 19:19:12 - ✅ Connexion à la base de données établie
+2025-04-18 19:19:13 - ✅ Table 'commandes' existe
+2025-04-18 19:19:13 - ✅ Table 'commande_produit' existe
+2025-04-18 19:19:13 - ✅ Table 'paiements' existe
+2025-04-18 19:19:13 - ❌ Table 'factures' n'existe pas
+2025-04-18 19:19:13 - ⚠️ Certaines tables nécessaires sont manquantes. Veuillez exécuter les scripts de création de tables.
+2025-04-18 19:19:13 - ✅ Initialisation de Stripe réussie avec la clé publique: pk_live_51RDozlG7RjirpzdIvkXjsNZ9TcQ6phh5CJ2Xx18wrMJLxaw9sAYzNhSnFe28zRRUgtmHdSFXSbfAOew6LV8Jiodh00E6moh5PE
+2025-04-18 19:19:13 - 🔄 Test de création d'une intention de paiement...
+2025-04-18 19:19:13 - ✅ Intention de paiement créée avec succès!
+2025-04-18 19:19:13 - ID: pi_3RFKRRG7RjirpzdI04QER7AE
+2025-04-18 19:19:13 - 🔄 Test de vérification du paiement...
+2025-04-18 19:19:14 - ✅ Vérification du paiement réussie
+2025-04-18 19:19:14 - Statut: requires_payment_method
+2025-04-18 19:19:14 - 🔄 Test d'annulation du paiement...
+2025-04-18 19:19:14 - ✅ Annulation du paiement réussie
+2025-04-18 19:19:14 - <hr>
+2025-04-18 19:19:14 - <h2>Résumé des tests</h2>
+2025-04-18 19:19:14 - ✅ Intégration de base de Stripe fonctionne correctement
+2025-04-18 19:19:14 - ✅ La base de données est configurée pour enregistrer les paiements
+2025-04-18 19:19:14 - ✅ Le processus de création, vérification et annulation fonctionne
+2025-04-18 19:19:14 - <hr>
+2025-04-18 19:19:14 - <h2>Instructions d'utilisation</h2>
+2025-04-18 19:19:14 - 1. Pour compléter l'intégration, assurez-vous que le webhookSecret est correctement configuré dans config/stripe.php
+2025-04-18 19:19:14 - 2. Utilisez process_stripe_payment.php comme point de terminaison webhook dans le tableau de bord Stripe
+2025-04-18 19:19:14 - 3. Pour les tests en production, utilisez les numéros de carte de test Stripe :
+2025-04-18 19:19:14 -    • 4242 4242 4242 4242 : Paiement réussi
+2025-04-18 19:19:14 -    • 4000 0000 0000 0002 : Paiement refusé
+2025-04-18 19:19:14 - <hr>
+2025-04-18 19:19:14 - <strong>Le système de paiement est correctement configuré et prêt à l'emploi!</strong>
+2025-04-18 19:20:55 - ✅ Connexion à la base de données établie
+2025-04-18 19:20:55 - ✅ Table 'commandes' existe
+2025-04-18 19:20:55 - ✅ Table 'commande_produit' existe
+2025-04-18 19:20:55 - ✅ Table 'paiements' existe
+2025-04-18 19:20:55 - ✅ Table 'factures' existe
+2025-04-18 19:20:55 - ✅ Initialisation de Stripe réussie avec la clé publique: pk_live_51RDozlG7RjirpzdIvkXjsNZ9TcQ6phh5CJ2Xx18wrMJLxaw9sAYzNhSnFe28zRRUgtmHdSFXSbfAOew6LV8Jiodh00E6moh5PE
+2025-04-18 19:20:55 - 🔄 Test de création d'une intention de paiement...
+2025-04-18 19:20:56 - ✅ Intention de paiement créée avec succès!
+2025-04-18 19:20:56 - ID: pi_3RFKT6G7RjirpzdI0c2fOLwK
+2025-04-18 19:20:56 - 🔄 Test de vérification du paiement...
+2025-04-18 19:20:57 - ✅ Vérification du paiement réussie
+2025-04-18 19:20:57 - Statut: requires_payment_method
+2025-04-18 19:20:57 - 🔄 Test d'annulation du paiement...
+2025-04-18 19:20:57 - ✅ Annulation du paiement réussie
+2025-04-18 19:20:57 - <hr>
+2025-04-18 19:20:57 - <h2>Résumé des tests</h2>
+2025-04-18 19:20:57 - ✅ Intégration de base de Stripe fonctionne correctement
+2025-04-18 19:20:57 - ✅ La base de données est configurée pour enregistrer les paiements
+2025-04-18 19:20:57 - ✅ Le processus de création, vérification et annulation fonctionne
+2025-04-18 19:20:57 - <hr>
+2025-04-18 19:20:57 - <h2>Instructions d'utilisation</h2>
+2025-04-18 19:20:57 - 1. Pour compléter l'intégration, assurez-vous que le webhookSecret est correctement configuré dans config/stripe.php
+2025-04-18 19:20:57 - 2. Utilisez process_stripe_payment.php comme point de terminaison webhook dans le tableau de bord Stripe
+2025-04-18 19:20:57 - 3. Pour les tests en production, utilisez les numéros de carte de test Stripe :
+2025-04-18 19:20:57 -    • 4242 4242 4242 4242 : Paiement réussi
+2025-04-18 19:20:57 -    • 4000 0000 0000 0002 : Paiement refusé
+2025-04-18 19:20:57 - <hr>
+2025-04-18 19:20:57 - <strong>Le système de paiement est correctement configuré et prêt à l'emploi!</strong>

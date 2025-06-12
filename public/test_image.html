@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Image Loading</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .image-test {
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      h2 {
+        margin-top: 30px;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Image Loading Test</h1>
+
+    <h2>Direct Path Tests</h2>
+
+    <div class="image-test">
+      <h3>Logo Light (Direct Path)</h3>
+      <img src="/public/images/logov2/Logosfnoir.png" alt="Logo Light" />
+    </div>
+
+    <div class="image-test">
+      <h3>Logo Dark (Direct Path)</h3>
+      <img src="/public/images/logov2/Logosfblanc.png" alt="Logo Dark" />
+    </div>
+
+    <h2>Relative Path Tests</h2>
+
+    <div class="image-test">
+      <h3>Logo Light (Relative Path)</h3>
+      <img src="images/logov2/Logosfnoir.png" alt="Logo Light" />
+    </div>
+
+    <div class="image-test">
+      <h3>Logo Dark (Relative Path)</h3>
+      <img src="images/logov2/Logosfblanc.png" alt="Logo Dark" />
+    </div>
+
+    <h2>Absolute URL Tests</h2>
+
+    <div class="image-test">
+      <h3>Logo Light (Absolute URL)</h3>
+      <img
+        src="https://ledesignduweb.com/public/images/logov2/Logosfnoir.png"
+        alt="Logo Light"
+      />
+    </div>
+
+    <div class="image-test">
+      <h3>Logo Dark (Absolute URL)</h3>
+      <img
+        src="https://ledesignduweb.com/public/images/logov2/Logosfblanc.png"
+        alt="Logo Dark"
+      />
+    </div>
+
+    <h2>Other Image Tests</h2>
+
+    <div class="image-test">
+      <h3>Another Image from public/images</h3>
+      <img src="/public/images/logo3ft.png" alt="Another Image" />
+    </div>
+
+    <div class="image-test">
+      <h3>External Image (Google Logo)</h3>
+      <img
+        src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+        alt="Google Logo"
+      />
+    </div>
+  </body>
+</html>

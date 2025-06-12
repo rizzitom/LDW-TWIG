@@ -1,0 +1,262 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Mes commandes{% endblock %}
+
+{% block client_actions %}
+<div class="d-flex align-items-center">
+    <form action="index.php" method="get" class="me-2 d-flex">
+        <input type="hidden" name="page" value="commandes">
+        <input type="text" name="recherche" class="form-control form-control-sm" placeholder="Rechercher..." value="{{ recherche|default('') }}">
+        <button type="submit" class="btn btn-sm btn-purple ms-2">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+    <a href="index.php?page=boutique" class="btn btn-outline-purple">
+        <i class="fas fa-store me-1"></i> Continuer mes achats
+    </a>
+</div>
+{% endblock %}
+
+{% block client_content %}
+    <div class="client-card mb-4">
+        <div class="card-header">
+            <i class="fas fa-shopping-bag"></i> Historique de vos commandes
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-client mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Référence</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Méthode de paiement</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if commandes|length > 0 %}
+                            {% for commande in commandes %}
+                                <tr class="clickable-row" data-href="index.php?page=commande&id={{ commande.id }}">
+                                    <td>{{ commande.reference }}</td>
+                                    <td>{{ commande.date_commande|date("d/m/Y") }}</td>
+                                    <td>{{ commande.montant_total|number_format(2, ',', ' ') }} €</td>
+                                    <td>
+                                        {% if commande.methode_paiement == 'carte' %}
+                                            <i class="far fa-credit-card me-1"></i> Carte bancaire
+                                        {% elseif commande.methode_paiement == 'paypal' %}
+                                            <i class="fab fa-paypal me-1"></i> PayPal
+                                        {% elseif commande.methode_paiement == 'virement' %}
+                                            <i class="fas fa-university me-1"></i> Virement bancaire
+                                        {% else %}
+                                            {{ commande.methode_paiement }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if commande.statut == 'en_attente' %}
+                                            <span class="status-badge status-pending">En attente</span>
+                                        {% elseif commande.statut == 'en_cours' %}
+                                            <span class="status-badge status-processing">En cours</span>
+                                        {% elseif commande.statut == 'expedie' %}
+                                            <span class="status-badge status-shipped">Expédiée</span>
+                                        {% elseif commande.statut == 'livre' %}
+                                            <span class="status-badge status-delivered">Livrée</span>
+                                        {% elseif commande.statut == 'annule' %}
+                                            <span class="status-badge status-cancelled">Annulée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a href="index.php?page=commande&id={{ commande.id }}" class="btn btn-sm btn-outline-purple" title="Voir le détail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="index.php?page=commande&id={{ commande.id }}&action=facture" class="btn btn-sm btn-outline-primary" title="Télécharger la facture">
+                                                <i class="fas fa-file-invoice"></i>
+                                            </a>
+                                            {% if commande.statut == 'en_attente' or commande.statut == 'en_cours' %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Annuler la commande" 
+                                                    data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ commande.id }}">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+                                    <p class="mb-3">Vous n'avez pas encore passé de commande.</p>
+                                    <a href="index.php?page=boutique" class="btn btn-purple">
+                                        <i class="fas fa-shopping-bag me-2"></i> Découvrir nos produits
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ section -->
+    <div class="client-card mb-4">
+        <div class="card-header">
+            <i class="fas fa-question-circle"></i> Questions fréquentes sur les commandes
+        </div>
+        <div class="card-body">
+            <div class="accordion" id="faqCommandes">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Comment suivre l'état de ma commande ?
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqCommandes">
+                        <div class="accordion-body">
+                            Vous pouvez suivre l'état de votre commande en consultant le détail de celle-ci. Cliquez sur le bouton <i class="fas fa-eye"></i> ou simplement sur la ligne de la commande pour accéder à ses détails. Vous y verrez le statut actuel et l'historique du suivi.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Comment puis-je annuler une commande ?
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqCommandes">
+                        <div class="accordion-body">
+                            Vous pouvez annuler une commande uniquement si elle est en statut "En attente" ou "En cours". Pour cela, cliquez sur le bouton <i class="fas fa-times"></i> dans les actions de la commande. Notez que les commandes déjà expédiées ne peuvent plus être annulées par ce biais, vous devrez contacter notre service client pour un retour.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Comment obtenir ma facture ?
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqCommandes">
+                        <div class="accordion-body">
+                            Pour télécharger une facture, cliquez sur le bouton <i class="fas fa-file-invoice"></i> dans les actions de la commande. La facture sera générée au format PDF et téléchargée automatiquement. Vous pouvez également retrouver toutes vos factures dans le détail de chaque commande.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFour">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                            Quels sont les différents statuts d'une commande ?
+                        </button>
+                    </h2>
+                    <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqCommandes">
+                        <div class="accordion-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="status-badge status-pending">En attente</span> - Votre commande a été reçue mais le paiement est en cours de vérification.</li>
+                                <li class="mb-2"><span class="status-badge status-processing">En cours</span> - Votre commande est en cours de préparation dans notre entrepôt.</li>
+                                <li class="mb-2"><span class="status-badge status-shipped">Expédiée</span> - Votre commande a été remise au transporteur et est en route.</li>
+                                <li class="mb-2"><span class="status-badge status-delivered">Livrée</span> - Votre commande a été livrée à l'adresse indiquée.</li>
+                                <li><span class="status-badge status-cancelled">Annulée</span> - La commande a été annulée.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations services client -->
+    <div class="client-card">
+        <div class="card-header">
+            <i class="fas fa-headset"></i> Besoin d'aide ?
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h5 class="mb-3">Notre service client est à votre disposition</h5>
+                    <p>
+                        Si vous avez des questions concernant vos commandes ou si vous rencontrez des difficultés, 
+                        n'hésitez pas à contacter notre équipe de support client.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+                        <a href="tel:+33123456789" class="btn btn-outline-purple">
+                            <i class="fas fa-phone-alt me-2"></i> 01 23 45 67 89
+                        </a>
+                        <a href="mailto:contact@ldw.fr" class="btn btn-outline-purple">
+                            <i class="fas fa-envelope me-2"></i> contact@ldw.fr
+                        </a>
+                        <a href="index.php?page=messages" class="btn btn-purple">
+                            <i class="fas fa-comments me-2"></i> Contacter le support
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-5 text-center mt-4 mt-md-0">
+                    <img src="{{ get_asset_url('/public/images/undraw_mailbox.svg') }}" alt="Support client" class="img-fluid" style="max-height: 180px;">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modals d'annulation pour chaque commande -->
+    {% if commandes|length > 0 %}
+        {% for commande in commandes %}
+            {% if commande.statut == 'en_attente' or commande.statut == 'en_cours' %}
+                <div class="modal fade" id="cancelOrderModal{{ commande.id }}" tabindex="-1" aria-labelledby="cancelOrderModalLabel{{ commande.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="index.php?page=commandes" method="post">
+                                <input type="hidden" name="id_commande" value="{{ commande.id }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="cancelOrderModalLabel{{ commande.id }}">Confirmer l'annulation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="mb-0">Êtes-vous sûr de vouloir annuler la commande <strong>{{ commande.reference }}</strong> ?</p>
+                                    <p class="text-danger mt-3 mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Cette action est irréversible.</p>
+                                    <div class="mt-3">
+                                        <label for="motif_annulation{{ commande.id }}" class="form-label">Motif d'annulation (optionnel)</label>
+                                        <select class="form-select" id="motif_annulation{{ commande.id }}" name="motif_annulation">
+                                            <option value="erreur_commande">Erreur de commande</option>
+                                            <option value="changement_avis">Changement d'avis</option>
+                                            <option value="delai_livraison">Délai de livraison trop long</option>
+                                            <option value="prix">Prix trop élevé</option>
+                                            <option value="autre">Autre raison</option>
+                                        </select>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label for="commentaire_annulation{{ commande.id }}" class="form-label">Commentaire (optionnel)</label>
+                                        <textarea class="form-control" id="commentaire_annulation{{ commande.id }}" name="commentaire_annulation" rows="3" placeholder="Précisez votre raison ici..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" name="annuler_commande" class="btn btn-danger">Confirmer l'annulation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block client_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const clickableRows = document.querySelectorAll('.clickable-row');
+        clickableRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Ne pas déclencher si on clique sur un bouton ou un lien
+                if (!e.target.closest('button, a')) {
+                    window.location.href = this.dataset.href;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

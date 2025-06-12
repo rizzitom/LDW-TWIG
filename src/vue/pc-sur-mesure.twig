@@ -1,0 +1,375 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ titre }} - Configurations Premium{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/custom-pc-page.css') }}">
+    <meta name="description" content="Découvrez nos PC sur mesure premium - Configurations uniques, composants haut de gamme, stocks limités">
+{% endblock %}
+
+{% block body %}
+<div class="pc-sur-mesure-container">
+    <!-- Hero Section Premium -->
+    <section class="premium-hero">
+        <div class="premium-hero-content">
+            <h1>PC LDW</h1>
+            <p>L'excellence technologique à votre service. Chaque configuration est unique, assemblée avec des composants premium sélectionnés pour leurs performances exceptionnelles.</p>
+            
+            <div class="premium-stats">
+                <div class="premium-stat">
+                    <span class="premium-stat-number">{{ produits|length }}</span>
+                    <span class="premium-stat-label">Configs Disponibles</span>
+                </div>
+                <div class="premium-stat">
+                    <span class="premium-stat-number">48H</span>
+                    <span class="premium-stat-label">Assemblage Express</span>
+                </div>
+                <div class="premium-stat">
+                    <span class="premium-stat-number">3 ANS</span>
+                    <span class="premium-stat-label">Garantie Premium</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filtres Premium -->
+    <section class="filters-premium">
+        <h2 class="filters-title">CONFIGURATEUR INTELLIGENT</h2>
+        <form id="filterForm" class="filters-grid">
+            <div class="filter-group">
+                <label for="filterType" class="filter-label">Usage Principal</label>
+                <select class="filter-select" id="filterType" name="type">
+                    <option value="">Toutes les configurations</option>
+                    <option value="gaming">🎮 Gaming Haute Performance</option>
+                    <option value="bureautique">💼 Bureautique Premium</option>
+                    <option value="creation">🎨 Création de Contenu</option>
+                    <option value="workstation">⚡ Station de Travail</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterBudget" class="filter-label">Gamme de Prix</label>
+                <select class="filter-select" id="filterBudget" name="budget">
+                    <option value="">Tous les budgets</option>
+                    <option value="0-1000">Entrée de gamme (< 1000€)</option>
+                    <option value="1000-1500">Milieu de gamme (1000€ - 1500€)</option>
+                    <option value="1500-2500">Haut de gamme (1500€ - 2500€)</option>
+                    <option value="2500+">Ultra Premium (> 2500€)</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterStock" class="filter-label">Disponibilité</label>
+                <select class="filter-select" id="filterStock" name="stock">
+                    <option value="">Toutes disponibilités</option>
+                    <option value="available">En stock uniquement</option>
+                    <option value="limited">Stock limité</option>
+                </select>
+            </div>
+        </form>
+    </section>
+
+    <!-- Grille de Produits -->
+    <section class="products-premium">
+        {% if produits and produits|length > 0 %}
+            <div class="products-grid" id="productGrid">
+                {% for produit in produits %}
+                    <article class="product-premium" 
+                             data-type="{{ produit.type|default('other') }}" 
+                             data-price="{{ produit.prix|default(0) }}"
+                             data-stock="{{ produit.stock|default(0) }}">
+                        
+                        <!-- Image Container -->
+                        <div class="product-image-container">
+                            {% set pc_image = 'images/produits/pcbureauledes.png' %}
+                            {% set product_name_lower = produit.nom|lower %}
+                            {% if produit.type == 'gaming' or 'gamer' in product_name_lower or 'gaming' in product_name_lower %}
+                                {% set pc_image = 'images/produits/pcgamerledes.png' %}
+                            {% endif %}
+                            <img src="{{ asset(pc_image) }}" 
+                                 alt="{{ produit.nom }}" 
+                                 class="product-image"
+                                 loading="lazy">
+                            
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                <span class="product-badge badge-limited">Série Limitée</span>
+                                <span class="product-badge badge-premium">Premium</span>
+                                {% if produit.type == 'gaming' %}
+                                    <span class="product-badge badge-gaming">Gaming</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Info Admin (visible au hover) -->
+                            {% if user and user.role == 'admin' %}
+                                <div class="admin-info">
+                                    Coût: {{ produit.prix_revient|default(0)|number_format(0, ',', ' ') }}€<br>
+                                    Marge: {{ ((produit.prix|default(0)) - (produit.prix_revient|default(0)))|number_format(0, ',', ' ') }}€
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contenu -->
+                        <div class="product-content">
+                            <h3 class="product-title">{{ produit.nom }}</h3>
+                            <div class="product-type">{{ produit.type|default('PC')|upper }}</div>
+
+                            <!-- Specifications -->
+                            {% if produit.composants %}
+                                <div class="product-specs">
+                                    <h4 class="specs-title">
+                                        🔧 Composants Premium
+                                    </h4>
+                                    {% set composants = produit.composants|json_decode %}
+                                    {% if composants %}
+                                        <ul class="specs-list">
+                                            {% for key, value in composants %}
+                                                <li class="specs-item">
+                                                    <span class="specs-label">{{ key|title }}</span>
+                                                    <span class="specs-value">{{ value }}</span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Performances Gaming avec exemples -->
+                            {% if produit.type == 'gaming' or 'gamer' in product_name_lower or 'gaming' in product_name_lower %}
+                                <div class="product-performance">
+                                    <h4 class="performance-title">🎮 Performances Gaming Ultra</h4>
+                                    <div class="performance-showcase">
+                                        <!-- Performances personnalisées ou par défaut -->
+                                        {% set performances = [] %}
+                                        {% if produit.infos_performance %}
+                                            {% set performances = produit.infos_performance|json_decode %}
+                                        {% endif %}
+                                        
+                                        {% if performances is empty %}
+                                            {% set performances = {
+                                                'Cyberpunk 2077': '85-120',
+                                                'Call of Duty': '144+',
+                                                'Fortnite': '165+',
+                                                'Valorant': '300+',
+                                                'GTA V': '120+',
+                                                'Apex Legends': '144+',
+                                                'Minecraft RTX': '90-110',
+                                                'Red Dead 2': '75-95'
+                                            } %}
+                                        {% endif %}
+                                        
+                                        <div class="performance-grid">
+                                            {% for jeu, fps in performances %}
+                                                <div class="performance-item-enhanced">
+                                                    <div class="game-info">
+                                                        <span class="game-icon">🎯</span>
+                                                        <span class="game-name">{{ jeu }}</span>
+                                                    </div>
+                                                    <div class="fps-display">
+                                                        <span class="fps-number">{{ fps }}</span>
+                                                        <span class="fps-label">FPS</span>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <div class="performance-note">
+                                            <small>🔥 Performances en Ultra/Epic settings • 1440p</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Prix et Stock -->
+                            <div class="product-pricing">
+                                <div class="product-price">
+                                    {{ produit.prix|number_format(0, ',', ' ') }}€
+                                </div>
+                                <div class="product-stock">
+                                    {% set stock = produit.stock|default(0) %}
+                                    <span class="stock-number 
+                                        {% if stock == 0 %}stock-out
+                                        {% elseif stock <= 3 %}stock-low
+                                        {% else %}stock-high{% endif %}">
+                                        {{ stock }}
+                                    </span>
+                                    <span class="stock-label">
+                                        {% if stock == 0 %}
+                                            Épuisé
+                                        {% elseif stock <= 3 %}
+                                            Dernières pièces
+                                        {% else %}
+                                            En stock
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Bouton d'ajout au panier -->
+                            <form action="?page=panier" method="post">
+                                <input type="hidden" name="action" value="ajouter">
+                                <input type="hidden" name="id_produit" value="{{ produit.id }}">
+                                <input type="hidden" name="quantite" value="1">
+                                <button type="submit" 
+                                        class="add-to-cart-premium" 
+                                        {% if stock == 0 %}disabled{% endif %}>
+                                    {% if stock == 0 %}
+                                        Configuration Épuisée
+                                    {% else %}
+                                        Ajouter au Panier - {{ produit.prix|number_format(0, ',', ' ') }}€
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🖥️</div>
+                <h3>Aucune configuration disponible</h3>
+                <p>Nos artisans travaillent sur de nouvelles configurations exceptionnelles.<br>
+                   Revenez bientôt pour découvrir nos prochaines créations.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Éléments du filtre
+            const filterType = document.getElementById('filterType');
+            const filterBudget = document.getElementById('filterBudget');
+            const filterStock = document.getElementById('filterStock');
+            const productGrid = document.getElementById('productGrid');
+            
+            if (!productGrid) return; // Pas de produits à filtrer
+            
+            const productCards = Array.from(productGrid.getElementsByClassName('product-premium'));
+
+            function applyFilters() {
+                const selectedType = filterType.value;
+                const selectedBudget = filterBudget.value;
+                const selectedStock = filterStock.value;
+                
+                let visibleCount = 0;
+
+                productCards.forEach(card => {
+                    // Filtre par type
+                    const typeMatch = selectedType === "" || card.dataset.type === selectedType;
+                    
+                    // Filtre par budget
+                    let budgetMatch = true;
+                    if (selectedBudget !== "") {
+                        const price = parseFloat(card.dataset.price);
+                        switch(selectedBudget) {
+                            case "0-1000":
+                                budgetMatch = price < 1000;
+                                break;
+                            case "1000-1500":
+                                budgetMatch = price >= 1000 && price <= 1500;
+                                break;
+                            case "1500-2500":
+                                budgetMatch = price >= 1500 && price <= 2500;
+                                break;
+                            case "2500+":
+                                budgetMatch = price > 2500;
+                                break;
+                        }
+                    }
+                    
+                    // Filtre par stock
+                    let stockMatch = true;
+                    if (selectedStock !== "") {
+                        const stock = parseInt(card.dataset.stock);
+                        switch(selectedStock) {
+                            case "available":
+                                stockMatch = stock > 0;
+                                break;
+                            case "limited":
+                                stockMatch = stock > 0 && stock <= 3;
+                                break;
+                        }
+                    }
+
+                    // Afficher/masquer selon les filtres
+                    if (typeMatch && budgetMatch && stockMatch) {
+                        card.style.display = '';
+                        visibleCount++;
+                        
+                        // Animation d'apparition
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 50);
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Afficher un message si aucun produit ne correspond
+                let noResultsMessage = document.getElementById('no-results-message');
+                if (visibleCount === 0) {
+                    if (!noResultsMessage) {
+                        noResultsMessage = document.createElement('div');
+                        noResultsMessage.id = 'no-results-message';
+                        noResultsMessage.className = 'empty-state';
+                        noResultsMessage.innerHTML = `
+                            <div class="empty-icon">🔍</div>
+                            <h3>Aucune configuration trouvée</h3>
+                            <p>Essayez de modifier vos critères de recherche pour découvrir nos configurations disponibles.</p>
+                        `;
+                        productGrid.appendChild(noResultsMessage);
+                    }
+                    noResultsMessage.style.display = 'block';
+                } else if (noResultsMessage) {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+
+            // Événements de filtre
+            filterType.addEventListener('change', applyFilters);
+            filterBudget.addEventListener('change', applyFilters);
+            filterStock.addEventListener('change', applyFilters);
+
+            // Effet de parallax léger sur le hero
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const hero = document.querySelector('.premium-hero');
+                if (hero) {
+                    hero.style.transform = `translateY(${scrolled * 0.2}px)`;
+                }
+            });
+
+            // Animation des cartes au scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Appliquer l'observer à toutes les cartes produit
+            productCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+{% endblock %}

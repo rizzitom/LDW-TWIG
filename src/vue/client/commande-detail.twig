@@ -1,0 +1,544 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Détail de la commande{% endblock %}
+
+{% block client_actions %}
+<div class="d-flex">
+    <a href="index.php?page=commandes" class="btn btn-outline-purple me-2">
+        <i class="fas fa-arrow-left me-1"></i> Retour aux commandes
+    </a>
+    <a href="index.php?page=commande&id={{ commande.id }}&action=facture" class="btn btn-outline-primary">
+        <i class="fas fa-file-invoice me-1"></i> Télécharger la facture
+    </a>
+</div>
+{% endblock %}
+
+{% block client_content %}
+    <div class="row">
+        <!-- En-tête récapitulatif de la commande -->
+        <div class="col-12 mb-4">
+            <div class="client-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-shopping-bag me-2"></i> Commande <strong>{{ commande.reference }}</strong>
+                    </div>
+                    <div>
+                        {% if commande.statut == 'en_attente' %}
+                            <span class="status-badge status-pending">En attente</span>
+                        {% elseif commande.statut == 'en_cours' %}
+                            <span class="status-badge status-processing">En cours</span>
+                        {% elseif commande.statut == 'expedie' %}
+                            <span class="status-badge status-shipped">Expédiée</span>
+                        {% elseif commande.statut == 'livre' %}
+                            <span class="status-badge status-delivered">Livrée</span>
+                        {% elseif commande.statut == 'annule' %}
+                            <span class="status-badge status-cancelled">Annulée</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body pb-0">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="text-muted small">Date de commande</div>
+                            <div><strong>{{ commande.date_commande|date("d/m/Y à H:i") }}</strong></div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-muted small">Total</div>
+                            <div><strong>{{ commande.montant_total|number_format(2, ',', ' ') }} €</strong></div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="text-muted small">Paiement</div>
+                            <div>
+                                {% if commande.methode_paiement == 'carte' %}
+                                    <i class="far fa-credit-card me-1"></i> <strong>Carte bancaire</strong>
+                                {% elseif commande.methode_paiement == 'paypal' %}
+                                    <i class="fab fa-paypal me-1"></i> <strong>PayPal</strong>
+                                {% elseif commande.methode_paiement == 'virement' %}
+                                    <i class="fas fa-university me-1"></i> <strong>Virement bancaire</strong>
+                                {% else %}
+                                    <strong>{{ commande.methode_paiement }}</strong>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            {% if commande.statut == 'en_attente' or commande.statut == 'en_cours' %}
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                                        <i class="fas fa-times me-1"></i> Annuler la commande
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suivi de commande (pour les commandes non annulées) -->
+                {% if commande.statut != 'annule' %}
+                    <div class="card-body">
+                        <div class="order-progress {% if commande.statut == 'livre' %}completed{% endif %}">
+                            <div class="progress-step {% if commande.statut == 'en_attente' %}active{% elseif commande.statut == 'en_cours' or commande.statut == 'expedie' or commande.statut == 'livre' %}completed{% endif %}">
+                                <div class="progress-step-icon">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <div class="progress-step-text">Commande confirmée</div>
+                            </div>
+                            <div class="progress-step {% if commande.statut == 'en_cours' %}active{% elseif commande.statut == 'expedie' or commande.statut == 'livre' %}completed{% endif %}">
+                                <div class="progress-step-icon">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="progress-step-text">En préparation</div>
+                            </div>
+                            <div class="progress-step {% if commande.statut == 'expedie' %}active{% elseif commande.statut == 'livre' %}completed{% endif %}">
+                                <div class="progress-step-icon">
+                                    <i class="fas fa-shipping-fast"></i>
+                                </div>
+                                <div class="progress-step-text">Expédiée</div>
+                            </div>
+                            <div class="progress-step {% if commande.statut == 'livre' %}active completed{% endif %}">
+                                <div class="progress-step-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="progress-step-text">Livrée</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Colonne gauche : Adresses et Infos -->
+        <div class="col-md-4">
+            <!-- Détails de livraison -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-truck me-2"></i> Adresse de livraison
+                </div>
+                <div class="card-body">
+                    <address>
+                        <strong>{{ client.prenom }} {{ client.nom }}</strong><br>
+                        {{ commande.adresse_livraison|raw|nl2br }}
+                    </address>
+                    
+                    {% if commande.numero_suivi %}
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-muted mb-1">Numéro de suivi :</div>
+                            <div class="d-flex align-items-center">
+                                <strong class="me-2">{{ commande.numero_suivi }}</strong>
+                                {% if commande.url_suivi %}
+                                    <a href="{{ commande.url_suivi }}" target="_blank" class="btn btn-sm btn-purple">
+                                        <i class="fas fa-external-link-alt me-1"></i> Suivre le colis
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% elseif commande.transporteur %}
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-muted mb-1">Transporteur :</div>
+                            <strong>{{ commande.transporteur }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Détails de facturation -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar me-2"></i> Adresse de facturation
+                </div>
+                <div class="card-body">
+                    <address>
+                        <strong>{{ client.prenom }} {{ client.nom }}</strong><br>
+                        {{ commande.adresse_facturation|raw|nl2br }}
+                    </address>
+                </div>
+            </div>
+
+            <!-- Historique et notes -->
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-history me-2"></i> Historique de la commande
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% if historique_commande|length > 0 %}
+                            {% for entree in historique_commande %}
+                                <li class="list-group-item">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                {% if entree.type == 'creation' %}
+                                                    <i class="fas fa-plus text-primary"></i>
+                                                {% elseif entree.type == 'paiement' %}
+                                                    <i class="fas fa-credit-card text-success"></i>
+                                                {% elseif entree.type == 'preparation' %}
+                                                    <i class="fas fa-box text-primary"></i>
+                                                {% elseif entree.type == 'expedition' %}
+                                                    <i class="fas fa-shipping-fast text-info"></i>
+                                                {% elseif entree.type == 'livraison' %}
+                                                    <i class="fas fa-check-circle text-success"></i>
+                                                {% elseif entree.type == 'annulation' %}
+                                                    <i class="fas fa-times-circle text-danger"></i>
+                                                {% else %}
+                                                    <i class="fas fa-info-circle text-secondary"></i>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ entree.libelle }}</div>
+                                            <div class="text-muted small">{{ entree.date|date("d/m/Y à H:i") }}</div>
+                                            {% if entree.commentaire %}
+                                                <div class="mt-1">{{ entree.commentaire }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item text-center py-4">
+                                <i class="fas fa-history text-muted fs-3 mb-2"></i>
+                                <p>Aucun historique disponible</p>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite : Produits et Récapitulatif -->
+        <div class="col-md-8">
+            <!-- Produits de la commande -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-box-open me-2"></i> Articles commandés
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-client mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 60px">Image</th>
+                                    <th scope="col">Produit</th>
+                                    <th scope="col" class="text-center">Quantité</th>
+                                    <th scope="col" class="text-end">Prix unitaire</th>
+                                    <th scope="col" class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if commande.produits|length > 0 %}
+                                    {% for produit in commande.produits %}
+                                        <tr>
+                                            <td>
+                                                {% if produit.image_url %}
+                                                    <img src="{{ get_asset_url(produit.image_url) }}" alt="{{ produit.nom }}" class="img-thumbnail" style="max-width: 50px; max-height: 50px;">
+                                                {% else %}
+                                                    <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-box text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="index.php?page=produit&id={{ produit.id_produit }}" class="text-decoration-none">{{ produit.nom }}</a>
+                                            </td>
+                                            <td class="text-center">{{ produit.quantite }}</td>
+                                            <td class="text-end">{{ produit.prix_unitaire|number_format(2, ',', ' ') }} €</td>
+                                            <td class="text-end">{{ (produit.prix_unitaire * produit.quantite)|number_format(2, ',', ' ') }} €</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-box-open text-muted fa-2x mb-2"></i>
+                                            <p>Aucun produit dans cette commande</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Récapitulatif des coûts -->
+            <div class="client-card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-receipt me-2"></i> Récapitulatif
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 offset-md-6">
+                            <table class="table table-borderless mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Sous-total</td>
+                                        <td class="text-end">{{ commande.sous_total|default(commande.montant_total)|number_format(2, ',', ' ') }} €</td>
+                                    </tr>
+                                    {% if commande.frais_livraison is defined %}
+                                        <tr>
+                                            <td>Frais de livraison</td>
+                                            <td class="text-end">{{ commande.frais_livraison|number_format(2, ',', ' ') }} €</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if commande.remise is defined and commande.remise > 0 %}
+                                        <tr>
+                                            <td>Remise</td>
+                                            <td class="text-end text-success">-{{ commande.remise|number_format(2, ',', ' ') }} €</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% if commande.tva is defined %}
+                                        <tr>
+                                            <td>TVA ({{ commande.taux_tva|default(20) }}%)</td>
+                                            <td class="text-end">{{ commande.tva|number_format(2, ',', ' ') }} €</td>
+                                        </tr>
+                                    {% endif %}
+                                    <tr class="fw-bold">
+                                        <td>Total</td>
+                                        <td class="text-end">{{ commande.montant_total|number_format(2, ',', ' ') }} €</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions client -->
+            <div class="client-card">
+                <div class="card-header">
+                    <i class="fas fa-cog me-2"></i> Actions
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if commande.statut == 'en_attente' or commande.statut == 'en_cours' %}
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                                    <i class="fas fa-times-circle me-2"></i> Annuler la commande
+                                </button>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <a href="index.php?page=commande&id={{ commande.id }}&action=facture" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-file-invoice me-2"></i> Télécharger la facture
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <a href="index.php?page=messages&sujet=commande-{{ commande.reference }}" class="btn btn-outline-purple w-100">
+                                <i class="fas fa-question-circle me-2"></i> Besoin d'aide ?
+                            </a>
+                        </div>
+                        {% if commande.statut == 'livre' %}
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#reviewOrderModal">
+                                    <i class="fas fa-star me-2"></i> Donner un avis
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modal annulation commande -->
+    {% if commande.statut == 'en_attente' or commande.statut == 'en_cours' %}
+        <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="index.php?page=commande" method="post">
+                        <input type="hidden" name="id_commande" value="{{ commande.id }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cancelOrderModalLabel">Confirmer l'annulation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">Êtes-vous sûr de vouloir annuler la commande <strong>{{ commande.reference }}</strong> ?</p>
+                            <p class="text-danger mt-3 mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Cette action est irréversible.</p>
+                            <div class="mt-3">
+                                <label for="motif_annulation" class="form-label">Motif d'annulation (optionnel)</label>
+                                <select class="form-select" id="motif_annulation" name="motif_annulation">
+                                    <option value="erreur_commande">Erreur de commande</option>
+                                    <option value="changement_avis">Changement d'avis</option>
+                                    <option value="delai_livraison">Délai de livraison trop long</option>
+                                    <option value="prix">Prix trop élevé</option>
+                                    <option value="autre">Autre raison</option>
+                                </select>
+                            </div>
+                            <div class="mt-3">
+                                <label for="commentaire_annulation" class="form-label">Commentaire (optionnel)</label>
+                                <textarea class="form-control" id="commentaire_annulation" name="commentaire_annulation" rows="3" placeholder="Précisez votre raison ici..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" name="annuler_commande" class="btn btn-danger">Confirmer l'annulation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Modal avis -->
+    {% if commande.statut == 'livre' %}
+        <div class="modal fade" id="reviewOrderModal" tabindex="-1" aria-labelledby="reviewOrderModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form action="index.php?page=commande" method="post">
+                        <input type="hidden" name="id_commande" value="{{ commande.id }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reviewOrderModalLabel">Donner votre avis</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Satisfaction globale</label>
+                                <div class="rating-stars d-flex">
+                                    {% for i in 1..5 %}
+                                        <input type="radio" id="star{{ i }}" name="note_globale" value="{{ i }}" class="visually-hidden">
+                                        <label for="star{{ i }}" class="star-label fs-3 text-warning me-1">
+                                            <i class="far fa-star"></i>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="commentaire_avis" class="form-label">Votre avis sur cette commande</label>
+                                <textarea class="form-control" id="commentaire_avis" name="commentaire_avis" rows="3" placeholder="Partagez votre expérience..."></textarea>
+                            </div>
+                            
+                            {% if commande.produits|length > 0 %}
+                                <hr class="my-4">
+                                <h6>Évaluer les produits</h6>
+                                <p class="text-muted small">Vous pouvez également donner votre avis sur chaque produit individuellement.</p>
+                                
+                                {% for produit in commande.produits %}
+                                    <div class="mb-3 p-3 border rounded">
+                                        <div class="d-flex mb-2">
+                                            {% if produit.image_url %}
+                                                <img src="{{ get_asset_url(produit.image_url) }}" alt="{{ produit.nom }}" class="img-thumbnail me-2" style="max-width: 40px; max-height: 40px;">
+                                            {% endif %}
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold">{{ produit.nom }}</div>
+                                                <div class="product-rating d-flex align-items-center">
+                                                    {% for i in 1..5 %}
+                                                        <input type="radio" id="product{{ produit.id_produit }}_star{{ i }}" name="note_produit[{{ produit.id_produit }}]" value="{{ i }}" class="visually-hidden">
+                                                        <label for="product{{ produit.id_produit }}_star{{ i }}" class="product-star-label me-1">
+                                                            <i class="far fa-star fs-5 text-warning"></i>
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <textarea class="form-control form-control-sm" name="commentaire_produit[{{ produit.id_produit }}]" rows="2" placeholder="Commentaire sur ce produit (optionnel)"></textarea>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" name="soumettre_avis" class="btn btn-success">Soumettre mon avis</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block client_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Rating stars functionality
+        const ratingLabels = document.querySelectorAll('.star-label');
+        if (ratingLabels.length > 0) {
+            ratingLabels.forEach(label => {
+                label.addEventListener('mouseover', function() {
+                    // Get the value of the associated radio
+                    const value = this.previousElementSibling.value;
+                    
+                    // Highlight all stars up to this one
+                    ratingLabels.forEach(l => {
+                        const starValue = l.previousElementSibling.value;
+                        if (starValue <= value) {
+                            l.querySelector('i').classList.remove('far');
+                            l.querySelector('i').classList.add('fas');
+                        } else {
+                            l.querySelector('i').classList.remove('fas');
+                            l.querySelector('i').classList.add('far');
+                        }
+                    });
+                });
+                
+                // When clicking, select the radio
+                label.addEventListener('click', function() {
+                    this.previousElementSibling.checked = true;
+                });
+            });
+            
+            // Reset stars when mouse leaves the container
+            const ratingContainer = document.querySelector('.rating-stars');
+            if (ratingContainer) {
+                ratingContainer.addEventListener('mouseleave', function() {
+                    ratingLabels.forEach(l => {
+                        if (!l.previousElementSibling.checked) {
+                            l.querySelector('i').classList.remove('fas');
+                            l.querySelector('i').classList.add('far');
+                        } else {
+                            l.querySelector('i').classList.remove('far');
+                            l.querySelector('i').classList.add('fas');
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Handle product rating stars similarly
+        const productStarLabels = document.querySelectorAll('.product-star-label');
+        productStarLabels.forEach(label => {
+            label.addEventListener('mouseover', function() {
+                const value = this.previousElementSibling.value;
+                const productId = this.previousElementSibling.name.match(/\[(\d+)\]/)[1];
+                
+                // Find all stars for this specific product
+                const productStars = document.querySelectorAll(`label[for^="product${productId}_star"]`);
+                
+                productStars.forEach(l => {
+                    const starValue = l.previousElementSibling.value;
+                    if (starValue <= value) {
+                        l.querySelector('i').classList.remove('far');
+                        l.querySelector('i').classList.add('fas');
+                    } else {
+                        l.querySelector('i').classList.remove('fas');
+                        l.querySelector('i').classList.add('far');
+                    }
+                });
+            });
+            
+            label.addEventListener('click', function() {
+                this.previousElementSibling.checked = true;
+            });
+            
+            // Find the parent container for this product's rating
+            const productId = label.previousElementSibling.name.match(/\[(\d+)\]/)[1];
+            const productContainer = label.closest('.product-rating');
+            
+            if (productContainer) {
+                productContainer.addEventListener('mouseleave', function() {
+                    const productStars = document.querySelectorAll(`label[for^="product${productId}_star"]`);
+                    
+                    productStars.forEach(l => {
+                        if (!l.previousElementSibling.checked) {
+                            l.querySelector('i').classList.remove('fas');
+                            l.querySelector('i').classList.add('far');
+                        } else {
+                            l.querySelector('i').classList.remove('far');
+                            l.querySelector('i').classList.add('fas');
+                        }
+                    });
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

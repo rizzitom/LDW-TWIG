@@ -1,0 +1,328 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Gestion des messages{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=admin" class="btn btn-outline-light me-2">
+    <i class="fas fa-arrow-left me-2"></i> Retour au tableau de bord
+</a>
+{% endblock %}
+
+{% block admin_content %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i> Cette fonctionnalité sera pleinement implémentée dans une future mise à jour. Actuellement, elle affiche des données de démonstration.
+</div>
+
+<!-- Filtres -->
+<div class="filter-section mb-4">
+    <form action="index.php" method="get" class="row g-3">
+        <input type="hidden" name="page" value="admin">
+        <input type="hidden" name="section" value="messages">
+        
+        <div class="col-md-4">
+            <label for="statut" class="form-label">Statut</label>
+            <select name="statut" id="statut" class="form-select search-admin">
+                <option value="">Tous les statuts</option>
+                <option value="non_lu">Non lu</option>
+                <option value="en_attente">En attente</option>
+                <option value="traite">Traité</option>
+                <option value="archive">Archivé</option>
+            </select>
+        </div>
+        
+        <div class="col-md-4">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" class="form-control search-admin" id="date" name="date">
+        </div>
+        
+        <div class="col-md-4">
+            <label for="recherche" class="form-label">Recherche</label>
+            <div class="input-group">
+                <input type="text" class="form-control search-admin" id="recherche" name="recherche" 
+                       placeholder="Email, sujet, contenu...">
+                <button class="btn btn-purple" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-12 text-end mt-4">
+            <button type="submit" class="btn btn-purple">
+                <i class="fas fa-filter me-2"></i> Filtrer
+            </button>
+            <a href="index.php?page=admin&section=messages" class="btn btn-outline-light ms-2">
+                <i class="fas fa-undo me-2"></i> Réinitialiser
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Liste des messages -->
+<div class="admin-table">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 50px"></th>
+                    <th>Expéditeur</th>
+                    <th>Sujet</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th style="width: 100px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Messages de démonstration -->
+                <tr class="hoverable-row unread">
+                    <td class="text-center">
+                        <span class="notification-indicator bg-primary"></span>
+                    </td>
+                    <td>
+                        Jean Dupont<br>
+                        <small class="text-muted">jean.dupont@example.com</small>
+                    </td>
+                    <td>
+                        Demande d'information sur vos services
+                    </td>
+                    <td>{{ "now"|date_modify("-1 hour")|date("d/m/Y H:i") }}</td>
+                    <td>
+                        <span class="status-badge status-pending">Non lu</span>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#viewMessageModal">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hoverable-row">
+                    <td class="text-center">
+                        <span class="notification-indicator"></span>
+                    </td>
+                    <td>
+                        Marie Martin<br>
+                        <small class="text-muted">marie.martin@example.com</small>
+                    </td>
+                    <td>
+                        Problème avec ma commande #12345
+                    </td>
+                    <td>{{ "now"|date_modify("-2 day")|date("d/m/Y H:i") }}</td>
+                    <td>
+                        <span class="status-badge status-processing">En attente</span>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#viewMessageModal">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hoverable-row">
+                    <td class="text-center">
+                        <span class="notification-indicator"></span>
+                    </td>
+                    <td>
+                        Pierre Durand<br>
+                        <small class="text-muted">pierre.durand@example.com</small>
+                    </td>
+                    <td>
+                        Question sur compatibilité de produits
+                    </td>
+                    <td>{{ "now"|date_modify("-1 week")|date("d/m/Y H:i") }}</td>
+                    <td>
+                        <span class="status-badge status-delivered">Traité</span>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#viewMessageModal">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hoverable-row">
+                    <td class="text-center">
+                        <span class="notification-indicator"></span>
+                    </td>
+                    <td>
+                        Sophie Petit<br>
+                        <small class="text-muted">sophie.petit@example.com</small>
+                    </td>
+                    <td>
+                        Demande de partenariat
+                    </td>
+                    <td>{{ "now"|date_modify("-2 week")|date("d/m/Y H:i") }}</td>
+                    <td>
+                        <span class="status-badge status-cancelled">Archivé</span>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#viewMessageModal">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMessageModal">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination simulée -->
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination pagination-admin">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" aria-label="Précédent">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Suivant">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
+
+{% block admin_modals %}
+<!-- Modal de visualisation d'un message -->
+<div class="modal fade modal-admin" id="viewMessageModal" tabindex="-1" aria-labelledby="viewMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewMessageModalLabel">Demande d'information sur vos services</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted">Expéditeur</p>
+                            <p class="mb-3">Jean Dupont (jean.dupont@example.com)</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1 text-muted">Date de réception</p>
+                            <p class="mb-3">{{ "now"|date_modify("-1 hour")|date("d/m/Y à H:i") }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="mb-1 text-muted">Message</p>
+                    <div class="p-3 bg-dark rounded mt-2">
+                        <p>Bonjour,</p>
+                        <p>Je suis intéressé par vos services de développement web. Pouvez-vous me fournir plus d'informations sur vos tarifs et délais pour la création d'un site e-commerce ?</p>
+                        <p>J'aimerais également savoir si vous proposez un service de maintenance après la mise en ligne.</p>
+                        <p>Merci d'avance pour votre réponse.</p>
+                        <p>Cordialement,<br>Jean Dupont</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="replyMessage" class="form-label">Répondre</label>
+                    <textarea class="form-control mb-3" id="replyMessage" rows="5" placeholder="Votre réponse..."></textarea>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="markAsResolved">
+                        <label class="form-check-label" for="markAsResolved">
+                            Marquer comme traité après l'envoi
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="dropdown me-auto">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-tag me-2"></i> Statut
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="#">Non lu</a></li>
+                        <li><a class="dropdown-item" href="#">En attente</a></li>
+                        <li><a class="dropdown-item" href="#">Traité</a></li>
+                        <li><a class="dropdown-item" href="#">Archivé</a></li>
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-purple">
+                    <i class="fas fa-paper-plane me-2"></i> Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade modal-admin" id="deleteMessageModal" tabindex="-1" aria-labelledby="deleteMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMessageModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce message ?</p>
+                <p class="text-danger">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<style>
+    /* Notification indicator */
+    .notification-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: transparent;
+    }
+    
+    .unread .notification-indicator {
+        background-color: var(--violet-principal);
+    }
+    
+    /* Unread message styling */
+    .unread {
+        font-weight: 500;
+    }
+    
+    /* Fix dropdown menu in modals */
+    .modal .dropdown-menu {
+        background-color: #2b2b2c;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal .dropdown-item {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .modal .dropdown-item:hover {
+        background-color: rgba(98, 0, 179, 0.2);
+        color: white;
+    }
+</style>
+{% endblock %}

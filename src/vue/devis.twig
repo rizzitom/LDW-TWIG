@@ -1,0 +1,1314 @@
+{% extends 'base.twig' %}
+
+{% block title %}Demande de devis - Le Design Du Web{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    <style>
+        /* ============================================== */
+        /* STYLES PAGE DEVIS                       */
+        /* ============================================== */
+        
+        /* Animation entrée */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Variables spécifiques à la page devis pour améliorations visuelles */
+        :root {
+            --card-transition: transform 0.35s ease, box-shadow 0.35s ease;
+            --card-hover-scale: 1.03;
+            --card-border-radius: 1.2rem;
+            --step-active-scale: 1.15;
+            --btn-hover-y: -3px;
+        }
+        
+        .devis-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        /* Élément décoratif derrière le titre */
+        .page-header::before {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(var(--violet-principal-rgb), 0.1);
+            border-radius: 50%;
+            z-index: -1;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .page-header h1 {
+            color: var(--texte-couleur);
+            font-weight: 700;
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--violet-principal), var(--violet-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent; /* Pour que le gradient soit visible */
+            display: inline-block; /* Nécessaire pour le clip */
+            position: relative;
+        }
+        
+        .page-header p {
+            color: var(--texte-secondaire);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Styles pour les étapes du devis */
+        .devis-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+            padding: 0 10px;
+        }
+        
+        .devis-steps::before {
+            content: "";
+            position: absolute;
+            top: 25px;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            background-color: var(--bordure-couleur);
+            z-index: 0;
+            border-radius: 4px;
+        }
+        
+        .devis-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            width: 25%;
+        }
+        
+        .devis-step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--fond-secondaire);
+            border: 2px solid var(--bordure-couleur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--texte-couleur);
+            transition: all 0.3s ease;
+        }
+        
+        .devis-step.active .devis-step-number {
+            background-color: var(--violet-principal);
+            border-color: var(--violet-principal);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 0 5px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        .devis-step-label {
+            font-size: 0.9rem;
+            color: var(--texte-secondaire);
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .devis-step.active .devis-step-label {
+            color: var(--violet-principal);
+            font-weight: 600;
+        }
+        
+        /* Styles pour les cartes de service */
+        .service-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .service-card {
+            background-color: var(--fond-secondaire);
+            border-radius: var(--card-border-radius);
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--ombre-couleur);
+            transition: var(--card-transition);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--bordure-couleur);
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Effet de lueur au survol */
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 0 0 0 rgba(var(--violet-principal-rgb), 0);
+            z-index: -1;
+            transition: box-shadow 0.4s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px) scale(var(--card-hover-scale));
+            box-shadow: 0 15px 30px var(--ombre-couleur);
+        }
+        
+        .service-card:hover::after {
+            box-shadow: 0 0 20px 5px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        .service-card.selected {
+            border: 2px solid var(--violet-principal);
+            position: relative;
+        }
+        
+        .service-card.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 25px;
+            height: 25px;
+            background-color: var(--violet-principal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .service-card-header {
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(145deg, rgba(var(--violet-principal-rgb), 0.15), rgba(var(--violet-principal-rgb), 0.05));
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            color: var(--violet-principal);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover .service-icon {
+            transform: scale(1.15) rotate(5deg);
+        }
+        
+        .service-card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--texte-couleur);
+            margin-bottom: 0.5rem;
+        }
+        
+        .service-card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .service-description {
+            color: var(--texte-secondaire);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+        
+        .service-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+        }
+        
+        .service-features li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.8rem;
+            color: var(--texte-secondaire);
+            transition: transform 0.2s ease;
+        }
+        
+        .service-card:hover .service-features li {
+            transform: translateX(3px);
+        }
+        
+        .service-features li::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: var(--violet-accent);
+            font-size: 0.8rem;
+        }
+        
+        .service-card-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--bordure-couleur);
+            text-align: center;
+        }
+        
+        .btn-devis {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--violet-principal);
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            border: none;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-devis::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-devis:hover {
+            background-color: var(--violet-secondaire);
+            transform: translateY(var(--btn-hover-y));
+            color: white;
+            box-shadow: 0 4px 15px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        
+        .btn-devis:hover::before {
+            left: 100%;
+        }
+        
+        .btn-devis i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Styles pour le formulaire de devis */
+        .devis-form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--ombre-couleur);
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            transition: transform 0.3s ease;
+        }
+        
+        .devis-form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px var(--ombre-couleur);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .form-section h3 {
+            color: var(--violet-principal);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            position: relative;
+            padding-left: 1rem;
+            display: inline-block;
+        }
+        
+        .form-section h3:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+            bottom: 0.2rem;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--violet-principal), var(--violet-accent));
+            border-radius: 3px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--texte-couleur);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--bordure-couleur);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--fond-tertiaire);
+            color: var(--texte-couleur);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--violet-principal);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(var(--violet-principal-rgb), 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .form-control::placeholder {
+            color: var(--texte-mute);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            width: calc(50% - 0.5rem);
+        }
+        
+        .checkbox-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .radio-item input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-submit {
+            background-color: var(--violet-principal);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .form-submit:hover {
+            background-color: var(--violet-secondaire);
+            transform: translateY(var(--btn-hover-y));
+            box-shadow: 0 4px 15px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        
+        .form-submit:active {
+            transform: translateY(0);
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e32;
+            font-weight: bold;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--texte-secondaire);
+            margin-top: 0.5rem;
+        }
+        
+        .terms-container {
+            background-color: var(--fond-tertiaire);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--bordure-couleur);
+            transition: background-color 0.3s ease;
+        }
+        
+        .terms-container:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.05);
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 0.5rem;
+        }
+        
+        .terms-checkbox input {
+            margin-right: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        
+        /* Navigation entre étapes */
+        .devis-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .btn-prev {
+            background-color: var(--fond-tertiaire);
+            color: var(--texte-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-prev:hover {
+            background-color: var(--fond-secondaire);
+            color: var(--texte-couleur);
+            transform: translateX(-2px);
+        }
+        
+        .btn-prev i {
+            margin-right: 0.5rem;
+        }
+        
+        .btn-next {
+            background-color: var(--violet-principal);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-next:hover {
+            background-color: var(--violet-secondaire);
+            transform: translateX(2px);
+        }
+        
+        .btn-next i {
+            margin-left: 0.5rem;
+        }
+        
+        /* Section d'information */
+        .info-section {
+            background-color: var(--fond-secondaire);
+            border-radius: var(--card-border-radius);
+            padding: 2rem;
+            margin-top: 3rem;
+            border: 1px solid var(--bordure-couleur);
+            box-shadow: 0 5px 15px var(--ombre-couleur);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--ombre-couleur);
+        }
+        
+        .info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(var(--violet-principal-rgb), 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .info-section h3 {
+            color: var(--texte-couleur);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-section h3 i {
+            color: var(--violet-accent);
+        }
+        
+        .info-section p {
+            color: var(--texte-secondaire);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-section ul, .info-section ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-section ul li, .info-section ol li {
+            color: var(--texte-secondaire);
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+        }
+        
+        .info-section ol li::marker {
+            color: var(--violet-accent);
+            font-weight: bold;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background-color: var(--fond-tertiaire);
+            border-radius: 0.8rem;
+            flex: 1;
+            min-width: 250px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .contact-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: rgba(var(--violet-principal-rgb), 0.05);
+            border-color: rgba(var(--violet-principal-rgb), 0.1);
+        }
+        
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--violet-accent);
+            transition: transform 0.3s ease;
+        }
+        
+        .contact-item:hover i {
+            transform: scale(1.15);
+        }
+        
+        .contact-item .contact-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .contact-item .contact-label {
+            font-size: 0.9rem;
+            color: var(--texte-secondaire);
+        }
+        
+        .contact-item .contact-value {
+            font-weight: 500;
+            color: var(--texte-couleur);
+        }
+        
+        .contact-item a {
+            color: var(--texte-couleur);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .contact-item a:hover {
+            color: var(--violet-accent);
+        }
+        
+        /* Message de succès */
+        .success-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            background-color: var(--fond-secondaire);
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 10px 30px var(--ombre-couleur);
+            border: 1px solid var(--bordure-couleur);
+            margin: 2rem auto;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .success-message::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .success-message::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: #4caf50;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--texte-couleur);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-text {
+            color: var(--texte-secondaire);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .success-reference {
+            background-color: var(--fond-tertiaire);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--violet-accent);
+            margin-bottom: 2rem;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--bordure-couleur);
+        }
+        
+        .success-reference:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        
+        /* Responsivité améliorée */
+        @media (max-width: 992px) {
+            .service-cards {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .success-title {
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .service-cards {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .contact-item {
+                flex: 1 1 100%;
+            }
+            
+            .checkbox-item {
+                width: 100%;
+            }
+            
+            .devis-form-container {
+                padding: 1.5rem;
+                margin: 1rem 0.5rem;
+            }
+            
+            .devis-steps {
+                overflow-x: auto;
+                padding-bottom: 1rem;
+                justify-content: flex-start;
+                gap: 20px;
+            }
+            
+            .devis-step {
+                min-width: 80px;
+                width: auto;
+                flex-shrink: 0;
+            }
+            
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .success-reference {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+            
+            .info-section {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .devis-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .page-header p {
+                font-size: 1rem;
+            }
+            
+            .service-card {
+                margin: 0 0.5rem;
+            }
+            
+            .success-message {
+                padding: 2rem 1rem;
+            }
+            
+            .success-icon {
+                font-size: 3rem;
+            }
+            
+            .success-title {
+                font-size: 1.5rem;
+            }
+            
+            .contact-info {
+                gap: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="devis-container">
+    <div class="page-header">
+        <h1>VOUS SOUHAITEZ UN DEVIS POUR ?</h1>
+        <p>Choisissez le service qui correspond à votre besoin pour obtenir un devis sur mesure. Notre équipe d'experts vous accompagnera tout au long de votre projet.</p>
+    </div>
+    
+    {% if success is defined and success %}
+        <div class="success-message animate__animated animate__fadeInUp">
+            <div class="success-icon">
+                <i class="fas fa-check-circle animate__animated animate__bounceIn animate__delay-1s"></i>
+            </div>
+            <h2 class="success-title">Demande envoyée avec succès !</h2>
+            <p class="success-text">Votre demande de devis a été envoyée avec succès. Un email de confirmation vient de vous être envoyé.</p>
+            
+            {% if reference is defined %}
+                <div class="success-details">
+                    <h3>Référence de votre demande</h3>
+                    <div class="success-reference animate__animated animate__fadeIn animate__delay-1s">
+                        {{ reference }}
+                        <button type="button" class="copy-btn" onclick="copyToClipboard('{{ reference }}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="success-reference-help">Conservez cette référence pour le suivi de votre demande</p>
+                </div>
+            {% endif %}
+            
+            <div class="success-next-steps">
+                <h3><i class="fas fa-hourglass-half me-2"></i>Prochaines étapes</h3>
+                <ol>
+                    <li><span class="step-number">1</span> Nous analysons votre demande (sous 24-48h)</li>
+                    <li><span class="step-number">2</span> Nous vous contactons pour préciser vos besoins</li>
+                    <li><span class="step-number">3</span> Nous élaborons votre devis personnalisé</li>
+                    <li><span class="step-number">4</span> Vous recevez votre devis et nous démarrons votre projet !</li>
+                </ol>
+            </div>
+            
+            <div class="success-actions">
+                <a href="index.php?page=mon_compte" class="btn-devis btn-account">
+                    <i class="fas fa-user-circle"></i> Voir mes devis
+                </a>
+                <a href="index.php" class="btn-devis">
+                    <i class="fas fa-home"></i> Retour à l'accueil
+                </a>
+            </div>
+            
+            <div class="success-contact-info">
+                <p>Une question ? Contactez-nous :</p>
+                <div class="contact-options">
+                    <a href="tel:+33123456789" class="contact-option">
+                        <i class="fas fa-phone"></i> 01 23 45 67 89
+                    </a>
+                    <a href="mailto:contact@ldw.fr" class="contact-option">
+                        <i class="fas fa-envelope"></i> contact@ldw.fr
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            function copyToClipboard(text) {
+                // Créer un élément temporaire
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                
+                // Afficher une notification
+                const notification = document.createElement('div');
+                notification.className = 'copy-notification animate__animated animate__fadeIn';
+                notification.innerHTML = '<i class="fas fa-check"></i> Référence copiée !';
+                document.body.appendChild(notification);
+                
+                // Supprimer la notification après 2 secondes
+                setTimeout(() => {
+                    notification.className = 'copy-notification animate__animated animate__fadeOut';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 1000);
+                }, 2000);
+            }
+        </script>
+        
+        <style>
+            /* Styles pour la confirmation améliorée */
+            .copy-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: rgba(76, 175, 80, 0.9);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                font-size: 1rem;
+                z-index: 9999;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            
+            .success-details {
+                background-color: rgba(var(--fond-tertiaire-rgb), 0.7);
+                padding: 1.5rem;
+                border-radius: 10px;
+                margin: 2rem 0;
+                border: 1px solid var(--bordure-couleur);
+            }
+            
+            .success-details h3 {
+                font-size: 1.3rem;
+                color: var(--texte-couleur);
+                margin-bottom: 1rem;
+                font-weight: 600;
+            }
+            
+            .success-reference {
+                font-family: 'Courier New', monospace;
+                background-color: var(--fond-secondaire);
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                font-size: 1.3rem;
+                color: var(--violet-accent);
+                display: inline-flex;
+                align-items: center;
+                position: relative;
+                margin-bottom: 0.5rem;
+                border: 1px solid var(--bordure-couleur);
+                box-shadow: 0 4px 12px rgba(var(--ombre-couleur), 0.15);
+            }
+            
+            .copy-btn {
+                background: transparent;
+                border: none;
+                color: var(--texte-secondaire);
+                cursor: pointer;
+                padding: 0.5rem;
+                margin-left: 1rem;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+            
+            .copy-btn:hover {
+                color: var(--violet-principal);
+                background-color: rgba(var(--violet-principal-rgb), 0.1);
+            }
+            
+            .success-reference-help {
+                color: var(--texte-secondaire);
+                font-size: 0.9rem;
+                font-style: italic;
+            }
+            
+            .success-next-steps {
+                margin: 2rem 0;
+                text-align: left;
+            }
+            
+            .success-next-steps h3 {
+                font-size: 1.4rem;
+                color: var(--texte-couleur);
+                margin-bottom: 1.5rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+            }
+            
+            .success-next-steps ol {
+                list-style: none;
+                padding: 0;
+                counter-reset: next-steps-counter;
+            }
+            
+            .success-next-steps li {
+                padding: 1rem 1.5rem;
+                margin-bottom: 1rem;
+                border-radius: 8px;
+                background-color: rgba(var(--fond-tertiaire-rgb), 0.5);
+                border: 1px solid var(--bordure-couleur);
+                display: flex;
+                align-items: center;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                animation: fadeInRight 0.5s ease forwards;
+                animation-delay: calc(0.2s * var(--i));
+                opacity: 0;
+            }
+            
+            .success-next-steps li:hover {
+                transform: translateX(5px);
+                box-shadow: 0 4px 12px rgba(var(--ombre-couleur), 0.15);
+                background-color: rgba(var(--violet-principal-rgb), 0.05);
+            }
+            
+            .success-next-steps li:nth-child(1) { --i: 1; }
+            .success-next-steps li:nth-child(2) { --i: 2; }
+            .success-next-steps li:nth-child(3) { --i: 3; }
+            .success-next-steps li:nth-child(4) { --i: 4; }
+            
+            @keyframes fadeInRight {
+                from { opacity: 0; transform: translateX(20px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            
+            .step-number {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                background-color: var(--violet-principal);
+                color: white;
+                border-radius: 50%;
+                margin-right: 1rem;
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+            
+            .success-actions {
+                display: flex;
+                gap: 1rem;
+                margin: 2rem 0;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .btn-account {
+                background-color: var(--fond-tertiaire);
+                color: var(--texte-couleur);
+                border: 1px solid var(--bordure-couleur);
+            }
+            
+            .btn-account:hover {
+                background-color: var(--violet-principal);
+                color: white;
+                border-color: var(--violet-principal);
+            }
+            
+            .success-contact-info {
+                margin-top: 2rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--bordure-couleur);
+                font-size: 0.95rem;
+                color: var(--texte-secondaire);
+            }
+            
+            .contact-options {
+                display: flex;
+                justify-content: center;
+                gap: 1.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .contact-option {
+                color: var(--texte-couleur);
+                text-decoration: none;
+                transition: color 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                border-radius: 30px;
+                background-color: rgba(var(--fond-tertiaire-rgb), 0.7);
+            }
+            
+            .contact-option:hover {
+                color: var(--violet-accent);
+                background-color: rgba(var(--violet-principal-rgb), 0.1);
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .success-actions {
+                    flex-direction: column;
+                }
+                
+                .success-reference {
+                    font-size: 1.1rem;
+                    padding: 0.75rem;
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                }
+            }
+        </style>
+    {% elseif type is defined %}
+        {% include 'formulaires/devis-' ~ type ~ '.twig' %}
+    {% else %}
+        <div class="devis-steps">
+            <div class="devis-step active">
+                <div class="devis-step-number">1</div>
+                <div class="devis-step-label">Catégorie</div>
+            </div>
+            <div class="devis-step">
+                <div class="devis-step-number">2</div>
+                <div class="devis-step-label">Projet</div>
+            </div>
+            <div class="devis-step">
+                <div class="devis-step-number">3</div>
+                <div class="devis-step-label">Détail</div>
+            </div>
+            <div class="devis-step">
+                <div class="devis-step-number">4</div>
+                <div class="devis-step-label">CGUV</div>
+            </div>
+        </div>
+        
+        <div class="service-cards">
+            <div class="service-card" onclick="window.location.href='{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=developpement-web{% else %}index.php?page=connexion&redirect=devis&type=developpement-web{% endif %}'">
+                <div class="service-card-header">
+                    <div class="service-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h2>Développement Web & Mobile</h2>
+                </div>
+                <div class="service-card-body">
+                    <p class="service-description">Création de sites vitrines élégants, plateformes e-commerce robustes, applications web personnalisées et applications mobiles modernes.</p>
+                    <ul class="service-features">
+                        <li>Design Responsive Unique</li>
+                        <li>Optimisation SEO Avancée</li>
+                        <li>Interface d'administration simple</li>
+                        <li>Technologies Modernes</li>
+                    </ul>
+                </div>
+                <div class="service-card-footer">
+                    <a href="{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=developpement-web{% else %}index.php?page=connexion&redirect=devis&type=developpement-web{% endif %}" class="btn-devis">
+                        <i class="fas fa-paper-plane"></i> Demander un devis
+                    </a>
+                </div>
+            </div>
+
+        <div class="service-card" onclick="window.location.href='{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=seo{% else %}index.php?page=connexion&redirect=devis&type=seo{% endif %}'">
+                <div class="service-card-header">
+                    <div class="service-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h2>Référencement & Visibilité (SEO/SEA)</h2>
+                </div>
+                <div class="service-card-body">
+                    <p class="service-description">Boostez votre visibilité en ligne. Notre expertise en référencement naturel (SEO) et référencement payant (SEA) vous permet d'attirer un trafic ciblé et qualifié.</p>
+                    <ul class="service-features">
+                        <li>Audit SEO Complet</li>
+                        <li>Optimisation Technique</li>
+                        <li>Stratégie Mots-Clés Personnalisée</li>
+                        <li>Campagnes Google Ads Rentables</li>
+                    </ul>
+                </div>
+                <div class="service-card-footer">
+                    <a href="{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=seo{% else %}index.php?page=connexion&redirect=devis&type=seo{% endif %}" class="btn-devis">
+                        <i class="fas fa-paper-plane"></i> Demander un devis
+                    </a>
+                </div>
+            </div>
+
+        <div class="service-card" onclick="window.location.href='{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=copywriting{% else %}index.php?page=connexion&redirect=devis&type=copywriting{% endif %}'">
+                <div class="service-card-header">
+                    <div class="service-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h2>Copywriting & Contenu</h2>
+                </div>
+                <div class="service-card-body">
+                    <p class="service-description">Des textes persuasifs qui convertissent. Nous créons des contenus engageants pour votre site web, blog, réseaux sociaux et supports marketing.</p>
+                    <ul class="service-features">
+                        <li>Rédaction Optimisée SEO</li>
+                        <li>Storytelling Impactant</li>
+                        <li>Adaptation au Ton de Marque</li>
+                        <li>Création de Contenu Stratégique</li>
+                    </ul>
+                </div>
+                <div class="service-card-footer">
+                    <a href="{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=copywriting{% else %}index.php?page=connexion&redirect=devis&type=copywriting{% endif %}" class="btn-devis">
+                        <i class="fas fa-paper-plane"></i> Demander un devis
+                    </a>
+                </div>
+            </div>
+        </div>
+            
+            {#<div class="service-card" onclick="window.location.href='{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=montage-pc{% else %}index.php?page=connexion&redirect=devis&type=montage-pc{% endif %}'">
+                <div class="service-card-header">
+                    <div class="service-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h2>PC sur Mesure</h2>
+                </div>
+                <div class="service-card-body">
+                    <p class="service-description">Configurez la machine de vos rêves ! Nous assemblons des PC optimisés pour le gaming, la création de contenu ou un usage professionnel.</p>
+                    <ul class="service-features">
+                        <li>Sélection Composants Premium</li>
+                        <li>Assemblage Expert & Tests</li>
+                        <li>Optimisation Performance</li>
+                        <li>Conseils Personnalisés</li>
+                    </ul>
+                </div>
+                <div class="service-card-footer">
+                    <a href="{% if utilisateur_connecte is defined and utilisateur_connecte %}index.php?page=devis&type=montage-pc{% else %}index.php?page=connexion&redirect=devis&type=montage-pc{% endif %}" class="btn-devis">
+                        <i class="fas fa-paper-plane"></i> Demander un devis
+                    </a>
+                </div>
+            </div>#}
+    {% endif %}
+    
+    <div class="info-section">
+        <h3><i class="fas fa-info-circle me-2"></i>Comment ça marche ?</h3>
+        <p>Notre processus de devis est simple et efficace :</p>
+        <ol>
+            <li>Sélectionnez le service qui correspond à votre besoin</li>
+            <li>Remplissez le formulaire détaillé avec vos informations et les spécificités de votre projet</li>
+            <li>Notre équipe analyse votre demande et prépare un devis personnalisé</li>
+            <li>Vous recevez votre devis par email sous 48h ouvrées</li>
+            <li>Nous discutons ensemble des détails et ajustements éventuels</li>
+            <li>Une fois le devis validé, nous planifions et démarrons votre projet</li>
+        </ol>
+        
+        <h3 class="mt-4"><i class="fas fa-question-circle me-2"></i>Besoin d'aide pour choisir ?</h3>
+        <p>Si vous n'êtes pas sûr du service qui correspond le mieux à votre besoin, ou si vous avez un projet qui combine plusieurs de nos services, n'hésitez pas à nous contacter directement. Nous vous guiderons vers la solution la plus adaptée.</p>
+        
+        <div class="contact-info">
+            <div class="contact-item">
+                <i class="fas fa-phone-alt"></i>
+                <div class="contact-text">
+                    <span class="contact-label">Téléphone</span>
+                    <a href="tel:+33123456789" class="contact-value">01 23 45 67 89</a>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <div class="contact-text">
+                    <span class="contact-label">Email</span>
+                    <a href="mailto:contact@ldw.fr" class="contact-value">contact@ldw.fr</a>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <i class="fas fa-clock"></i>
+                <div class="contact-text">
+                    <span class="contact-label">Horaires</span>
+                    <span class="contact-value">Lun-Ven: 9h-18h</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ajouter des interactions pour les cartes de service
+            const serviceCards = document.querySelectorAll('.service-card');
+            
+            serviceCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const link = this.querySelector('.btn-devis').getAttribute('href');
+                    window.location.href = link;
+                });
+            });
+        });
+    </script>
+{% endblock %}

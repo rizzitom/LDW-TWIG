@@ -1,0 +1,148 @@
+/* Styles pour les options de livraison améliorées */
+.delivery-options-container {
+    background-color: var(--fond-tertiaire, #f8f9fa); /* Fond légèrement différent */
+}
+
+.delivery-option {
+    transition: all 0.3s ease-in-out;
+}
+
+.delivery-option-card {
+    border: 1px solid var(--bordure-couleur, #dee2e6);
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.delivery-option.selected .delivery-option-card {
+    border-color: var(--violet-principal, #6200b3);
+    box-shadow: 0 0 0 3px rgba(var(--violet-principal-rgb, 98, 0, 179), 0.25);
+}
+
+.delivery-option-header {
+    padding: 1rem; /* Espace intérieur pour l'en-tête */
+}
+
+.delivery-option-icon i {
+    font-size: 1.8rem; /* Icônes légèrement plus grandes */
+    width: 40px; /* Largeur fixe pour alignement */
+    text-align: center;
+}
+
+.delivery-option-radio .form-check-input {
+    width: 1.3em;
+    height: 1.3em;
+    margin-top: 0.1em; /* Ajustement vertical */
+}
+
+.delivery-option-body {
+    padding: 0 1rem 1rem 1rem; /* Padding pour le contenu replié */
+    background-color: var(--fond-secondaire, #fff);
+}
+
+.delivery-features li {
+    color: var(--texte-secondaire, #6c757d);
+}
+
+.delivery-features i {
+    width: 20px; /* Alignement des icônes de features */
+}
+
+/* Styles pour la recherche et résultats Mondial Relay */
+.relay-selector {
+    background-color: var(--fond-primaire, #fff); /* Fond distinct */
+}
+
+#relay-map {
+    width: 100%;
+    min-height: 300px; /* Hauteur minimale */
+}
+
+.relay-results-list {
+    border: 1px solid var(--bordure-couleur, #dee2e6);
+    border-radius: 0.375rem; /* Bootstrap's default */
+}
+
+.relay-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--bordure-couleur, #dee2e6);
+    transition: background-color 0.2s ease-in-out;
+}
+.relay-item:last-child {
+    border-bottom: none;
+}
+
+.relay-item:hover {
+    background-color: var(--fond-tertiaire-hover, #e9ecef);
+}
+
+.relay-item.active {
+    background-color: rgba(var(--violet-principal-rgb, 98, 0, 179), 0.1);
+    border-left: 4px solid var(--violet-principal, #6200b3);
+    font-weight: bold;
+}
+
+.relay-item-distance {
+    font-size: 0.9em;
+    font-weight: normal;
+}
+
+.relay-item-hours .show-hours-details i {
+    color: var(--bs-primary);
+    cursor: pointer;
+}
+
+/* Style pour les marqueurs Leaflet */
+.relay-map-icon {
+    background-color: var(--bs-primary);
+    color: white;
+    border-radius: 50% 50% 50% 0; /* Forme goutte */
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    border: 2px solid white;
+}
+
+.relay-map-icon i {
+    transform: rotate(45deg); /* Redresser l'icône */
+    font-size: 1rem;
+}
+
+/* Popup Leaflet */
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+}
+.leaflet-popup-content {
+    margin: 10px;
+    font-size: 0.9rem;
+}
+.relay-popup h6 {
+    margin-bottom: 5px;
+    color: var(--bs-primary);
+}
+.relay-popup .select-relay-map-btn {
+    margin-top: 8px;
+    width: 100%;
+}
+
+/* Indicateur de chargement */
+.loading-indicator {
+    color: var(--bs-secondary);
+}
+
+/* Animation Flash */
+@keyframes flash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(var(--violet-principal-rgb, 98, 0, 179), 0.15); }
+    100% { background-color: transparent; }
+}
+
+.flash-update {
+    animation: flash 1s ease-out;
+}
+
+/* Conteneur de toasts */
+.toast-container {
+    z-index: 1100; /* S'assurer qu'il est au-dessus des autres éléments */
+}

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+{# Prépare la variable pour le thème initial (sera réellement appliquée par JS) #}
+{% set initial_theme = 'dark' %} {# Défaut sombre #}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Le Design Du Web - Devis{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    {# <link rel="stylesheet" href="/public/css/modern-styles.css"> #} {# Si vous avez des styles additionnels #}
+
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/969792f3e4.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="/public/css/order-styles.css"/>
+
+    <style>
+        /* ============================================== */
+        /* VARIABLES CSS THEME LDW               */
+        /* ============================================== */
+        :root {
+            /* --- Couleurs de Base --- */
+            --violet-principal: #8A2BE2;
+            --violet-principal-rgb: 138, 43, 226; /* Pour rgba() */
+            --violet-secondaire: #5D19A8;
+            --violet-accent: #BB86FC;
+            --white: #FFFFFF;
+            --black: #000000;
+            --success-color: #4CAF50; /* Vert succès */
+            --danger-color: #dc3545;  /* Rouge danger */
+            --warning-color: #ff9800; /* Orange avertissement */
+            --link-color-special: #e91e63; /* Pour l'icône coeur, si besoin */
+
+            /* --- Mode Sombre (Défaut) --- */
+            --fond-primaire: #121212;
+            --fond-primaire-rgb: 18, 18, 18; /* Pour rgba() */
+            --fond-secondaire: #1e1e1e;
+            --fond-tertiaire: #2a2a2e;
+            --texte-couleur: var(--white);
+            --texte-secondaire: rgba(255, 255, 255, 0.7);
+            --texte-mute: rgba(255, 255, 255, 0.5);
+            --bordure-couleur: rgba(255, 255, 255, 0.1);
+            --ombre-couleur: rgba(0, 0, 0, 0.3);
+            --logo-image: url('/public/images/logov2/Logosfblanc.png');
+
+            /* --- Variables Bootstrap (Sombre) --- */
+            --bs-primary: var(--violet-principal);
+            --bs-primary-rgb: var(--violet-principal-rgb);
+            --bs-secondary: var(--violet-secondaire);
+            --bs-secondary-rgb: 93, 25, 168;
+            --bs-body-color: var(--texte-couleur);
+            --bs-body-bg: var(--fond-primaire);
+            --bs-link-color: var(--violet-accent);
+            --bs-link-hover-color: var(--texte-couleur);
+            --bs-border-color: var(--bordure-couleur);
+            --bs-light-rgb: 255, 255, 255;
+            --bs-dark-rgb: 18, 18, 18;
+             /* Couleurs alertes BS */
+            --bs-success-rgb: 76, 175, 80;
+            --bs-danger-rgb: 220, 53, 69;
+            --bs-warning-rgb: 255, 152, 0;
+        }
+
+        /* --- Mode Clair --- */
+        body.light-theme {
+            --fond-primaire: #f8f9fa;
+            --fond-primaire-rgb: 248, 249, 250; /* Pour rgba() */
+            --fond-secondaire: #ffffff;
+            --fond-tertiaire: #e9ecef;
+            --texte-couleur: #212529;
+            --texte-secondaire: rgba(0, 0, 0, 0.7);
+            --texte-mute: rgba(0, 0, 0, 0.5);
+            --bordure-couleur: rgba(0, 0, 0, 0.1);
+            --ombre-couleur: rgba(0, 0, 0, 0.1);
+            --logo-image: url('/public/images/logov2/Logosfnoir.png');
+
+            /* --- Variables Bootstrap (Clair) --- */
+            --bs-body-color: var(--texte-couleur); /* CORRIGÉ */
+            --bs-body-bg: var(--fond-primaire);
+            --bs-link-color: var(--violet-principal);
+            --bs-link-hover-color: var(--violet-secondaire);
+            --bs-border-color: var(--bordure-couleur);
+            --bs-light-rgb: 33, 37, 41; /* Texte foncé */
+            --bs-dark-rgb: 248, 249, 250; /* Fond clair */
+             /* Couleurs alertes BS déjà ok par défaut */
+        }
+
+        /* ============================================== */
+        /* STYLES DE BASE & BODY                 */
+        /* ============================================== */
+        body {
+            background-color: var(--fond-primaire);
+            color: var(--texte-couleur);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        main { min-height: calc(100vh - 150px - 200px); } /* Approx header/footer height */
+
+        /* ============================================== */
+        /* HEADER & NAVBAR                       */
+        /* ============================================== */
+        .site-header {
+            background-color: rgba(var(--fond-primaire-rgb), 0.8); /* Adapte fond initial au thème */
+            backdrop-filter: blur(8px);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+        .site-header.header-scrolled {
+            background-color: var(--fond-secondaire);
+            box-shadow: 0 2px 10px var(--ombre-couleur);
+        }
+        .navbar { transition: background-color 0.3s ease; }
+
+        /* Styles Navbar basés sur thème (appliqués par le JS via classe sur body) */
+        body.light-theme .navbar { /* Navbar claire */
+            --bs-navbar-color: var(--texte-secondaire);
+            --bs-navbar-hover-color: var(--texte-couleur);
+            --bs-navbar-active-color: var(--violet-principal);
+            --bs-navbar-toggler-border-color: var(--bordure-couleur);
+            --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(33, 37, 41, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        body:not(.light-theme) .navbar { /* Navbar sombre */
+            --bs-navbar-color: var(--texte-secondaire);
+            --bs-navbar-hover-color: var(--texte-couleur);
+            --bs-navbar-active-color: var(--violet-accent);
+            --bs-navbar-toggler-border-color: var(--bordure-couleur);
+            --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        .navbar-brand .logo-img {
+            height: 35px;
+            transition: transform 0.3s ease;
+        }
+        .navbar-brand:hover .logo-img { transform: scale(1.05); }
+
+        /* ============================================== */
+        /* DROPDOWNS (Normal & Megamenu)         */
+        /* ============================================== */
+        .dropdown-menu {
+            background-color: var(--fond-secondaire);
+            border: 1px solid var(--bordure-couleur);
+            box-shadow: 0 5px 15px var(--ombre-couleur);
+            padding: 0.5rem 0;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem; /* Petit espace sous le lien parent */
+        }
+        .dropdown-item {
+            color: var(--texte-couleur);
+            transition: background-color 0.2s ease, color 0.2s ease;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            display: flex; /* Pour aligner icônes */
+            align-items: center;
+        }
+        .dropdown-item i {
+            color: var(--violet-accent);
+            margin-right: 0.75rem;
+            width: 18px;
+            text-align: center;
+            transition: color 0.2s ease;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            color: var(--violet-principal);
+        }
+        .dropdown-item:hover i { color: var(--violet-principal); }
+        .dropdown-divider { border-top: 1px solid var(--bordure-couleur); }
+
+        /* --- Mega Menu Amélioré --- */
+        .mega-menu {
+            border-top: 3px solid var(--violet-principal);
+            width: calc(100% - 2rem);
+            left: 1rem;
+            padding: 1.5rem 1rem;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+        
+        /* Boutons d'accès rapide */
+        .mega-menu-top-buttons {
+            padding: 0.5rem 0;
+        }
+        
+        /* Classe pour le texte violet */
+        .text-purple {
+            color: var(--violet-accent) !important;
+        }
+        .mega-menu .row { margin: 0 -0.75rem; } /* Ajuste gouttière row BS */
+        .mega-menu .column {
+            padding: 0 0.75rem;
+            transition: background-color 0.3s ease;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .mega-menu .column:hover {
+            background-color: rgba(var(--violet-principal-rgb), 0.05);
+        }
+        .mega-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--bordure-couleur);
+        }
+        .mega-menu-header i {
+            color: var(--violet-accent);
+            font-size: 1.6rem;
+            width: 30px;
+            text-align: center;
+        }
+        .mega-menu-header i.fa-recycle { color: var(--success-color) !important; } /* Vert pour recycle */
+        .mega-menu-header h6 {
+            color: var(--texte-couleur);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+        .mega-menu ul { list-style: none; padding: 0; margin: 0; }
+        .mega-menu ul li a {
+            color: var(--texte-secondaire);
+            text-decoration: none;
+            display: block;
+            padding: 0.4rem 0.5rem;
+            margin: 0 -0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.9rem;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .mega-menu ul li a:hover {
+            color: var(--violet-accent);
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+        }
+        
+        /* Sous-menus dans le mega menu */
+        .mega-menu ul li.mega-submenu {
+            position: relative;
+        }
+        
+        .mega-menu ul li.mega-submenu > ul {
+            padding-left: 1.2rem;
+            margin-top: 0.2rem;
+            margin-bottom: 0.5rem;
+            border-left: 1px solid rgba(var(--violet-principal-rgb), 0.2);
+            display: none;
+        }
+        
+        .mega-menu ul li.mega-submenu:hover > ul {
+            display: block;
+        }
+        
+        .mega-menu ul li.mega-submenu > a:after {
+            content: '\f105';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            margin-left: auto;
+            opacity: 0.7;
+            transition: transform 0.2s;
+        }
+        
+        .mega-menu ul li.mega-submenu:hover > a:after {
+            transform: rotate(90deg);
+            opacity: 1;
+        }
+        
+        /* Bannière inférieure */
+        .mega-menu-banner {
+            background-color: rgba(var(--violet-principal-rgb), 0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        .mega-menu-banner a {
+            color: var(--violet-accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .mega-menu-banner a:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================== */
+        /* BOUTONS                               */
+        /* ============================================== */
+        .btn { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-purple {
+            background-color: var(--violet-principal);
+            border-color: var(--violet-principal);
+            color: var(--white); /* Toujours blanc */
+            box-shadow: 0 2px 5px rgba(var(--violet-principal-rgb), 0.2);
+        }
+        .btn-purple:hover, .btn-purple:focus {
+            background-color: var(--violet-secondaire);
+            border-color: var(--violet-secondaire);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(var(--violet-principal-rgb), 0.3);
+        }
+        .btn-outline-purple {
+            color: var(--violet-accent);
+            border-color: var(--violet-accent);
+        }
+        .btn-outline-purple:hover, .btn-outline-purple:focus {
+            color: var(--texte-couleur);
+            background-color: var(--violet-accent);
+            border-color: var(--violet-accent);
+        }
+        .btn-outline-light {
+            color: var(--texte-secondaire);
+            border-color: var(--bordure-couleur);
+        }
+        .btn-outline-light:hover {
+            color: var(--fond-secondaire); /* Texte contrasté */
+            background-color: var(--texte-secondaire);
+            border-color: var(--texte-secondaire);
+        }
+         /* Adapte btn-outline-danger pour thèmes */
+         .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: rgba(var(--bs-danger-rgb), 0.5);
+         }
+         .btn-outline-danger:hover {
+             color: var(--white);
+             background-color: var(--danger-color);
+             border-color: var(--danger-color);
+         }
+
+
+        /* ============================================== */
+        /* FORMULAIRES (Recherche, etc)          */
+        /* ============================================== */
+        .search-form .form-control {
+            background-color: var(--fond-tertiaire);
+            border: 1px solid var(--bordure-couleur);
+            color: var(--texte-couleur);
+            border-radius: 50px 0 0 50px;
+            padding-left: 1rem;
+            height: calc(1.5em + 0.75rem + 2px); /* Match button height */
+        }
+        .search-form .form-control::placeholder { color: var(--texte-mute); }
+        .search-form .form-control:focus {
+            background-color: var(--fond-tertiaire);
+            border-color: var(--violet-principal);
+            box-shadow: 0 0 0 0.2rem rgba(var(--violet-principal-rgb), 0.25);
+            color: var(--texte-couleur);
+        }
+        .search-form .btn { border-radius: 0 50px 50px 0; }
+
+        /* ============================================== */
+        /* ICONES NAVBAR (Theme, Panier)         */
+        /* ============================================== */
+        .theme-toggle {
+            cursor: pointer;
+            padding: 0.375rem 0.75rem;
+            color: var(--texte-secondaire);
+            font-size: 1.2rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+            margin-left: 0.5rem;
+        }
+        .theme-toggle:hover {
+            color: var(--violet-accent);
+            transform: rotate(15deg);
+        }
+        .cart-icon-container { position: relative; display: inline-block; }
+        .cart-icon-container > i { font-size: 1.3rem; color: var(--texte-secondaire); transition: color 0.2s ease;}
+        .nav-link:hover .cart-icon-container > i { color: var(--texte-couleur); }
+        .cart-badge {
+            position: absolute;
+            top: -7px;
+            right: -10px;
+        }
+        .cart-count, .fa-exclamation-triangle {
+            background-color: var(--violet-accent);
+            color: var(--fond-primaire);
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: bold;
+            line-height: 1;
+            border: 1px solid var(--fond-secondaire);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 0.45em;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1031;
+        }
+        .fa-exclamation-triangle {
+            font-size: 0.6rem;
+            background-color: var(--danger-color);
+        }
+
+        /* ============================================== */
+        /* FOOTER                                */
+        /* ============================================== */
+        .site-footer {
+            background-color: var(--fond-secondaire);
+            color: var(--texte-secondaire);
+            padding: 3rem 0 1rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--bordure-couleur);
+        }
+        .footer-logo { height: 40px; margin-bottom: 1rem; }
+        .footer-title {
+            color: var(--texte-couleur);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem; /* Légèrement plus grand */
+        }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 0.5rem; }
+        .footer-links a {
+            color: var(--texte-secondaire);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-size: 0.95rem;
+        }
+        .footer-links a:hover { color: var(--violet-accent); }
+        .footer-links i {
+            color: var(--violet-accent);
+            width: 20px;
+            text-align: center;
+            margin-right: 0.5rem;
+            opacity: 0.8; /* Subtil */
+        }
+         .footer-links a:hover i { opacity: 1; } /* Pleine opacité au survol */
+
+        .social-icons a {
+            color: var(--texte-secondaire);
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .social-icons a:last-child { margin-right: 0; }
+        .social-icons a:hover {
+            color: var(--violet-accent);
+            transform: translateY(-2px); /* Léger lift */
+        }
+        .footer-bottom {
+            border-top: 1px solid var(--bordure-couleur);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--texte-mute);
+        }
+        .footer-bottom-links a {
+            color: var(--texte-mute);
+            margin: 0 0.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .footer-bottom-links a:hover { color: var(--violet-accent); }
+
+        /* ============================================== */
+        /* UTILITAIRES & ANIMATIONS              */
+        /* ============================================== */
+        .text-muted { color: var(--texte-mute) !important; }
+        .animate__animated { visibility: hidden; } /* Caché par défaut, révélé par JS */
+        .animate__fadeInUp { animation-duration: 0.6s; }
+        
+        /* ============================================== */
+        /* TOAST NOTIFICATIONS                   */
+        /* ============================================== */
+        .custom-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            min-width: 280px;
+            max-width: 350px;
+            background-color: var(--fond-secondaire);
+            color: var(--texte-couleur);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            z-index: 1060;
+            overflow: hidden;
+            padding: 0;
+            border: 1px solid var(--bordure-couleur);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: toastFadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes toastFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .custom-toast .toast-header {
+            background-color: var(--fond-secondaire);
+            color: var(--texte-couleur);
+            border-bottom: 1px solid var(--bordure-couleur);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .custom-toast .toast-body {
+            padding: 0.75rem 1rem;
+            color: var(--texte-couleur);
+        }
+        
+        .success-toast .toast-header {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .error-toast .toast-header {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .warning-toast .toast-header {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .btn-close {
+            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23888'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/0.8em auto no-repeat;
+            opacity: 0.5;
+            width: 1em;
+            height: 1em;
+            padding: 0;
+            margin-left: auto;
+            transition: opacity 0.2s ease;
+        }
+        
+        .btn-close:hover {
+            opacity: 0.8;
+        }
+        
+        .light-theme .btn-close {
+            filter: invert(1) grayscale(100%) brightness(80%);
+        }
+
+    </style>
+
+    {% block head %}{% endblock %}
+</head>
+<body class="{% if initial_theme == 'light' %}light-theme{% endif %}">
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="index.php">
+                    <img src="#" alt="LDW Logo" class="logo-img" id="theme-logo-header"> {# Src mis par JS #}
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link {% if page == 'accueil' or page is not defined %}active{% endif %}" href="index.php">
+                                <i class="fas fa-home me-1"></i> Accueil
+                            </a>
+                        </li>
+                        {% if session.login is defined and session.role == 1 %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-shield me-1"></i> Administration
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                    <li><a class="dropdown-item" href="index.php?page=admin&section=dashboard"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="index.php?page=produit"><i class="fas fa-box me-2"></i> Gestion Produits</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=type"><i class="fas fa-tags me-2"></i> Gestion Catégories</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=utilisateurs"><i class="fas fa-users-cog me-2"></i> Gestion Utilisateurs</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {% if page == 'services' or page == 'devis' %}active{% endif %}" href="#" id="navbarDropdownServices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cogs me-1"></i> Services
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownServices">
+                                <li><a class="dropdown-item" href="index.php?page=devis"><i class="fas fa-list me-2"></i> Tous nos services</a></li>
+                                <li><a class="dropdown-item" href="index.php?page=services"><i class="fas fa-file-invoice me-2"></i> Nos Tarifs</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% if session.id is defined %}index.php?page=devis&type=developpement-web{% else %}index.php?page=connexion&redirect=devis&type=developpement-web{% endif %}"><i class="fas fa-laptop-code me-2"></i> Devis développement web/mobile</a></li>
+                                <li><a class="dropdown-item" href="{% if session.id is defined %}index.php?page=devis&type=seo{% else %}index.php?page=connexion&redirect=devis&type=seo{% endif %}"><i class="fas fa-search me-2"></i> Devis SEO/SEA</a></li>
+                                <li><a class="dropdown-item" href="{% if session.id is defined %}index.php?page=devis&type=copywriting{% else %}index.php?page=connexion&redirect=devis&type=copywriting{% endif %}"><i class="fas fa-pen-fancy me-2"></i> Devis copywriting</a></li>
+                               <!-- <li><a class="dropdown-item" href="{% if session.id is defined %}index.php?page=devis&type=montage{% else %}index.php?page=connexion&redirect=devis&type=montage{% endif %}"><i class="fas fa-desktop me-2"></i> Devis montage PC</a></li>-->
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown position-static">
+                            <a class="nav-link dropdown-toggle {% if page == 'boutique' %}active{% endif %}" href="index.php?page=boutique" id="navbarDropdownBoutique" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-shopping-bag me-1"></i> Boutique
+                            </a>
+                            <div class="dropdown-menu mega-menu container animate__animated animate__fadeIn" aria-labelledby="navbarDropdownBoutique">
+                                <!-- Méga menu amélioré -->
+                                <div class="row mb-4">
+                                    <!-- Top Buttons pour accès rapide -->
+                                    <div class="col-12 text-center mb-3">
+                                        <div class="mega-menu-top-buttons">
+                                            <a href="index.php?page=boutique" class="btn btn-purple me-2 px-4">
+                                                <i class="fas fa-store me-2"></i>Tous les produits
+                                            </a>
+                                            <a href="index.php?page=boutique&en_promo=1" class="btn btn-outline-purple me-2">
+                                                <i class="fas fa-percentage me-1"></i>Promotions
+                                            </a>
+                                            <a href="index.php?page=boutique&tri=recent" class="btn btn-outline-purple">
+                                                <i class="fas fa-star me-1"></i>Nouveautés
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <!-- Informatique -->
+                                    <div class="column col-lg-3 col-md-6">
+                                        <div class="mega-menu-header">
+                                            <i class="fas fa-laptop"></i>
+                                            <h6>Informatique</h6>
+                                        </div>
+                                        <ul>
+                                            <li><a href="index.php?page=boutique&categorie=3"><i class="fas fa-laptop me-2 text-purple"></i>Ordinateurs Portables</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=pc_fixe"><i class="fas fa-desktop me-2 text-purple"></i>Ordinateurs Fixes</a></li>
+                                            <li class="mega-submenu">
+                                                <a href="index.php?page=boutique&categorie=4"><i class="fas fa-microchip me-2 text-purple"></i>Composants PC</a>
+                                                <ul>
+                                                    <li><a href="index.php?page=boutique&categorie=processeurs">Processeurs</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=cartes_graphiques">Cartes graphiques</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=memoire">Mémoire RAM</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="index.php?page=boutique&categorie=2"><i class="fas fa-keyboard me-2 text-purple"></i>Périphériques</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=reseau"><i class="fas fa-network-wired me-2 text-purple"></i>Réseau</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Image & Son -->
+                                    <div class="column col-lg-3 col-md-6">
+                                        <div class="mega-menu-header"><i class="fas fa-tv"></i><h6>Image & Son</h6></div>
+                                        <ul>
+                                            <li><a href="index.php?page=boutique&categorie=6"><i class="fas fa-tv me-2 text-purple"></i>Télévisions</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=ecrans_pc"><i class="fas fa-desktop me-2 text-purple"></i>Écrans PC</a></li>
+                                            <li class="mega-submenu">
+                                                <a href="index.php?page=boutique&categorie=7"><i class="fas fa-headphones-alt me-2 text-purple"></i>Audio</a>
+                                                <ul>
+                                                    <li><a href="index.php?page=boutique&categorie=casques">Casques & écouteurs</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=enceintes">Enceintes</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=barres_son">Barres de son</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="index.php?page=boutique&categorie=photo_video"><i class="fas fa-camera me-2 text-purple"></i>Photo & Vidéo</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Téléphonie & Mobilité -->
+                                    <div class="column col-lg-3 col-md-6">
+                                        <div class="mega-menu-header"><i class="fas fa-mobile-alt"></i><h6>Téléphonie & Mobilité</h6></div>
+                                        <ul>
+                                            <li class="mega-submenu">
+                                                <a href="index.php?page=boutique&categorie=9"><i class="fas fa-mobile-alt me-2 text-purple"></i>Smartphones</a>
+                                                <ul>
+                                                    <li><a href="index.php?page=boutique&categorie=smartphones_apple">Apple</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=smartphones_samsung">Samsung</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=smartphones_xiaomi">Xiaomi</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="index.php?page=boutique&categorie=tablettes"><i class="fas fa-tablet-alt me-2 text-purple"></i>Tablettes</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=montres_connectees"><i class="fas fa-stopwatch me-2 text-purple"></i>Montres connectées</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=objets_connectes"><i class="fas fa-wifi me-2 text-purple"></i>Objets Connectés</a></li>
+                                            <li><a href="index.php?page=boutique&categorie=8"><i class="fas fa-plug me-2 text-purple"></i>Accessoires Mobiles</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Colonne 4: Gaming & Reconditionnés -->
+                                    <div class="column col-lg-3 col-md-6">
+                                        <div class="mega-menu-header"><i class="fas fa-gamepad"></i><h6>Gaming & Reconditionnés</h6></div>
+                                        <ul>
+                                            <li class="mega-submenu">
+                                                <a href="index.php?page=boutique&categorie=gaming"><i class="fas fa-gamepad me-2 text-purple"></i>Gaming</a>
+                                                <ul>
+                                                    <li><a href="index.php?page=boutique&categorie=consoles">Consoles</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=jeux_video">Jeux vidéo</a></li>
+                                                    <li><a href="index.php?page=boutique&categorie=accessoires_gaming">Accessoires gaming</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="index.php?page=boutique&categorie=10"><i class="fas fa-recycle me-2 text-success"></i>Produits Reconditionnés</a></li>
+                                            <li><a href="index.php?page=services#montage"><i class="fas fa-tools me-2 text-purple"></i>Montage PC sur Mesure</a></li>
+                                            <li><a href="index.php?page=boutique&tri=popular"><i class="fas fa-fire me-2 text-purple"></i>Produits populaires</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bottom Banner/Call to Action -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="mega-menu-banner">
+                                            <p class="mb-0"><i class="fas fa-truck me-2"></i> <strong>Livraison gratuite</strong> pour toute commande de plus de 50€ <a href="index.php?page=cgv" class="ms-2">En savoir plus</a></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <form class="search-form d-flex me-lg-3 my-2 my-lg-0" action="index.php" method="get" role="search">
+                        <input type="hidden" name="page" value="boutique">
+                        <input class="form-control" type="search" name="recherche" placeholder="Rechercher..." aria-label="Recherche">
+                        <button class="btn btn-purple" type="submit" aria-label="Lancer la recherche"><i class="fas fa-search"></i></button>
+                    </form>
+                    <ul class="navbar-nav align-items-center flex-row">
+                        {% if session.login is defined %}
+                            <li class="nav-item dropdown ms-2">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% if session.profile_picture is defined and session.profile_picture is not empty %}
+                                        <img src="{{ session.profile_picture }}" alt="Photo de profil" class="rounded-circle me-1" style="width: 28px; height: 28px; object-fit: cover;">
+                                    {% else %}
+                                        <i class="fas fa-user-circle me-1 fs-5"></i>
+                                    {% endif %}
+                                    <span class="d-none d-lg-inline">
+                                        {% if session.prenom is defined and session.prenom is not empty %}
+                                            {{ session.prenom }}
+                                        {% elseif session.username is defined and session.username is not empty %}
+                                            {{ session.username }}
+                                        {% else %}
+                                            Utilisateur
+                                        {% endif %}
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="index.php?page=mon_compte"><i class="fas fa-user-circle"></i> Mon profil</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=commandes"><i class="fas fa-shopping-bag"></i> Mes commandes</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=adresses"><i class="fas fa-map-marker-alt"></i> Mes adresses</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                                    <li><a class="dropdown-item" href="index.php?page=securite"><i class="fas fa-shield-alt"></i> Sécurité</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="index.php?page=deconnexion"><i class="fas fa-sign-out-alt"></i> Se déconnecter</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item ms-2">
+                                <a class="nav-link" href="index.php?page=connexion" title="Se connecter / S'inscrire">
+                                    <i class="fas fa-user-circle fs-5"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item ms-2">
+                            <div class="theme-toggle" id="theme-toggle" title="Changer le thème">
+                                <i class="fas"></i> {# Icône définie par JS #}
+                            </div>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="nav-link position-relative" href="index.php?page=panier" title="Voir le Panier">
+                                <div class="cart-icon-container">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <div class="cart-badge">
+                                        <i class="fas fa-exclamation-triangle d-none"></i>
+                                        <span class="cart-count" id="cart-count-badge">
+                                            {{ session.panier.nombre_articles|default(0) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <img src="#" alt="LDW Logo Footer" class="footer-logo" id="theme-logo-footer"> {# Src mis par JS #}
+                    <p class="text-muted mt-2">Votre expert local en solutions numériques et matériel high-tech.</p>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <h5 class="footer-title">Boutique</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.php?page=boutique">Tous les produits</a></li>
+                        <li><a href="index.php?page=boutique&categorie=1">Informatique</a></li>
+                        <li><a href="index.php?page=boutique&categorie=5">Image & Son</a></li>
+                        <li><a href="index.php?page=boutique&categorie=8">Téléphonie</a></li>
+                        <li><a href="index.php?page=boutique&categorie=10">Reconditionné</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <h5 class="footer-title">Services</h5>
+                    <ul class="footer-links">
+                        <li><a href="index.php?page=services">Nos Prestations</a></li>
+                        <li><a href="index.php?page=services#dev-web">Développement Web</a></li>
+                        <li><a href="index.php?page=services#depannage">Dépannage Info</a></li>
+                        <li><a href="index.php?page=services#montage">Montage PC</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h5 class="footer-title">Informations</h5>
+                    <ul class="footer-links">
+                         <li><a href="#contact"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
+                        <li><a href="tel:+33123456789"><i class="fas fa-phone"></i> 01 23 45 67 89</a></li>
+                        <li><a href="mailto:contact@ldw.fr"><i class="fas fa-envelope"></i> contact@ldw.fr</a></li>
+                         <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                    </ul>
+                    <div class="social-icons mt-3">
+                        <a href="#" class="social-icon" title="Facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon" title="LinkedIn" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {{ "now"|date("Y") }} Le Design Du Web (LDW). Tous droits réservés.</p>
+                <div class="footer-bottom-links">
+                    <a href="index.php?page=mentions-legales">Mentions légales</a>
+                    <a href="index.php?page=politique-de-confidentialite">Politique de confidentialité</a>
+                    <a href="index.php?page=cgv">CGV</a>
+                    <a href="index.php?page=cookies">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Effet Header au Scroll
+            const header = document.querySelector('.site-header');
+            if (header) {
+                 window.addEventListener('scroll', function() {
+                    if (window.scrollY > 50) {
+                        header.classList.add('header-scrolled');
+                    } else {
+                        header.classList.remove('header-scrolled');
+                    }
+                 });
+            }
+
+            // 2. Animations au Scroll (Intersection Observer)
+            const animateElements = document.querySelectorAll('.animate__animated');
+            if ("IntersectionObserver" in window && animateElements.length > 0) {
+                 const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const element = entry.target;
+                            const delay = element.style.animationDelay ? parseFloat(element.style.animationDelay) * 1000 : 0;
+                            setTimeout(() => {
+                                 element.style.visibility = 'visible';
+                                 // Retrouve le nom de l'animation (ex: animate__fadeInUp)
+                                 const animationClass = Array.from(element.classList).find(cls => cls.startsWith('animate__') && cls !== 'animate__animated');
+                                 if (animationClass) {
+                                     element.classList.add(animationClass); // Ré-applique pour être sûr ? Ou juste visibilité
+                                 }
+                            }, delay);
+                            observer.unobserve(element);
+                        }
+                    });
+                 }, { threshold: 0.1 });
+
+                 animateElements.forEach((element, index) => {
+                     element.style.visibility = 'hidden'; // Cache
+                     // Applique délai si non défini
+                    if (!element.style.animationDelay) {
+                         element.style.animationDelay = `${index * 0.05}s`;
+                    }
+                     observer.observe(element);
+                 });
+            } else {
+                  animateElements.forEach(el => { el.style.visibility = 'visible'; }); // Fallback
+            }
+
+            // 3. Logique de Changement de Thème
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
+            const logoHeader = document.getElementById('theme-logo-header');
+            const logoFooter = document.getElementById('theme-logo-footer');
+            // Utilise les variables CSS pour les chemins - plus propre si ça marche, sinon fallback JS
+            // Note: Cette approche CSS directe ne fonctionne PAS pour <img src="">
+            // Il faut utiliser JS comme ci-dessous.
+             const logoPathLight = '/public/images/logov2/Logosfnoir.png';
+             const logoPathDark = '/public/images/logov2/Logosfblanc.png';
+
+
+             // Fonction pour appliquer le thème
+             function applyTheme(theme, initialLoad = false) {
+                // Applique la classe au body
+                body.classList.toggle('light-theme', theme === 'light');
+
+                // Met à jour l'icône du bouton
+                 if (themeIcon) {
+                     themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+                 }
+
+                 // Met à jour la source des logos
+                 if (logoHeader) {
+                    logoHeader.src = theme === 'light' ? logoPathLight : logoPathDark;
+                    if(!initialLoad) logoHeader.style.opacity = 0; // Effet fondu
+                 }
+                 if (logoFooter) {
+                    logoFooter.src = theme === 'light' ? logoPathLight : logoPathDark;
+                     if(!initialLoad) logoFooter.style.opacity = 0; // Effet fondu
+                 }
+
+                 // Effet fondu pour les logos (optionnel)
+                 if(!initialLoad) {
+                    setTimeout(() => {
+                        if(logoHeader) logoHeader.style.transition = 'opacity 0.3s ease';
+                        if(logoFooter) logoFooter.style.transition = 'opacity 0.3s ease';
+                        if(logoHeader) logoHeader.style.opacity = 1;
+                        if(logoFooter) logoFooter.style.opacity = 1;
+                    }, 50); // Petit délai pour que le changement de src soit pris en compte
+                 }
+             }
+
+            // Récupère le thème sauvegardé ou utilise le thème système/défaut
+             let currentTheme = localStorage.getItem('theme');
+             if (!currentTheme) {
+                 // Préférence système (optionnel, fallback sombre si non supporté)
+                 // currentTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                 currentTheme = 'dark'; // Ou forcer sombre par défaut si pas de préférence système
+             }
+
+             // Applique le thème initial au chargement (sans transition logo)
+             applyTheme(currentTheme, true);
+
+             // Listener pour le bouton de changement de thème
+             if (themeToggle) {
+                  themeToggle.addEventListener('click', () => {
+                     currentTheme = body.classList.contains('light-theme') ? 'dark' : 'light';
+                     localStorage.setItem('theme', currentTheme);
+                     applyTheme(currentTheme); // Applique avec transition logo
+                  });
+             }
+             
+             // 4. Gestion Méga Menu amélioré pour mobile
+             const handleMegaSubmenuMobile = () => {
+                 // Ne s'applique qu'en mode mobile
+                 if (window.innerWidth < 992) {
+                     const megaSubmenuItems = document.querySelectorAll('.mega-menu ul li.mega-submenu > a');
+                     
+                     megaSubmenuItems.forEach(item => {
+                         item.addEventListener('click', function(e) {
+                             // Empêche la navigation uniquement si le clic est sur le lien parent
+                             // et pas un élément enfant
+                             if (e.currentTarget === e.target || e.target.tagName === 'I') {
+                                 e.preventDefault();
+                                 
+                                 // Trouve la liste imbriquée associée
+                                 const submenu = this.nextElementSibling;
+                                 if (submenu && submenu.tagName === 'UL') {
+                                     // Toggle l'affichage
+                                     const isVisible = submenu.style.display === 'block';
+                                     submenu.style.display = isVisible ? 'none' : 'block';
+                                     
+                                     // Rotation de la flèche
+                                     const arrow = this.querySelector('::after');
+                                     if (arrow) {
+                                         this.classList.toggle('submenu-open', !isVisible);
+                                     }
+                                 }
+                             }
+                         });
+                     });
+                 }
+             };
+             
+             // Applique au chargement et au redimensionnement
+             handleMegaSubmenuMobile();
+             window.addEventListener('resize', handleMegaSubmenuMobile);
+
+        }); // Fin DOMContentLoaded
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

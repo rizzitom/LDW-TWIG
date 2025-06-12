@@ -1,0 +1,27 @@
+{# This file contains the corrected version of the date_modify filter usage #}
+
+{# The error is:
+   Fatal error: Uncaught ArgumentCountError: Too few arguments to function twig_date_modify_filter(), 
+   2 passed in [...] and exactly 3 expected
+   
+   This typically happens when using the date_modify filter without the required modifier parameter:
+   
+   INCORRECT:
+   {{ some_date|date_modify|date("Y-m-d") }}
+   
+   CORRECT:
+   {{ some_date|date_modify("+1 day")|date("Y-m-d") }}
+   
+   The date_modify filter must always include a modifier string parameter,
+   such as "+1 day", "-2 weeks", "+1 month", etc.
+#}
+
+{# Example of correct usage #}
+{% set tomorrow = "now"|date_modify("+1 day")|date("Y-m-d") %}
+{% set yesterday = "now"|date_modify("-1 day")|date("Y-m-d") %}
+{% set next_month = "now"|date_modify("+1 month")|date("Y-m-d") %}
+
+{# Usage in a function should provide all required parameters #}
+{% macro show_future_date(days_to_add) %}
+    {{ "now"|date_modify("+" ~ days_to_add ~ " days")|date("Y-m-d") }}
+{% endmacro %}

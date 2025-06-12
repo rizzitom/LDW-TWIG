@@ -1,0 +1,356 @@
+{% extends "admin/base-admin.twig" %}
+
+{% block admin_title %}Détails de la commande{% endblock %}
+
+{% block admin_actions %}
+<a href="index.php?page=admin&section=commandes" class="btn btn-outline-light me-2">
+    <i class="fas fa-arrow-left me-2"></i> Retour aux commandes
+</a>
+<button type="button" class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+    <i class="fas fa-edit me-2"></i> Modifier le statut
+</button>
+{% endblock %}
+
+{% block admin_content %}
+{% if statut_updated %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i> Le statut de la commande a été mis à jour avec succès.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>
+{% endif %}
+
+{% if error == 'csrf' %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i> Erreur de sécurité. Veuillez réessayer l'opération.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Informations générales de la commande -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informations de la commande</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-1 text-muted">Référence</p>
+                        <p class="mb-3 fs-5 fw-semibold">{{ commande.reference }}</p>
+                        
+                        <p class="mb-1 text-muted">Date de commande</p>
+                        <p class="mb-3">{{ commande.date_commande|date("d/m/Y à H:i") }}</p>
+                        
+                        <p class="mb-1 text-muted">Statut</p>
+                        <p class="mb-0">
+                            {% if commande.statut == 'en_attente' %}
+                                <span class="status-badge status-pending">En attente</span>
+                            {% elseif commande.statut == 'validee' %}
+                                <span class="status-badge status-processing">Validée</span>
+                            {% elseif commande.statut == 'en_preparation' %}
+                                <span class="status-badge status-processing">En préparation</span>
+                            {% elseif commande.statut == 'expediee' %}
+                                <span class="status-badge status-shipped">Expédiée</span>
+                            {% elseif commande.statut == 'livree' %}
+                                <span class="status-badge status-delivered">Livrée</span>
+                            {% elseif commande.statut == 'annulee' %}
+                                <span class="status-badge status-cancelled">Annulée</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="mb-1 text-muted">Montant total</p>
+                        <p class="mb-3 fs-5 fw-semibold">{{ commande.montant_total|number_format(2, ',', ' ') }} €</p>
+                        
+                        <p class="mb-1 text-muted">Méthode de paiement</p>
+                        <p class="mb-3">{{ commande.methode_paiement }}</p>
+                        
+                        <p class="mb-1 text-muted">Notes</p>
+                        <p class="mb-0">{{ commande.notes ?: 'Aucune note' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Produits commandés -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-box me-2"></i> Produits commandés</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px">Image</th>
+                                <th>Produit</th>
+                                <th class="text-center">Quantité</th>
+                                <th class="text-end">Prix unitaire</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produit in produits %}
+                            <tr>
+                                <td>
+                                    <div style="width: 60px; height: 60px; background-image: url('{{ produit.image_url }}'); background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 5px;"></div>
+                                </td>
+                                <td>{{ produit.nom }}</td>
+                                <td class="text-center">{{ produit.quantite }}</td>
+                                <td class="text-end">{{ produit.prix_unitaire|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-end">{{ (produit.prix_unitaire * produit.quantite)|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Total</td>
+                                <td class="text-end fw-bold">{{ commande.montant_total|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Informations client -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i> Informations client</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-1 text-muted">Client</p>
+                <p class="mb-3 fw-semibold">{{ commande.nom }} {{ commande.prenom }}</p>
+                
+                <p class="mb-1 text-muted">Email</p>
+                <p class="mb-3">{{ commande.email }}</p>
+                
+                <p class="mb-1 text-muted">Téléphone</p>
+                <p class="mb-0">{{ commande.telephone ?: 'Non renseigné' }}</p>
+                
+                <hr class="my-3">
+                
+                <p class="mb-1 text-muted">Adresse de livraison</p>
+                <p class="mb-3">{{ commande.adresse_livraison|nl2br }}</p>
+                
+                <p class="mb-1 text-muted">Adresse de facturation</p>
+                <p class="mb-0">{{ commande.adresse_facturation|nl2br }}</p>
+            </div>
+        </div>
+        
+        <!-- Historique des statuts (pour une future implémentation) -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i> Historique</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <p class="mb-0 fw-semibold">Commande créée</p>
+                            <small class="text-muted">{{ commande.date_commande|date("d/m/Y à H:i") }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if commande.statut != 'en_attente' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker {{ commande.statut == 'annulee' ? 'bg-danger' : 'bg-primary' }}"></div>
+                        <div class="timeline-content">
+                            <p class="mb-0 fw-semibold">
+                                {% if commande.statut == 'validee' %}Commande validée
+                                {% elseif commande.statut == 'en_preparation' %}En préparation
+                                {% elseif commande.statut == 'expediee' %}Commande expédiée
+                                {% elseif commande.statut == 'livree' %}Commande livrée
+                                {% elseif commande.statut == 'annulee' %}Commande annulée
+                                {% endif %}
+                            </p>
+                            <small class="text-muted">Date non disponible</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted fst-italic">L'historique complet sera disponible dans une future mise à jour</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions sur la commande -->
+        <div class="card-admin mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                        <i class="fas fa-edit me-2"></i> Modifier le statut
+                    </button>
+                    <a href="javascript:window.print()" class="btn btn-outline-light">
+                        <i class="fas fa-print me-2"></i> Imprimer la commande
+                    </a>
+                    {% if commande.statut != 'annulee' %}
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                        <i class="fas fa-times me-2"></i> Annuler la commande
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_modals %}
+<!-- Modal de mise à jour du statut -->
+<div class="modal fade modal-admin" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Modifier le statut de la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form action="index.php?page=admin&section=commande-detail&id={{ commande.id }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nouveauStatut" class="form-label">Nouveau statut</label>
+                        <select class="form-select" id="nouveauStatut" name="nouveau_statut" required>
+                            <option value="en_attente" {% if commande.statut == 'en_attente' %}selected{% endif %}>En attente</option>
+                            <option value="validee" {% if commande.statut == 'validee' %}selected{% endif %}>Validée</option>
+                            <option value="en_preparation" {% if commande.statut == 'en_preparation' %}selected{% endif %}>En préparation</option>
+                            <option value="expediee" {% if commande.statut == 'expediee' %}selected{% endif %}>Expédiée</option>
+                            <option value="livree" {% if commande.statut == 'livree' %}selected{% endif %}>Livrée</option>
+                            <option value="annulee" {% if commande.statut == 'annulee' %}selected{% endif %}>Annulée</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-purple">Mettre à jour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'annulation de commande -->
+<div class="modal fade modal-admin" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">Confirmer l'annulation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir annuler la commande <strong>{{ commande.reference }}</strong> ?</p>
+                <p class="text-danger">Cette action est définitive et ne peut pas être annulée.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                <form action="index.php?page=admin&section=commande-detail&id={{ commande.id }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="nouveau_statut" value="annulee">
+                    <button type="submit" class="btn btn-danger">Confirmer l'annulation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<style>
+    /* Styles pour la timeline */
+    .timeline {
+        position: relative;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .timeline:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+        width: 2px;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 15px;
+        padding-left: 40px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        top: 0;
+        left: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--violet-principal);
+        transform: translateX(-50%);
+    }
+    
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .bg-primary {
+        background-color: var(--violet-principal) !important;
+    }
+    
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    /* Styles pour l'impression */
+    @media print {
+        .admin-sidebar, .admin-header, .admin-footer, .modal, .btn {
+            display: none !important;
+        }
+        
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        .admin-container, .card-admin, .card-body {
+            background-color: white !important;
+            color: black !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .table {
+            color: black !important;
+        }
+        
+        .table th {
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+        
+        .status-badge {
+            border: 1px solid #ddd !important;
+            background-color: #f8f9fa !important;
+            color: black !important;
+        }
+    }
+</style>
+{% endblock %}

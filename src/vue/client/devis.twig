@@ -1,0 +1,284 @@
+{% extends "client/base-client.twig" %}
+
+{% block client_title %}Mes devis{% endblock %}
+
+{% block client_actions %}
+<div class="d-flex align-items-center">
+    <form action="index.php" method="get" class="me-2 d-flex">
+        <input type="hidden" name="page" value="devis">
+        <input type="text" name="recherche" class="form-control form-control-sm" placeholder="Rechercher..." value="{{ recherche|default('') }}">
+        <button type="submit" class="btn btn-sm btn-purple ms-2">
+            <i class="fas fa-search"></i>
+        </button>
+    </form>
+    <a href="index.php?page=devis" class="btn btn-outline-purple">
+        <i class="fas fa-plus-circle me-1"></i> Nouveau devis
+    </a>
+</div>
+{% endblock %}
+
+{% block client_content %}
+    {# Sélection du type de devis si aucun type n'est passé #}
+    {% if not type %}
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 col-md-10">
+            <h2 class="text-center mb-4">Demander un devis</h2>
+            <p class="text-center mb-4">Choisissez le service pour lequel vous souhaitez obtenir un devis personnalisé :</p>
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-4">
+                    <a href="index.php?page=devis&type=developpement-web" class="devis-card-link">
+                        <div class="devis-type-card shadow-sm h-100 text-center p-4">
+                            <i class="fas fa-laptop-code fa-3x mb-3 text-primary"></i>
+                            <h5 class="mb-2">Développement Web</h5>
+                            <p class="text-muted mb-0">Création de sites web, applications sur-mesure, refonte, etc.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-md-4">
+                    <a href="index.php?page=devis&type=maintenance" class="devis-card-link">
+                        <div class="devis-type-card shadow-sm h-100 text-center p-4">
+                            <i class="fas fa-tools fa-3x mb-3 text-success"></i>
+                            <h5 class="mb-2">Maintenance Informatique</h5>
+                            <p class="text-muted mb-0">Dépannage, assistance, contrat de maintenance pour vos équipements.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-md-4">
+                    <a href="index.php?page=devis&type=montage-pc" class="devis-card-link">
+                        <div class="devis-type-card shadow-sm h-100 text-center p-4">
+                            <i class="fas fa-desktop fa-3x mb-3 text-warning"></i>
+                            <h5 class="mb-2">Montage PC sur mesure</h5>
+                            <p class="text-muted mb-0">Configuration, assemblage et conseils pour un PC adapté à vos besoins.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="client-card mb-4">
+        <div class="card-header">
+            <i class="fas fa-file-invoice-dollar"></i> Historique de vos demandes de devis
+        </div>
+        
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-client mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Référence</th>
+                            <th scope="col">Service</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Montant estimé</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if devis|length > 0 %}
+                            {% for d in devis %}
+                                <tr class="clickable-row" data-href="index.php?page=devis-detail&id={{ d.id }}">
+                                    <td>#{{ d.id }}</td>
+                                    <td>{{ d.service_nom }}</td>
+                                    <td>{{ d.date_demande|date("d/m/Y") }}</td>
+                                    <td>
+                                        {% if d.montant_estime %}
+                                            {{ d.montant_estime|number_format(2, ',', ' ') }} €
+                                        {% else %}
+                                            <span class="text-muted">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if d.statut == 'en_attente' %}
+                                            <span class="status-badge status-pending">En attente</span>
+                                        {% elseif d.statut == 'en_cours' %}
+                                            <span class="status-badge status-processing">En cours</span>
+                                        {% elseif d.statut == 'termine' %}
+                                            <span class="status-badge status-delivered">Terminé</span>
+                                        {% elseif d.statut == 'rejete' %}
+                                            <span class="status-badge status-cancelled">Rejeté</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <a href="index.php?page=devis-detail&id={{ d.id }}" class="btn btn-sm btn-outline-purple" title="Voir le détail">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if d.statut == 'termine' and d.montant_estime %}
+                                                <a href="index.php?page=devis-detail&id={{ d.id }}&action=accepter" class="btn btn-sm btn-outline-success" title="Accepter le devis">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% endif %}
+                                            {% if d.statut == 'en_attente' %}
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Annuler la demande" 
+                                                    data-bs-toggle="modal" data-bs-target="#cancelQuoteModal{{ d.id }}">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-file-invoice fa-3x mb-3 text-muted"></i>
+                                    <p class="mb-3">Vous n'avez pas encore de demande de devis.</p>
+                                    <a href="index.php?page=devis" class="btn btn-purple">
+                                        <i class="fas fa-plus-circle me-2"></i> Demander un devis
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ section -->
+    <div class="client-card mb-4">
+        <div class="card-header">
+            <i class="fas fa-question-circle"></i> Questions fréquentes sur les devis
+        </div>
+        <div class="card-body">
+            <div class="accordion" id="faqDevis">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                            Comment fonctionne le processus de devis ?
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqDevis">
+                        <div class="accordion-body">
+                            Notre processus de devis est simple : vous remplissez le formulaire en ligne avec les détails de votre projet, nous analysons votre demande et vous recevez un devis personnalisé sous 48h ouvrées. Vous pouvez ensuite accepter le devis, demander des modifications ou le décliner.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Comment puis-je modifier ma demande de devis ?
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqDevis">
+                        <div class="accordion-body">
+                            Si votre demande est encore en statut "En attente", vous pouvez nous contacter directement pour apporter des modifications. Une fois que nous avons commencé à traiter votre demande, vous pouvez toujours nous envoyer un message avec les informations supplémentaires via la page de détail du devis.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Que signifient les différents statuts de devis ?
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqDevis">
+                        <div class="accordion-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><span class="status-badge status-pending">En attente</span> - Votre demande a été reçue et est en attente de traitement.</li>
+                                <li class="mb-2"><span class="status-badge status-processing">En cours</span> - Nous sommes en train d'analyser votre demande et de préparer votre devis.</li>
+                                <li class="mb-2"><span class="status-badge status-delivered">Terminé</span> - Votre devis est prêt et vous pouvez le consulter.</li>
+                                <li><span class="status-badge status-cancelled">Rejeté</span> - La demande a été annulée ou nous ne sommes pas en mesure d'y répondre favorablement.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations services client -->
+    <div class="client-card">
+        <div class="card-header">
+            <i class="fas fa-headset"></i> Besoin d'aide ?
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h5 class="mb-3">Notre équipe est à votre disposition</h5>
+                    <p>
+                        Si vous avez des questions concernant vos devis ou si vous souhaitez obtenir plus d'informations,
+                        n'hésitez pas à contacter notre équipe.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+                        <a href="tel:+33123456789" class="btn btn-outline-purple">
+                            <i class="fas fa-phone-alt me-2"></i> 01 23 45 67 89
+                        </a>
+                        <a href="mailto:contact@ldw.fr" class="btn btn-outline-purple">
+                            <i class="fas fa-envelope me-2"></i> contact@ldw.fr
+                        </a>
+                        <a href="index.php?page=messages" class="btn btn-purple">
+                            <i class="fas fa-comments me-2"></i> Contacter le support
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-5 text-center mt-4 mt-md-0">
+                    <img src="{{ get_asset_url('/public/images/undraw_agreement.svg') }}" alt="Support client" class="img-fluid" style="max-height: 180px;">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block client_modals %}
+    <!-- Modals d'annulation pour chaque devis -->
+    {% if devis|length > 0 %}
+        {% for d in devis %}
+            {% if d.statut == 'en_attente' %}
+                <div class="modal fade" id="cancelQuoteModal{{ d.id }}" tabindex="-1" aria-labelledby="cancelQuoteModalLabel{{ d.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="index.php?page=devis" method="post">
+                                <input type="hidden" name="id_devis" value="{{ d.id }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="cancelQuoteModalLabel{{ d.id }}">Confirmer l'annulation</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="mb-0">Êtes-vous sûr de vouloir annuler votre demande de devis #{{ d.id }} ?</p>
+                                    <p class="text-danger mt-3 mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Cette action est irréversible.</p>
+                                    <div class="mt-3">
+                                        <label for="motif_annulation{{ d.id }}" class="form-label">Motif d'annulation (optionnel)</label>
+                                        <select class="form-select" id="motif_annulation{{ d.id }}" name="motif_annulation">
+                                            <option value="erreur_demande">Erreur de demande</option>
+                                            <option value="changement_avis">Changement d'avis</option>
+                                            <option value="autre_prestataire">Autre prestataire choisi</option>
+                                            <option value="projet_annule">Projet annulé</option>
+                                            <option value="autre">Autre raison</option>
+                                        </select>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label for="commentaire_annulation{{ d.id }}" class="form-label">Commentaire (optionnel)</label>
+                                        <textarea class="form-control" id="commentaire_annulation{{ d.id }}" name="commentaire_annulation" rows="3" placeholder="Précisez votre raison ici..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" name="annuler_devis" class="btn btn-danger">Confirmer l'annulation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block client_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const clickableRows = document.querySelectorAll('.clickable-row');
+        clickableRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Ne pas déclencher si on clique sur un bouton ou un lien
+                if (!e.target.closest('button, a')) {
+                    window.location.href = this.dataset.href;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

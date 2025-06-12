@@ -1,0 +1,1298 @@
+{% extends "base.twig" %}
+
+{% block title %}Finaliser la commande - Le Design Du Web{% endblock %}
+
+{% block head %}
+<!-- Payment SDKs -->
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id|default('') }}&currency=EUR"></script>
+<link rel="stylesheet" href="public/css/stripe-elements.css">
+<link rel="stylesheet" href="public/css/delivery-options.css">
+<link rel="stylesheet" href="public/css/payment-summary.css">
+<meta name="stripe-public-key" content="{{ stripe_public_key|default('pk_live_51RDozlG7RjirpzdIvkXjsNZ9TcQ6phh5CJ2Xx18wrMJLxaw9sAYzNhSnFe28zRRUgtmHdSFXSbfAOew6LV8Jiodh00E6moh5PE') }}">
+<style>
+    /* Styles améliorés pour le processus de checkout */
+    .checkout-container {
+        background-color: var(--fond-secondaire);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px var(--ombre-couleur);
+        border: 1px solid var(--bordure-couleur);
+        transition: all 0.3s ease;
+    }
+    
+    .checkout-summary {
+        background-color: var(--fond-tertiaire);
+        border-radius: 10px;
+        padding: 1.5rem;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .checkout-summary-title {
+        border-bottom: 1px solid var(--violet-principal);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .checkout-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .checkout-summary-total {
+        font-size: 1.5rem;
+        font-weight: bold;
+        border-top: 1px solid var(--violet-principal);
+        padding-top: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .checkout-items {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 1.5rem;
+    }
+    
+    .checkout-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--bordure-couleur);
+    }
+    
+    .checkout-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .checkout-item-image {
+        width: 60px;
+        height: 60px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 5px;
+        margin-right: 1rem;
+    }
+    
+    .checkout-item-details {
+        flex-grow: 1;
+    }
+    
+    .checkout-item-price {
+        font-weight: bold;
+        color: var(--violet-principal);
+    }
+    
+    .checkout-form-label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .payment-method {
+        background-color: var(--fond-tertiaire);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .payment-method:hover {
+        background-color: rgba(var(--violet-principal-rgb), 0.05);
+    }
+    
+    .payment-method.active {
+        border-color: var(--violet-principal);
+    }
+    
+    .payment-method-header {
+        display: flex;
+        align-items: center;
+    }
+    
+    .payment-method-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: var(--violet-principal);
+    }
+    
+    .payment-tabs {
+        display: flex;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--bordure-couleur);
+    }
+    
+    .payment-tab {
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .payment-tab.active {
+        border-bottom: 2px solid var(--violet-principal);
+        color: var(--violet-principal);
+    }
+    
+    .payment-tab:hover:not(.active) {
+        background-color: rgba(var(--violet-principal-rgb), 0.05);
+    }
+    
+    .payment-content {
+        display: none;
+    }
+    
+    .payment-content.active {
+        display: block;
+    }
+    
+    /* Indicateur de progression amélioré */
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+        position: relative;
+        padding: 0 10px;
+    }
+    
+    .step-indicator::before {
+        content: "";
+        position: absolute;
+        top: 35px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background-color: var(--bordure-couleur);
+        z-index: 1;
+    }
+    
+    .step-progress {
+        position: absolute;
+        top: 35px;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--violet-principal), var(--violet-secondaire));
+        z-index: 2;
+        transition: width 0.5s ease;
+        border-radius: 2px;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        flex: 1;
+        z-index: 3;
+    }
+    
+    .step-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: var(--fond-tertiaire);
+        color: var(--texte-couleur);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        border: 2px solid var(--bordure-couleur);
+        position: relative;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px var(--ombre-couleur);
+    }
+    
+    .step.active .step-icon {
+        background-color: var(--violet-principal);
+        color: white;
+        border-color: var(--violet-principal);
+        transform: scale(1.1);
+        box-shadow: 0 0 0 5px rgba(var(--violet-principal-rgb), 0.2);
+    }
+    
+    .step.completed .step-icon {
+        background-color: var(--violet-secondaire);
+        color: white;
+        border-color: var(--violet-secondaire);
+    }
+    
+    .step.completed .step-icon::after {
+        content: "\f00c";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        border: 2px solid var(--fond-secondaire);
+    }
+    
+    .step-label {
+        font-size: 1rem;
+        color: var(--texte-secondaire);
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active .step-label {
+        color: var(--violet-principal);
+        font-weight: bold;
+    }
+    
+    .step.completed .step-label {
+        color: var(--violet-secondaire);
+    }
+    
+    .step-description {
+        font-size: 0.85rem;
+        color: var(--texte-secondaire);
+        text-align: center;
+        max-width: 150px;
+        margin-top: 5px;
+        display: none;
+    }
+    
+    .step.active .step-description {
+        display: block;
+    }
+    
+    /* Switch styles améliorés */
+    .toggle-container {
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        background-color: var(--fond-tertiaire);
+        padding: 15px;
+        border-radius: 12px;
+        border: 1px solid var(--bordure-couleur);
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+        margin-right: 15px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--bordure-couleur);
+        border-radius: 34px;
+        transition: .4s;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: var(--fond-secondaire);
+        border-radius: 50%;
+        transition: .4s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    input:checked + .slider {
+        background-color: var(--violet-principal);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .toggle-label {
+        font-weight: 500;
+        color: var(--texte-couleur);
+    }
+    
+    /* PayPal Button Styles */
+    #paypal-button-container {
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    /* On light theme, adjust some PayPal element styles */
+    body.light-theme .payment-method {
+        background-color: #f5f5f7;
+    }
+    
+    body.light-theme .step-number {
+        border: 1px solid #e0e0e0;
+    }
+    
+    /* Améliorations des méthodes de paiement */
+    .payment-methods-icons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .payment-icon {
+        padding: 15px;
+        border-radius: 10px;
+        background-color: rgba(var(--fond-primaire-rgb), 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: 1px solid var(--bordure-couleur);
+        min-width: 80px;
+        height: 60px;
+    }
+    
+    .payment-icon:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px var(--ombre-couleur);
+        border-color: var(--violet-principal);
+    }
+    
+    /* Boutons de navigation entre étapes */
+    .checkout-nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+    
+    .btn-prev-step {
+        background-color: transparent;
+        border: 1px solid var(--bordure-couleur);
+        color: var(--texte-couleur);
+        padding: 10px 20px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-prev-step:hover {
+        background-color: var(--fond-tertiaire);
+        color: var(--violet-principal);
+    }
+    
+    .btn-next-step {
+        background: linear-gradient(135deg, var(--violet-principal), var(--violet-secondaire));
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        border: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(var(--violet-principal-rgb), 0.3);
+    }
+    
+    .btn-next-step:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(var(--violet-principal-rgb), 0.4);
+    }
+    
+    /* Animation pour les transitions entre étapes */
+    .step-content {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s forwards;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Finaliser votre commande</h1>
+    
+    {% if erreur %}
+    <div class="alert alert-danger mb-4" role="alert">
+        {{ erreur }}
+    </div>
+    {% endif %}
+    
+    {# Indicateur de progression amélioré #}
+    <div class="step-indicator">
+        <div class="step-progress" style="width: {% if etape == 'panier' %}0%{% elseif etape == 'livraison' %}33%{% elseif etape == 'paiement' %}66%{% else %}100%{% endif %};"></div>
+        
+        <div class="step {% if etape == 'panier' %}active{% endif %} {% if etape in ['livraison', 'paiement', 'confirmation'] %}completed{% endif %}">
+            <div class="step-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="step-label">Panier</div>
+            <div class="step-description">Vérifiez vos articles</div>
+        </div>
+        
+        <div class="step {% if etape == 'livraison' %}active{% endif %} {% if etape in ['paiement', 'confirmation'] %}completed{% endif %}">
+            <div class="step-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="step-label">Livraison</div>
+            <div class="step-description">Choisissez votre mode de livraison</div>
+        </div>
+        
+        <div class="step {% if etape == 'paiement' %}active{% endif %} {% if etape == 'confirmation' %}completed{% endif %}">
+            <div class="step-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="step-label">Paiement</div>
+            <div class="step-description">Finalisez votre achat en toute sécurité</div>
+        </div>
+        
+        <div class="step {% if etape == 'confirmation' %}active{% endif %}">
+            <div class="step-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="step-label">Confirmation</div>
+            <div class="step-description">Commande validée</div>
+        </div>
+    </div>
+    
+    <form action="index.php?page=panier&action=valider-commande" method="post" id="checkout-form">
+<div class="row">
+            <div class="col-lg-8">
+                <div class="checkout-container">
+                    {# CONTENU SPÉCIFIQUE À CHAQUE ÉTAPE #}
+                    {% if etape == 'livraison' %}
+                    <div class="step-content">
+                        <h2 class="mb-4">Adresse de livraison</h2>
+                        
+                        {% if erreur %}
+                        <div class="alert alert-danger mb-4" role="alert">
+                            {{ erreur }}
+                        </div>
+                        {% endif %}
+                    
+                        {% if adresses|length > 0 %}
+                        <div class="mb-4">
+                            <label for="adresse_selection" class="form-label">Choisir une adresse enregistrée</label>
+                            <select class="form-select" id="adresse_selection" name="adresse_selection">
+                                <option value="nouvelle">Saisir une nouvelle adresse</option>
+                                {% for adresse in adresses %}
+                                    <option value="{{ adresse.id }}" {% if adresse.is_default %}selected{% endif %}>
+                                        {{ adresse.nom }} - {{ adresse.rue }}, {{ adresse.code_postal }} {{ adresse.ville }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <div id="adresse_formulaire" {% if adresses|length > 0 and adresse_principale %}style="display: none;"{% endif %}>
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nom" class="form-label">Nom</label>
+                                    <input type="text" class="form-control" id="nom" name="nom" value="{{ utilisateur.nom }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="prenom" class="form-label">Prénom</label>
+                                    <input type="text" class="form-control" id="prenom" name="prenom" value="{{ utilisateur.prenom }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ utilisateur.email }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" id="telephone" name="telephone" value="{{ utilisateur.telephone }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="adresse" class="form-label">Adresse</label>
+                                <input type="text" class="form-control" id="adresse" name="adresse" value="{{ utilisateur.adresse }}" required>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="code_postal" class="form-label">Code postal</label>
+                                    <input type="text" class="form-control" id="code_postal" name="code_postal" value="{{ utilisateur.code_postal }}" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="ville" class="form-label">Ville</label>
+                                    <input type="text" class="form-control" id="ville" name="ville" value="{{ utilisateur.ville }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="sauvegarder_adresse" name="sauvegarder_adresse" value="1">
+                                <label class="form-check-label" for="sauvegarder_adresse">
+                                    Sauvegarder cette adresse pour mes prochaines commandes
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Option de livraison à domicile uniquement -->
+                        {% include 'partials/options-livraison.twig' %}
+                        
+                        <div class="toggle-container mt-4">
+                            <div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="adresse_facturation_identique" name="adresse_facturation_identique" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-label">
+                                <span>Utiliser la même adresse pour la facturation</span>
+                                <p class="text-muted mb-0 small">Décochez cette option si l'adresse de facturation est différente de l'adresse de livraison</p>
+                            </div>
+                        </div>
+                        
+                        <div id="adresse_facturation_form" class="mt-4" style="display: none;">
+                            <h3 class="mb-3">Adresse de facturation</h3>
+                            
+                            {% if adresses|length > 0 %}
+                            <div class="mb-4">
+                                <label for="adresse_facturation_selection" class="form-label">Choisir une adresse enregistrée</label>
+                                <select class="form-select" id="adresse_facturation_selection" name="adresse_facturation_selection">
+                                    <option value="nouvelle">Saisir une nouvelle adresse</option>
+                                    {% for adresse in adresses %}
+                                        <option value="{{ adresse.id }}">
+                                            {{ adresse.nom }} - {{ adresse.rue }}, {{ adresse.code_postal }} {{ adresse.ville }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            
+                            <div id="adresse_facturation_formulaire">
+                                <div class="mb-3">
+                                    <label for="adresse_facturation" class="form-label">Adresse</label>
+                                    <input type="text" class="form-control" id="adresse_facturation" name="adresse_facturation">
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="code_postal_facturation" class="form-label">Code postal</label>
+                                        <input type="text" class="form-control" id="code_postal_facturation" name="code_postal_facturation">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="ville_facturation" class="form-label">Ville</label>
+                                        <input type="text" class="form-control" id="ville_facturation" name="ville_facturation">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="sauvegarder_adresse_facturation" name="sauvegarder_adresse_facturation" value="1">
+                                    <label class="form-check-label" for="sauvegarder_adresse_facturation">
+                                        Sauvegarder cette adresse pour mes prochaines commandes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkout-nav-buttons">
+                            <a href="index.php?page=panier" class="btn-prev-step">
+                                <i class="fas fa-chevron-left me-2"></i> Retour au panier
+                            </a>
+                            <button type="submit" name="valider_livraison" value="1" class="btn-next-step">
+                                Continuer vers le paiement <i class="fas fa-chevron-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% elseif etape == 'paiement' %}
+                    <div class="step-content">
+                        <h2 class="mb-4">Méthode de paiement</h2>
+                    
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="payment-method active">
+                                <div class="payment-method-header">
+                                    <div class="payment-method-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Paiement sécurisé</h5>
+                                        <p class="text-muted mb-0">Choisissez votre méthode de paiement</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Payment Tabs -->
+                                <div class="payment-tabs mt-4">
+                                    <div class="payment-tab active" data-payment="card">
+                                        <i class="far fa-credit-card"></i> Carte bancaire
+                                    </div>
+                                    <div class="payment-tab" data-payment="paypal">
+                                        <i class="fab fa-paypal"></i> PayPal
+                                    </div>
+                                </div>
+                                
+                                <!-- Card Payment Content -->
+                                <div id="card-payment-content" class="payment-content active mt-3">
+                                    <!-- Stripe Payment Element Container -->
+                                    <div id="stripe-elements-container">
+                                        <!-- Payment Element will be inserted here -->
+                                        <div id="payment-element" class="mb-3"></div>
+                                        <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                                    </div>
+                                    
+                                    <!-- Supported payment methods -->
+                                    <div class="payment-methods-icons mt-3">
+                                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                                            <div class="payment-icon" title="Cartes bancaires internationales"><i class="far fa-credit-card fa-2x"></i></div>
+                                            <div class="payment-icon" title="Cartes bancaires françaises"><i class="far fa-credit-card fa-2x"></i> <span class="badge bg-light text-dark">FR</span></div>
+                                            <div class="payment-icon" title="Link"><span class="badge bg-primary">Link</span></div>
+                                            <div class="payment-icon" title="Revolut Pay"><span class="badge bg-primary">Revolut Pay</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- PayPal Payment Content -->
+                                <div id="paypal-payment-content" class="payment-content mt-3">
+                                    <div class="text-center mb-3">
+                                        <p>Payez rapidement et en toute sécurité avec PayPal</p>
+                                    </div>
+                                    
+                                    <!-- PayPal Button Container -->
+                                    <div id="paypal-button-container"></div>
+                                    
+                                    <div id="paypal-errors" class="text-danger mt-2" role="alert"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-5">
+                            <div class="payment-order-summary">
+                                <h4 class="mb-3">Récapitulatif de commande</h4>
+                                
+                                <div class="order-summary-details mb-4">
+                                    <div class="order-summary-address">
+                                        <h5 class="mb-2">Adresse de livraison</h5>
+                                        <p id="delivery-address-summary">
+                                            {% if adresse_principale %}
+                                                {{ adresse_principale.nom }} - {{ adresse_principale.rue }}, {{ adresse_principale.code_postal }} {{ adresse_principale.ville }}
+                                            {% else %}
+                                                {{ utilisateur.prenom }} {{ utilisateur.nom }}<br>
+                                                {{ utilisateur.adresse }}<br>
+                                                {{ utilisateur.code_postal }} {{ utilisateur.ville }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="order-summary-delivery mt-3">
+                                        <h5 class="mb-2">Mode de livraison</h5>
+                                        <div class="selected-delivery-method">
+                                            <i class="fas fa-home me-2"></i> Livraison à domicile
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="order-summary-products">
+                                    <h5 class="mb-2">Produits ({{ panier.produits|length }})</h5>
+                                    <div class="products-list">
+                                        {% for produit in panier.produits %}
+                                            <div class="product-item d-flex justify-content-between mb-1">
+                                                <div class="product-name">{{ produit.nom }} <span class="text-muted">x{{ produit.quantite }}</span></div>
+                                                <div class="product-price">{{ produit.total_produit|number_format(2, ',', ' ') }} €</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div class="order-summary-totals mt-3">
+                                    <div class="total-line d-flex justify-content-between">
+                                        <span>Sous-total</span>
+                                        <span>{{ panier.total|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                    <div class="total-line d-flex justify-content-between">
+                                        <span>TVA (20%)</span>
+                                        <span>{{ panier.tva|number_format(2, ',', ' ') }} €</span>
+                                    </div>
+                                    <div class="total-line d-flex justify-content-between">
+                                        <span>Frais de livraison</span>
+                                        {% if panier.frais_livraison == 0 %}
+                                            <span class="text-success">Gratuit</span>
+                                        {% else %}
+                                            <span>{{ panier.frais_livraison|number_format(2, ',', ' ') }} €</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="total-line d-flex justify-content-between font-weight-bold mt-2 pt-2 border-top">
+                                        <span><strong>Total à payer</strong></span>
+                                        {% set total_ttc = panier.total + panier.frais_livraison + panier.tva %}
+                                        <span class="order-total"><strong>{{ total_ttc|number_format(2, ',', ' ') }} €</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden fields for payment processing -->
+                    <input type="hidden" id="payment_intent_id" name="payment_intent_id">
+                    <input type="hidden" id="payment_method_id" name="payment_method_id">
+                    <input type="hidden" id="paypal_order_id" name="paypal_order_id">
+                    <input type="hidden" name="methode_paiement" id="methode_paiement" value="carte">
+                    
+                    <!-- Hidden fields for Mondial Relay information -->
+                    <input type="hidden" name="relay_name" id="relay_name" value="">
+                    <input type="hidden" name="relay_address" id="relay_address" value="">
+                    
+                    <div class="mt-4">
+                        <label for="notes" class="form-label">Notes sur la commande (optionnel)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Instructions particulières concernant votre commande..."></textarea>
+                    </div>
+                    
+                    <div class="checkout-nav-buttons">
+                        <a href="index.php?page=panier&action=commander&etape=livraison" class="btn-prev-step">
+                            <i class="fas fa-chevron-left me-2"></i> Retour à la livraison
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if etape != 'livraison' %}
+            <div class="col-lg-4">
+                <div class="checkout-summary">
+                    <h3 class="checkout-summary-title">Récapitulatif</h3>
+                    
+                    <div class="checkout-items">
+                        {% for produit in panier.produits %}
+                        <div class="checkout-item">
+                            <div class="checkout-item-image" style="background-image: url('{{ produit.image_url }}')"></div>
+                            <div class="checkout-item-details">
+                                <h6 class="mb-1">{{ produit.nom }}</h6>
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ produit.quantite }} x {{ produit.prix }} €</span>
+                                    <span class="checkout-item-price">{{ produit.total_produit }} €</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="checkout-summary-row">
+                        <span>Sous-total (HT)</span>
+                        <span>{{ panier.total|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    <div class="checkout-summary-row">
+                        <span>TVA (20%)</span>
+                        <span>{{ panier.tva|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    <div class="checkout-summary-row">
+                        <span>Frais de livraison</span>
+                        {% if panier.frais_livraison == 0 %}
+                            <span class="text-success">Offerte{% if panier.total < 50 %} à partir de 50€{% endif %}</span>
+                        {% else %}
+                            <span>{{ panier.frais_livraison|number_format(2, ',', ' ') }} €</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="checkout-summary-row checkout-summary-total">
+                        <span>Total (TTC)</span>
+                        {% set total_ttc = panier.total + panier.frais_livraison + panier.tva %}
+                        <span>{{ total_ttc|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                    
+                    <!-- RGPD et consentement -->
+                    <div class="mt-4 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rgpd_consent" name="rgpd_consent" required>
+                            <label class="form-check-label" for="rgpd_consent">
+                                J'accepte que mes données personnelles soient utilisées pour le traitement de ma commande conformément à la <a href="index.php?page=politique-de-confidentialite" target="_blank">politique de confidentialité</a>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary w-100 confirm-btn" id="confirmation-button" disabled>
+                            <i class="fas fa-lock me-2"></i> Confirmer et payer
+                        </button>
+                        <a href="index.php?page=panier" class="btn btn-link text-light w-100 mt-2">
+                            <i class="fas fa-arrow-left me-2"></i> Retour au panier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<script>
+    // Fonction pour gérer les options de livraison dans le checkout
+    function handleDeliveryOptions() {
+        // Écouteur pour les radios de méthode de livraison
+        document.querySelectorAll('input[name="mode_livraison"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Mise à jour côté serveur via AJAX
+                const formData = new FormData();
+                formData.append('methode', this.value);
+                
+                // Récupérer option_id selon le type de livraison
+                let option_id = null;
+                if (this.value === 'relay' && document.querySelector('input[name="point_relais_id"]')) {
+                    option_id = document.querySelector('input[name="point_relais_id"]').value;
+                } else if (this.value === 'poste' && document.querySelector('input[name="bureau_poste_id"]')) {
+                    option_id = document.querySelector('input[name="bureau_poste_id"]').value;
+                } else if (this.value === 'click-collect' && document.getElementById('magasin-select')) {
+                    option_id = document.getElementById('magasin-select').value;
+                }
+                
+                if (option_id) {
+                    formData.append('option_id', option_id);
+                }
+                
+                fetch('index.php?page=panier&action=methode-livraison&ajax=1', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour les frais de livraison et totaux
+                        const fraisElement = document.querySelector('.checkout-summary-row:nth-child(3) span:last-child');
+                        const totalElement = document.querySelector('.checkout-summary-total span:last-child');
+                        
+                        if (fraisElement && data.panier.frais_livraison === 0) {
+                            fraisElement.innerHTML = '<span class="text-success">Gratuit</span>';
+                        } else if (fraisElement) {
+                            fraisElement.textContent = data.panier.frais_livraison.toFixed(2).replace('.', ',') + ' €';
+                        }
+                        
+                        if (totalElement) {
+                            const total = data.panier.total + data.panier.frais_livraison + data.panier.tva;
+                            totalElement.textContent = total.toFixed(2).replace('.', ',') + ' €';
+                        }
+                    }
+                })
+                .catch(error => console.error('Erreur lors de la mise à jour de la méthode de livraison:', error));
+            });
+        });
+        
+        // Écouteurs pour chaque méthode spécifique
+        // Point Relais
+        const searchRelayBtn = document.getElementById('search-relay-btn');
+        if (searchRelayBtn) {
+            searchRelayBtn.addEventListener('click', function() {
+                const postalCode = document.getElementById('relay-search').value;
+                if (!postalCode || postalCode.length < 3) {
+                    alert('Veuillez saisir un code postal valide');
+                    return;
+                }
+                
+                document.getElementById('relay-results').innerHTML = 
+                    '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Recherche des points relais...</p></div>';
+                
+                // Simulation de requête API
+                setTimeout(() => {
+                    // Dans une vraie implémentation, ceci serait un appel API à Mondial Relay ou autre
+                    let resultsHtml = '';
+                    const relayPoints = [
+                        {id: 'REL001', name: 'Tabac Presse du Centre', address: '15 rue du Commerce, ' + postalCode, hours: 'Lun-Sam: 7h-20h'},
+                        {id: 'REL002', name: 'Supermarché Express', address: '45 avenue des Lilas, ' + postalCode, hours: 'Lun-Dim: 8h-22h'},
+                        {id: 'REL003', name: 'Pressing du Quartier', address: '3 boulevard Saint Michel, ' + postalCode, hours: 'Lun-Ven: 9h-19h'}
+                    ];
+                    
+                    relayPoints.forEach(point => {
+                        resultsHtml += `
+                            <div class="relay-item" data-relay-id="${point.id}">
+                                <h5>${point.name}</h5>
+                                <div class="relay-item-address">${point.address}</div>
+                                <div class="relay-item-hours"><i class="far fa-clock me-1"></i> ${point.hours}</div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-primary select-relay-btn" data-relay-id="${point.id}">
+                                        Choisir ce point relais
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('relay-results').innerHTML = resultsHtml;
+                    
+                    // Attacher les événements
+                    document.querySelectorAll('.select-relay-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const relayId = this.getAttribute('data-relay-id');
+                            
+                            // Créer/mettre à jour l'input caché
+                            let hiddenInput = document.querySelector('input[name="point_relais_id"]');
+                            if (!hiddenInput) {
+                                hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'point_relais_id';
+                                document.querySelector('form').appendChild(hiddenInput);
+                            }
+                            hiddenInput.value = relayId;
+                            
+                            // Mise à jour visuelle
+                            document.querySelectorAll('.relay-item').forEach(item => {
+                                item.classList.remove('selected');
+                                if (item.getAttribute('data-relay-id') === relayId) {
+                                    item.classList.add('selected');
+                                }
+                            });
+                            
+                            // Mise à jour côté serveur
+                            const formData = new FormData();
+                            formData.append('methode', 'relay');
+                            formData.append('option_id', relayId);
+                            
+                            fetch('index.php?page=panier&action=methode-livraison&ajax=1', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .catch(error => console.error('Erreur:', error));
+                        });
+                    });
+                }, 1000);
+            });
+        }
+        
+        // Bureau de Poste
+        const searchPosteBtn = document.getElementById('search-poste-btn');
+        if (searchPosteBtn) {
+            searchPosteBtn.addEventListener('click', function() {
+                const postalCode = document.getElementById('poste-search').value;
+                if (!postalCode || postalCode.length < 3) {
+                    alert('Veuillez saisir un code postal valide');
+                    return;
+                }
+                
+                document.getElementById('poste-results').innerHTML = 
+                    '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Recherche des bureaux de poste...</p></div>';
+                
+                // Simulation de requête API
+                setTimeout(() => {
+                    // Dans une vraie implémentation, ceci serait un appel API à La Poste
+                    let resultsHtml = '';
+                    const postePoints = [
+                        {id: 'POS001', name: 'La Poste Centrale', address: '10 place de la République, ' + postalCode, hours: 'Lun-Ven: 9h-18h, Sam: 9h-12h'},
+                        {id: 'POS002', name: 'La Poste Quartier Nord', address: '35 rue des Écoles, ' + postalCode, hours: 'Lun-Ven: 9h-17h30'}
+                    ];
+                    
+                    postePoints.forEach(point => {
+                        resultsHtml += `
+                            <div class="poste-item" data-poste-id="${point.id}">
+                                <h5>${point.name}</h5>
+                                <div class="poste-item-address">${point.address}</div>
+                                <div class="poste-item-hours"><i class="far fa-clock me-1"></i> ${point.hours}</div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-primary select-poste-btn" data-poste-id="${point.id}">
+                                        Choisir ce bureau de poste
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('poste-results').innerHTML = resultsHtml;
+                    
+                    // Attacher les événements
+                    document.querySelectorAll('.select-poste-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const posteId = this.getAttribute('data-poste-id');
+                            
+                            // Créer/mettre à jour l'input caché
+                            let hiddenInput = document.querySelector('input[name="bureau_poste_id"]');
+                            if (!hiddenInput) {
+                                hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name = 'bureau_poste_id';
+                                document.querySelector('form').appendChild(hiddenInput);
+                            }
+                            hiddenInput.value = posteId;
+                            
+                            // Mise à jour visuelle
+                            document.querySelectorAll('.poste-item').forEach(item => {
+                                item.classList.remove('selected');
+                                if (item.getAttribute('data-poste-id') === posteId) {
+                                    item.classList.add('selected');
+                                }
+                            });
+                            
+                            // Mise à jour côté serveur
+                            const formData = new FormData();
+                            formData.append('methode', 'poste');
+                            formData.append('option_id', posteId);
+                            
+                            fetch('index.php?page=panier&action=methode-livraison&ajax=1', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .catch(error => console.error('Erreur:', error));
+                        });
+                    });
+                }, 1000);
+            });
+        }
+        
+        // Gestion magasin Click & Collect
+        const magasinSelect = document.getElementById('magasin-select');
+        if (magasinSelect) {
+            magasinSelect.addEventListener('change', function() {
+                const magasinId = this.value;
+                if (!magasinId) return;
+                
+                // Mise à jour côté serveur
+                const formData = new FormData();
+                formData.append('methode', 'click-collect');
+                formData.append('option_id', magasinId);
+                
+                fetch('index.php?page=panier&action=methode-livraison&ajax=1', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .catch(error => console.error('Erreur:', error));
+                
+                // Afficher les infos du magasin
+                const magasins = {
+                    '1': {
+                        name: 'Paris - Centre Commercial',
+                        address: '123 avenue des Champs-Élysées, 75008 Paris',
+                        hours: 'Lun-Sam: 10h-20h, Dim: 11h-19h',
+                        stock: 'Stock disponible pour retrait immédiat'
+                    },
+                    '2': {
+                        name: 'Lyon - Part-Dieu',
+                        address: '45 rue de la Part-Dieu, 69003 Lyon',
+                        hours: 'Lun-Sam: 9h-19h30',
+                        stock: 'Disponible sous 24h'
+                    },
+                    '3': {
+                        name: 'Marseille - Grand Littoral',
+                        address: '11 avenue du Littoral, 13016 Marseille',
+                        hours: 'Lun-Sam: 9h-20h',
+                        stock: 'Stock disponible pour retrait immédiat'
+                    },
+                    '4': {
+                        name: 'Bordeaux - Centre',
+                        address: '56 cours de l\'Intendance, 33000 Bordeaux',
+                        hours: 'Lun-Sam: 10h-19h',
+                        stock: 'Disponible sous 48h'
+                    },
+                    '5': {
+                        name: 'Lille - Euralille',
+                        address: '100 avenue Willy Brandt, 59000 Lille',
+                        hours: 'Lun-Sam: 10h-20h, Dim: 10h-19h',
+                        stock: 'Stock disponible pour retrait immédiat'
+                    }
+                };
+                
+                const magasinInfo = magasins[magasinId];
+                if (magasinInfo) {
+                    const infoContainer = document.querySelector('.selected-magasin-info');
+                    if (infoContainer) {
+                        infoContainer.innerHTML = `
+                            <div class="magasin-info-header">
+                                <i class="fas fa-store"></i>
+                                <h5>${magasinInfo.name}</h5>
+                            </div>
+                            <div class="magasin-info-address">${magasinInfo.address}</div>
+                            <div class="magasin-info-hours"><i class="far fa-clock me-1"></i> ${magasinInfo.hours}</div>
+                            <div class="mt-2">
+                                <span class="magasin-info-stock"><i class="fas fa-check me-1"></i> ${magasinInfo.stock}</span>
+                            </div>
+                        `;
+                    }
+                }
+            });
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les options de livraison
+        handleDeliveryOptions();
+        
+        // Payment method tabs
+        const paymentTabs = document.querySelectorAll('.payment-tab');
+        const paymentContents = document.querySelectorAll('.payment-content');
+        const methodeInput = document.getElementById('methode_paiement');
+        
+        // Configure payment tabs
+        paymentTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const paymentMethod = this.getAttribute('data-payment');
+                
+                // Update active tab
+                paymentTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding content
+                paymentContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === paymentMethod + '-payment-content') {
+                        content.classList.add('active');
+                    }
+                });
+                
+                // Update hidden input for payment method
+                if (paymentMethod === 'paypal') {
+                    methodeInput.value = 'paypal';
+                } else {
+                    methodeInput.value = 'carte';
+                }
+            });
+        });
+        
+        // Toggle adresse de facturation
+        const toggleFacturation = document.getElementById('adresse_facturation_identique');
+        const facturationForm = document.getElementById('adresse_facturation_form');
+        
+        toggleFacturation.addEventListener('change', function() {
+            facturationForm.style.display = this.checked ? 'none' : 'block';
+        });
+        
+        // Gestion du choix d'adresse prédéfinie
+        const adresseSelection = document.getElementById('adresse_selection');
+        const adresseFormulaire = document.getElementById('adresse_formulaire');
+        
+        if (adresseSelection) {
+            adresseSelection.addEventListener('change', function() {
+                if (this.value === 'nouvelle') {
+                    adresseFormulaire.style.display = 'block';
+                    // Réinitialiser les champs ou les laisser vides
+                    document.getElementById('adresse').value = '';
+                    document.getElementById('code_postal').value = '';
+                    document.getElementById('ville').value = '';
+                } else {
+                    // Cas où une adresse existante est sélectionnée
+                    adresseFormulaire.style.display = 'none';
+                    
+                    // Remplir les champs cachés avec les valeurs de l'adresse sélectionnée
+                    fetch('index.php?page=adresses&action=get&id=' + this.value + '&ajax=1')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Les champs cachés seront utilisés pour la soumission du formulaire
+                                document.getElementById('adresse').value = data.adresse.rue;
+                                document.getElementById('code_postal').value = data.adresse.code_postal;
+                                document.getElementById('ville').value = data.adresse.ville;
+                                document.getElementById('telephone').value = data.adresse.telephone || '';
+                            }
+                        })
+                        .catch(error => console.error('Erreur:', error));
+                }
+            });
+            
+            // Trigger au chargement pour configurer correctement l'affichage
+            if (adresseSelection.value !== 'nouvelle') {
+                adresseFormulaire.style.display = 'none';
+            }
+        }
+        
+        // Gestion du choix d'adresse de facturation prédéfinie
+        const adresseFacturationSelection = document.getElementById('adresse_facturation_selection');
+        const adresseFacturationFormulaire = document.getElementById('adresse_facturation_formulaire');
+        
+        if (adresseFacturationSelection) {
+            adresseFacturationSelection.addEventListener('change', function() {
+                if (this.value === 'nouvelle') {
+                    adresseFacturationFormulaire.style.display = 'block';
+                    // Réinitialiser les champs
+                    document.getElementById('adresse_facturation').value = '';
+                    document.getElementById('code_postal_facturation').value = '';
+                    document.getElementById('ville_facturation').value = '';
+                } else {
+                    // Cas où une adresse existante est sélectionnée
+                    adresseFacturationFormulaire.style.display = 'none';
+                    
+                    // Remplir les champs cachés avec les valeurs de l'adresse sélectionnée
+                    fetch('index.php?page=adresses&action=get&id=' + this.value + '&ajax=1')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Les champs cachés seront utilisés pour la soumission du formulaire
+                                document.getElementById('adresse_facturation').value = data.adresse.rue;
+                                document.getElementById('code_postal_facturation').value = data.adresse.code_postal;
+                                document.getElementById('ville_facturation').value = data.adresse.ville;
+                            }
+                        })
+                        .catch(error => console.error('Erreur:', error));
+                }
+            });
+        }
+        
+        // Gestion du consentement RGPD et de la double validation
+        const rgpdConsent = document.getElementById('rgpd_consent');
+        const confirmButton = document.getElementById('confirmation-button');
+        
+        rgpdConsent.addEventListener('change', function() {
+            confirmButton.disabled = !this.checked;
+        });
+        
+        // Double-clic nécessaire pour confirmer la commande
+        let clickCount = 0;
+        let clickTimer;
+        
+        confirmButton.addEventListener('click', function(e) {
+            if (!rgpdConsent.checked) {
+                e.preventDefault();
+                alert("Veuillez accepter les conditions relatives à la politique de confidentialité pour continuer.");
+                return;
+            }
+            
+            clickCount++;
+            
+            if (clickCount === 1) {
+                e.preventDefault();
+                this.innerHTML = '<i class="fas fa-lock me-2"></i> Cliquez à nouveau pour confirmer';
+                
+                // Réinitialiser après 3 secondes si pas de deuxième clic
+                clickTimer = setTimeout(() => {
+                    clickCount = 0;
+                    this.innerHTML = '<i class="fas fa-lock me-2"></i> Confirmer et payer';
+                }, 3000);
+            } else if (clickCount === 2) {
+                // Laisser le formulaire se soumettre
+                clearTimeout(clickTimer);
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement en cours...';
+            }
+        });
+        
+        // Payment processing is handled by payment-handler.js
+    });
+</script>
+{% endblock %}
+
+{% block scripts %}
+{{ parent() }}
+<script src="public/js/delivery-options.js"></script>
+<script src="public/js/payment-handler.js"></script>
+{% endblock %}

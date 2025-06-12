@@ -1,0 +1,195 @@
+{% extends 'admin/base-admin.twig' %}
+
+{% block admin_title %}Gestion des Utilisateurs{% endblock %}
+
+{% block admin_actions %}
+<button type="button" class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#ajouterUtilisateurModal">
+    <i class="fas fa-user-plus me-2"></i> Ajouter un utilisateur
+</button>
+{% endblock %}
+
+{% block admin_content %}
+    <div class="table-responsive admin-table">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Nom d'utilisateur</th>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Prénom</th>
+                    <th scope="col">Rôle</th>
+                    <th scope="col" style="width: 200px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in liste %}
+                <tr>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.nom }}</td>
+                    <td>{{ u.prenom }}</td>
+                    <td>
+                        {% if u.idRole == 1 %}
+                        <span class="status-badge status-featured">Administrateur</span>
+                        {% else %}
+                        <span class="status-badge status-active">Client</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalModifier{{ u.idUtilisateurs }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="index.php?page=utilisateurs&action=dupliquer&id={{ u.idUtilisateurs }}" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-copy"></i>
+                            </a>
+                            <a href="index.php?page=utilisateurs&action=supprimer&id={{ u.idUtilisateurs }}" class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if liste|length == 0 %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+                        <p>Aucun utilisateur trouvé</p>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block admin_modals %}
+    <!-- Modal d'ajout d'utilisateur -->
+    <div class="modal fade modal-admin" id="ajouterUtilisateurModal" tabindex="-1" aria-labelledby="ajouterUtilisateurModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ajouterUtilisateurModalLabel">
+                            <i class="fas fa-user-plus me-2"></i> Ajouter un utilisateur
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label">Email</label>
+                            <input type="email" id="inputEmail" name="inputEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputUsername" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" id="inputUsername" name="inputUsername" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputNom" class="form-label">Nom</label>
+                                <input type="text" id="inputNom" name="inputNom" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="inputPrenom" class="form-label">Prénom</label>
+                                <input type="text" id="inputPrenom" name="inputPrenom" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputRole" class="form-label">Rôle</label>
+                            <select id="inputRole" name="inputRole" class="form-select" required>
+                                <option value="1">Administrateur</option>
+                                <option value="2" selected>Client</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Mot de passe</label>
+                            <input type="password" id="inputPassword" name="inputPassword" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" id="inputPasswordConfirm" name="inputPasswordConfirm" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="btAjouterutilisateurs" class="btn btn-purple">Ajouter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals de modification pour chaque utilisateur -->
+    {% for u in liste %}
+    <div class="modal fade modal-admin" id="modalModifier{{ u.idUtilisateurs }}" tabindex="-1" aria-labelledby="modalModifierLabel{{ u.idUtilisateurs }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalModifierLabel{{ u.idUtilisateurs }}">
+                            <i class="fas fa-user-edit me-2"></i> Modifier l'utilisateur
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="idutilisateurs" value="{{ u.idUtilisateurs }}">
+                        <div class="mb-3">
+                            <label for="inputEmail{{ u.idUtilisateurs }}" class="form-label">Email</label>
+                            <input type="email" id="inputEmail{{ u.idUtilisateurs }}" name="inputEmail" class="form-control" value="{{ u.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputUsername{{ u.idUtilisateurs }}" class="form-label">Nom d'utilisateur</label>
+                            <input type="text" id="inputUsername{{ u.idUtilisateurs }}" name="inputUsername" class="form-control" value="{{ u.username }}" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputNom{{ u.idUtilisateurs }}" class="form-label">Nom</label>
+                                <input type="text" id="inputNom{{ u.idUtilisateurs }}" name="inputNom" class="form-control" value="{{ u.nom }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="inputPrenom{{ u.idUtilisateurs }}" class="form-label">Prénom</label>
+                                <input type="text" id="inputPrenom{{ u.idUtilisateurs }}" name="inputPrenom" class="form-control" value="{{ u.prenom }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputRole{{ u.idUtilisateurs }}" class="form-label">Rôle</label>
+                            <select id="inputRole{{ u.idUtilisateurs }}" name="inputRole" class="form-select">
+                                <option value="1" {% if u.idRole == 1 %}selected{% endif %}>Administrateur</option>
+                                <option value="2" {% if u.idRole == 2 %}selected{% endif %}>Client</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" name="btModifierutilisateurs" class="btn btn-purple">Enregistrer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
+
+{% block head %}
+{{ parent() }}
+<style>
+    .status-badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-featured {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .status-active {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+    }
+</style>
+{% endblock %}
